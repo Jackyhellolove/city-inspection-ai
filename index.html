@@ -101,6 +101,7 @@
     .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
     .edit { padding: 7px 10px; color: #1557a6; background: #edf5ff; }
+    .detail { padding: 7px 10px; color: #116548; background: #e8f7f0; }
     .row-actions { display: flex; gap: 7px; }
     .data-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
     .deadline { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
@@ -118,6 +119,16 @@
     dialog::backdrop { background: #172033aa; }
     dialog img { display: block; width: 100%; max-height: 78vh; object-fit: contain; border-radius: 10px; }
     .dialog-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 4px 2px 18px; }
+    .detail-item { padding: 10px; border-radius: 9px; background: #f5f8fc; }
+    .detail-item span { display: block; margin-bottom: 4px; color: #69758a; font-size: 12px; }
+    .detail-item strong { overflow-wrap: anywhere; }
+    .timeline { display: grid; gap: 12px; margin: 12px 0; padding-left: 10px; border-left: 3px solid #d9e5f5; }
+    .timeline-item { position: relative; padding: 10px 12px; border-radius: 10px; background: #f8fbff; }
+    .timeline-item::before { position: absolute; left: -19px; top: 16px; width: 9px; height: 9px; border: 3px solid white; border-radius: 50%; background: #1769e0; box-shadow: 0 0 0 1px #a9c3e8; content: ""; }
+    .timeline-time { color: #69758a; font-size: 12px; }
+    .timeline-title { margin: 3px 0; font-weight: 700; }
+    .timeline-note { color: #4c596e; font-size: 14px; white-space: pre-wrap; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -125,6 +136,7 @@
       .dashboard { grid-template-columns: 1fr; }
       .filters { grid-template-columns: 1fr; }
       .actions { flex-wrap: wrap; }
+      .detail-grid { grid-template-columns: 1fr; }
     }
     @media print {
       body { display: block; padding: 0; background: white; }
@@ -251,6 +263,13 @@
     <img id="photoLarge" alt="现场照片大图">
     <div class="dialog-actions"><button class="secondary" id="closePhoto" type="button">关闭</button></div>
   </dialog>
+  <dialog id="detailDialog">
+    <h2 id="detailTitle">巡查问题详情</h2>
+    <div id="detailContent"></div>
+    <h3>处置时间线</h3>
+    <div class="timeline" id="detailTimeline"></div>
+    <div class="dialog-actions"><button class="secondary" id="closeDetail" type="button">关闭</button></div>
+  </dialog>
   <script>
     const issue = document.querySelector('#issue');
     const output = {
@@ -268,6 +287,9 @@
     const removePhotoButton = document.querySelector('#removePhoto');
     const photoDialog = document.querySelector('#photoDialog');
     const photoLarge = document.querySelector('#photoLarge');
+    const detailDialog = document.querySelector('#detailDialog');
+    const detailContent = document.querySelector('#detailContent');
+    const detailTimeline = document.querySelector('#detailTimeline');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
@@ -348,6 +370,38 @@
       });
     }
 
+    function getTimeline(record) {
+      if (Array.isArray(record.timeline) && record.timeline.length) return record.timeline;
+      return [{
+        time: record.time || '时间未知',
+        fromStatus: '',
+        toStatus: record.status || '待派单',
+        note: '创建巡查记录'
+      }];
+    }
+
+    function showRecordDetail(record) {
+      document.querySelector('#detailTitle').textContent = `${record.id || '历史记录'} · 巡查问题详情`;
+      detailContent.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item"><span>问题描述</span><strong>${escapeHtml(record.description)}</strong></div>
+          <div class="detail-item"><span>发现地点</span><strong>${escapeHtml(record.location || '未填写')}</strong></div>
+          <div class="detail-item"><span>问题类型</span><strong>${escapeHtml(record.type || '未分类')}</strong></div>
+          <div class="detail-item"><span>处理部门</span><strong>${escapeHtml(record.department || '未指定')}</strong></div>
+          <div class="detail-item"><span>负责人</span><strong>${escapeHtml(record.owner || '未指定')}</strong></div>
+          <div class="detail-item"><span>当前状态</span><strong>${escapeHtml(record.status || '待派单')}</strong></div>
+          <div class="detail-item"><span>完成期限</span><strong>${escapeHtml(record.deadline || '未设置')}</strong></div>
+          <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
+        </div>`;
+      detailTimeline.innerHTML = getTimeline(record).slice().reverse().map(item => `
+        <div class="timeline-item">
+          <div class="timeline-time">${escapeHtml(item.time || '时间未知')}</div>
+          <div class="timeline-title">${item.fromStatus ? `${escapeHtml(item.fromStatus)} → ` : ''}${escapeHtml(item.toStatus || '状态未记录')}</div>
+          <div class="timeline-note">${escapeHtml(item.note || '未填写处理说明')}</div>
+        </div>`).join('');
+      detailDialog.showModal();
+    }
+
     function renderRecords() {
       const records = getRecords();
       const keyword = searchInput.value.trim().toLowerCase();
@@ -409,7 +463,7 @@
           <td>${escapeHtml(record.status || '待派单')}</td>
           <td>${renderDeadline(record)}</td>
           <td>${escapeHtml(record.updatedAt || record.time)}</td>
-          <td><div class="row-actions"><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
+          <td><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
         </tr>`).join('');
     }
 
@@ -459,7 +513,13 @@
         status: statusInput.value,
         deadline: deadlineInput.value,
         photo: photoData,
-        time: new Date().toLocaleString('zh-CN')
+        time: new Date().toLocaleString('zh-CN'),
+        timeline: [{
+          time: new Date().toLocaleString('zh-CN'),
+          fromStatus: '',
+          toStatus: statusInput.value,
+          note: '创建巡查记录'
+        }]
       });
       try {
         localStorage.setItem(storageKey, JSON.stringify(records));
@@ -570,6 +630,7 @@
       photoDialog.showModal();
     });
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
+    document.querySelector('#closeDetail').addEventListener('click', () => detailDialog.close());
 
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
@@ -579,6 +640,11 @@
       if (!button) return;
       const records = getRecords();
       const index = Number(button.dataset.index);
+
+      if (button.classList.contains('detail')) {
+        showRecordDetail(records[index]);
+        return;
+      }
 
       if (button.classList.contains('edit')) {
         const record = records[index];
@@ -600,7 +666,19 @@
           showNotice('完成期限格式应为：年-月-日');
           return;
         }
+        const note = window.prompt('填写本次处理说明（可留空）', '');
+        if (note === null) return;
         const [type, department, priority] = classify(description);
+        const updatedAt = new Date().toLocaleString('zh-CN');
+        const timeline = getTimeline(record);
+        if ((record.status || '待派单') !== status.trim() || note.trim()) {
+          timeline.push({
+            time: updatedAt,
+            fromStatus: record.status || '待派单',
+            toStatus: status.trim(),
+            note: note.trim() || '更新处置状态'
+          });
+        }
         records[index] = {
           ...record,
           description: description.trim() || record.description,
@@ -608,10 +686,11 @@
           owner: owner.trim(),
           status: status.trim(),
           deadline: deadline.trim(),
+          timeline,
           type,
           department,
           priority,
-          updatedAt: new Date().toLocaleString('zh-CN')
+          updatedAt
         };
         localStorage.setItem(storageKey, JSON.stringify(records));
         renderRecords();
