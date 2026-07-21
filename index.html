@@ -88,6 +88,8 @@
     .filters { display: grid; grid-template-columns: 1fr 160px; gap: 12px; margin-top: 14px; }
     .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
+    .edit { padding: 7px 10px; color: #1557a6; background: #edf5ff; }
+    .row-actions { display: flex; gap: 7px; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -162,7 +164,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>记录时间</th><th>操作</th></tr></thead>
+          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>更新时间</th><th>操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -243,8 +245,8 @@
           <td>${escapeHtml(record.priority)}</td>
           <td>${escapeHtml(record.owner || '未指定')}</td>
           <td>${escapeHtml(record.status || '待派单')}</td>
-          <td>${escapeHtml(record.time)}</td>
-          <td><button class="delete" data-index="${record.storageIndex}">删除</button></td>
+          <td>${escapeHtml(record.updatedAt || record.time)}</td>
+          <td><div class="row-actions"><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
         </tr>`).join('');
     }
 
@@ -299,10 +301,11 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '记录时间'],
+        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '创建时间', '更新时间'],
         ...records.map(record => [
           record.id || '历史记录', record.description, record.location || '', record.type,
-          record.department, record.priority, record.owner || '', record.status || '待派单', record.time
+          record.department, record.priority, record.owner || '', record.status || '待派单', record.time,
+          record.updatedAt || record.time
         ])
       ];
       const csv = '\ufeff' + rows.map(row => row.map(quote).join(',')).join('\r\n');
@@ -317,10 +320,45 @@
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     recordBody.addEventListener('click', event => {
-      const button = event.target.closest('.delete');
-      if (!button || !window.confirm('确定删除这条巡查记录吗？')) return;
+      const button = event.target.closest('button[data-index]');
+      if (!button) return;
       const records = getRecords();
-      records.splice(Number(button.dataset.index), 1);
+      const index = Number(button.dataset.index);
+
+      if (button.classList.contains('edit')) {
+        const record = records[index];
+        const description = window.prompt('修改问题描述', record.description);
+        if (description === null) return;
+        const location = window.prompt('修改发现地点', record.location || '');
+        if (location === null) return;
+        const owner = window.prompt('修改负责人', record.owner || '');
+        if (owner === null) return;
+        const status = window.prompt('修改处置状态：待派单、处理中或已完成', record.status || '待派单');
+        if (status === null) return;
+        if (!['待派单', '处理中', '已完成'].includes(status.trim())) {
+          showNotice('处置状态只能填写：待派单、处理中或已完成');
+          return;
+        }
+        const [type, department, priority] = classify(description);
+        records[index] = {
+          ...record,
+          description: description.trim() || record.description,
+          location: location.trim(),
+          owner: owner.trim(),
+          status: status.trim(),
+          type,
+          department,
+          priority,
+          updatedAt: new Date().toLocaleString('zh-CN')
+        };
+        localStorage.setItem(storageKey, JSON.stringify(records));
+        renderRecords();
+        showNotice('巡查记录已更新');
+        return;
+      }
+
+      if (!window.confirm('确定删除这条巡查记录吗？')) return;
+      records.splice(index, 1);
       localStorage.setItem(storageKey, JSON.stringify(records));
       renderRecords();
       showNotice('巡查记录已删除');
