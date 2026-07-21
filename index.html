@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>城市巡查 AI 助手</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #172033;
+      background: linear-gradient(135deg, #eef5ff, #f8fbff 50%, #eefaf5);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    main {
+      width: min(720px, 100%);
+      padding: 36px;
+      border: 1px solid #dce6f3;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 22px 60px rgba(31, 72, 118, .14);
+    }
+    h1 { margin: 0 0 10px; font-size: 30px; }
+    .intro { margin: 0 0 28px; color: #647087; }
+    label { display: block; margin-bottom: 10px; font-weight: 700; }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 16px;
+      border: 2px solid #8eb6ff;
+      border-radius: 12px;
+      outline: none;
+      resize: vertical;
+      font: inherit;
+      font-size: 17px;
+    }
+    textarea:focus { border-color: #1769e0; box-shadow: 0 0 0 4px #1769e01c; }
+    .actions { display: flex; gap: 12px; margin: 18px 0 26px; }
+    button {
+      padding: 11px 20px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+    .primary { color: white; background: #1769e0; }
+    .secondary { color: #34425a; background: #edf2f8; }
+    .success { color: white; background: #16835d; }
+    .results {
+      padding: 20px;
+      border-radius: 14px;
+      background: #f5f8fc;
+    }
+    .results h2 { margin: 0 0 14px; font-size: 18px; }
+    .row { display: grid; grid-template-columns: 100px 1fr; gap: 12px; padding: 9px 0; }
+    .name { color: #69758a; }
+    .value { font-weight: 700; }
+    .history { margin-top: 24px; }
+    .history-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .history-head h2 { margin: 0; font-size: 20px; }
+    .table-wrap { margin-top: 14px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 11px 9px; border-bottom: 1px solid #e3e9f1; text-align: left; white-space: nowrap; }
+    th { color: #69758a; font-weight: 600; }
+    td:first-child { max-width: 260px; white-space: normal; }
+    .empty { padding: 22px 0; color: #7b879b; text-align: center; }
+    .notice { min-height: 22px; margin: 10px 0 0; color: #16835d; font-size: 14px; }
+    @media (max-width: 560px) { main { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>城市巡查 AI 助手</h1>
+    <p class="intro">输入巡查现场发现的问题，系统将给出初步分类和处置建议。</p>
+
+    <label for="issue">巡查问题</label>
+    <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+
+    <div class="actions">
+      <button class="primary" id="analyze">开始识别</button>
+      <button class="success" id="save">保存记录</button>
+      <button class="secondary" id="clear">清空输入</button>
+    </div>
+
+    <section class="results" aria-live="polite">
+      <h2>识别结果</h2>
+      <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
+      <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
+      <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
+    </section>
+
+    <p class="notice" id="notice" aria-live="polite"></p>
+
+    <section class="history">
+      <div class="history-head">
+        <h2>巡查记录</h2>
+        <button class="secondary" id="export">导出 CSV 表格</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>问题描述</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>记录时间</th></tr></thead>
+          <tbody id="records"></tbody>
+        </table>
+        <div class="empty" id="empty">暂时没有保存的记录</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const issue = document.querySelector('#issue');
+    const output = {
+      type: document.querySelector('#type'),
+      department: document.querySelector('#department'),
+      priority: document.querySelector('#priority')
+    };
+    const notice = document.querySelector('#notice');
+    const recordBody = document.querySelector('#records');
+    const empty = document.querySelector('#empty');
+    const storageKey = 'city-inspection-records';
+
+    function includesAny(text, words) { return words.some(word => text.includes(word)); }
+
+    function classify(text) {
+      text = text.trim();
+      if (!text) return ['无法识别', '待人工确认', '待确认'];
+      if (includesAny(text, ['垃圾', '落叶', '污水', '保洁'])) return ['环境卫生', '环卫部门', '一般'];
+      if (includesAny(text, ['井盖', '路灯', '护栏', '道路破损'])) return ['市政设施', '市政管理部门', '较高'];
+      if (includesAny(text, ['树木倒伏', '树枝断裂', '绿化带'])) return ['园林绿化', '园林部门', '较高'];
+      return ['其他问题', '城市管理部门', '一般'];
+    }
+
+    function getRecords() {
+      try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
+      catch { return []; }
+    }
+
+    function showNotice(message) {
+      notice.textContent = message;
+      window.setTimeout(() => { notice.textContent = ''; }, 2500);
+    }
+
+    function renderRecords() {
+      const records = getRecords();
+      empty.hidden = records.length > 0;
+      recordBody.innerHTML = records.map(record => `
+        <tr>
+          <td>${escapeHtml(record.description)}</td>
+          <td>${escapeHtml(record.type)}</td>
+          <td>${escapeHtml(record.department)}</td>
+          <td>${escapeHtml(record.priority)}</td>
+          <td>${escapeHtml(record.time)}</td>
+        </tr>`).join('');
+    }
+
+    function escapeHtml(value) {
+      const element = document.createElement('div');
+      element.textContent = value;
+      return element.innerHTML;
+    }
+
+    document.querySelector('#analyze').addEventListener('click', () => {
+      const [type, department, priority] = classify(issue.value);
+      output.type.textContent = type;
+      output.department.textContent = department;
+      output.priority.textContent = priority;
+    });
+
+    document.querySelector('#clear').addEventListener('click', () => {
+      issue.value = '';
+      Object.values(output).forEach(element => element.textContent = '等待识别');
+      issue.focus();
+    });
+
+    document.querySelector('#save').addEventListener('click', () => {
+      const description = issue.value.trim();
+      if (!description) { showNotice('请先输入巡查问题'); issue.focus(); return; }
+      const [type, department, priority] = classify(description);
+      output.type.textContent = type;
+      output.department.textContent = department;
+      output.priority.textContent = priority;
+      const records = getRecords();
+      records.unshift({ description, type, department, priority, time: new Date().toLocaleString('zh-CN') });
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      renderRecords();
+      showNotice('巡查记录已保存到当前浏览器');
+    });
+
+    document.querySelector('#export').addEventListener('click', () => {
+      const records = getRecords();
+      if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
+      const quote = value => `"${String(value).replaceAll('"', '""')}"`;
+      const rows = [
+        ['问题描述', '问题类型', '处理部门', '优先级', '记录时间'],
+        ...records.map(record => [record.description, record.type, record.department, record.priority, record.time])
+      ];
+      const csv = '\ufeff' + rows.map(row => row.map(quote).join(',')).join('\r\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      link.download = `城市巡查记录-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showNotice('CSV 表格已导出');
+    });
+
+    renderRecords();
+  </script>
+</body>
+</html>
