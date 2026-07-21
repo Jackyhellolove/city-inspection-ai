@@ -39,7 +39,7 @@
       font-size: 17px;
     }
     textarea:focus { border-color: #1769e0; box-shadow: 0 0 0 4px #1769e01c; }
-    .field-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .field-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
     .field label { margin-bottom: 7px; font-size: 14px; }
     .field input, .field select {
       width: 100%;
@@ -81,7 +81,7 @@
     td:first-child { max-width: 260px; white-space: normal; }
     .empty { padding: 22px 0; color: #7b879b; text-align: center; }
     .notice { min-height: 22px; margin: 10px 0 0; color: #16835d; font-size: 14px; }
-    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0 14px; }
+    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 24px 0 14px; }
     .stat { padding: 16px; border: 1px solid #e1e8f1; border-radius: 12px; background: white; }
     .stat strong { display: block; margin-top: 5px; font-size: 24px; }
     .stat span { color: #6f7b8f; font-size: 13px; }
@@ -97,12 +97,17 @@
     .bar-track { height: 10px; overflow: hidden; border-radius: 999px; background: #e9eef5; }
     .bar-value { height: 100%; border-radius: inherit; background: #4f86e8; }
     .chart-empty { color: #7b879b; font-size: 14px; }
-    .filters { display: grid; grid-template-columns: 1fr 160px; gap: 12px; margin-top: 14px; }
+    .filters { display: grid; grid-template-columns: 1fr 150px 150px; gap: 12px; margin-top: 14px; }
     .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
     .edit { padding: 7px 10px; color: #1557a6; background: #edf5ff; }
     .row-actions { display: flex; gap: 7px; }
     .data-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .deadline { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .deadline-normal { color: #536179; background: #eef2f7; }
+    .deadline-soon { color: #8a4b08; background: #fff3d6; }
+    .deadline-overdue { color: #b42318; background: #fff0ee; }
+    .deadline-done { color: #116548; background: #e8f7f0; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -145,6 +150,10 @@
           <option>已完成</option>
         </select>
       </div>
+      <div class="field">
+        <label for="deadline">完成期限</label>
+        <input id="deadline" type="date">
+      </div>
     </div>
 
     <div class="actions">
@@ -168,6 +177,7 @@
       <div class="stat"><span>处理中</span><strong id="processingCount">0</strong></div>
       <div class="stat"><span>已完成</span><strong id="completedCount">0</strong></div>
       <div class="stat"><span>办结率</span><strong id="completionRate">0%</strong></div>
+      <div class="stat"><span>已逾期</span><strong id="overdueCount">0</strong></div>
     </section>
 
     <section class="dashboard" aria-label="巡查数据看板">
@@ -201,10 +211,17 @@
           <option>处理中</option>
           <option>已完成</option>
         </select>
+        <select id="deadlineFilter" aria-label="按期限状态筛选">
+          <option value="">全部期限</option>
+          <option value="overdue">已逾期</option>
+          <option value="soon">即将到期</option>
+          <option value="normal">期限正常</option>
+          <option value="none">未设期限</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>更新时间</th><th>操作</th></tr></thead>
+          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -222,8 +239,10 @@
     const locationInput = document.querySelector('#location');
     const ownerInput = document.querySelector('#owner');
     const statusInput = document.querySelector('#status');
+    const deadlineInput = document.querySelector('#deadline');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
+    const deadlineFilter = document.querySelector('#deadlineFilter');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
@@ -256,27 +275,52 @@
       return `XC-${day}-${String(count).padStart(3, '0')}`;
     }
 
+    function getDeadlineState(record) {
+      if ((record.status || '待派单') === '已完成') return 'done';
+      if (!record.deadline) return 'none';
+      const end = new Date(`${record.deadline}T23:59:59`);
+      if (end < new Date()) return 'overdue';
+      const remainingDays = Math.ceil((end - new Date()) / 86400000);
+      if (remainingDays <= 2) return 'soon';
+      return 'normal';
+    }
+
+    function renderDeadline(record) {
+      const state = getDeadlineState(record);
+      if (state === 'none') return '<span class="deadline deadline-normal">未设置</span>';
+      if (state === 'done') return `<span class="deadline deadline-done">${escapeHtml(record.deadline || '已办结')}</span>`;
+      if (state === 'overdue') return `<span class="deadline deadline-overdue">${escapeHtml(record.deadline)} · 已逾期</span>`;
+      if (state === 'soon') return `<span class="deadline deadline-soon">${escapeHtml(record.deadline)} · 即将到期</span>`;
+      return `<span class="deadline deadline-normal">${escapeHtml(record.deadline)}</span>`;
+    }
+
     function renderRecords() {
       const records = getRecords();
       const keyword = searchInput.value.trim().toLowerCase();
       const selectedStatus = statusFilter.value;
+      const selectedDeadline = deadlineFilter.value;
       const visibleRecords = records
         .map((record, index) => ({ ...record, storageIndex: index }))
         .filter(record => {
           const searchable = [record.id, record.description, record.location, record.owner].join(' ').toLowerCase();
           const status = record.status || '待派单';
-          return (!keyword || searchable.includes(keyword)) && (!selectedStatus || status === selectedStatus);
+          const deadlineState = getDeadlineState(record);
+          return (!keyword || searchable.includes(keyword))
+            && (!selectedStatus || status === selectedStatus)
+            && (!selectedDeadline || deadlineState === selectedDeadline);
         });
 
       const pendingCount = records.filter(record => (record.status || '待派单') === '待派单').length;
       const processingCount = records.filter(record => record.status === '处理中').length;
       const completedCount = records.filter(record => record.status === '已完成').length;
       const completionRate = records.length ? Math.round(completedCount / records.length * 100) : 0;
+      const overdueCount = records.filter(record => getDeadlineState(record) === 'overdue').length;
       document.querySelector('#totalCount').textContent = records.length;
       document.querySelector('#pendingCount').textContent = pendingCount;
       document.querySelector('#processingCount').textContent = processingCount;
       document.querySelector('#completedCount').textContent = completedCount;
       document.querySelector('#completionRate').textContent = `${completionRate}%`;
+      document.querySelector('#overdueCount').textContent = overdueCount;
       document.querySelector('#completionBar').style.width = `${completionRate}%`;
       document.querySelector('#completionText').textContent = records.length ? `已完成 ${completionRate}%` : '尚无巡查记录';
       document.querySelector('#completionRatio').textContent = `${completedCount} / ${records.length}`;
@@ -308,6 +352,7 @@
           <td>${escapeHtml(record.priority)}</td>
           <td>${escapeHtml(record.owner || '未指定')}</td>
           <td>${escapeHtml(record.status || '待派单')}</td>
+          <td>${renderDeadline(record)}</td>
           <td>${escapeHtml(record.updatedAt || record.time)}</td>
           <td><div class="row-actions"><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
         </tr>`).join('');
@@ -331,6 +376,7 @@
       locationInput.value = '';
       ownerInput.value = '';
       statusInput.value = '待派单';
+      deadlineInput.value = '';
       Object.values(output).forEach(element => element.textContent = '等待识别');
       issue.focus();
     });
@@ -352,6 +398,7 @@
         priority,
         owner: ownerInput.value.trim(),
         status: statusInput.value,
+        deadline: deadlineInput.value,
         time: new Date().toLocaleString('zh-CN')
       });
       localStorage.setItem(storageKey, JSON.stringify(records));
@@ -364,10 +411,10 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '创建时间', '更新时间'],
+        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
         ...records.map(record => [
           record.id || '历史记录', record.description, record.location || '', record.type,
-          record.department, record.priority, record.owner || '', record.status || '待派单', record.time,
+          record.department, record.priority, record.owner || '', record.status || '待派单', record.deadline || '', getDeadlineState(record), record.time,
           record.updatedAt || record.time
         ])
       ];
@@ -422,6 +469,7 @@
 
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
+    deadlineFilter.addEventListener('change', renderRecords);
     recordBody.addEventListener('click', event => {
       const button = event.target.closest('button[data-index]');
       if (!button) return;
@@ -442,6 +490,12 @@
           showNotice('处置状态只能填写：待派单、处理中或已完成');
           return;
         }
+        const deadline = window.prompt('修改完成期限（格式：年-月-日，留空表示不设置）', record.deadline || '');
+        if (deadline === null) return;
+        if (deadline.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(deadline.trim())) {
+          showNotice('完成期限格式应为：年-月-日');
+          return;
+        }
         const [type, department, priority] = classify(description);
         records[index] = {
           ...record,
@@ -449,6 +503,7 @@
           location: location.trim(),
           owner: owner.trim(),
           status: status.trim(),
+          deadline: deadline.trim(),
           type,
           department,
           priority,
