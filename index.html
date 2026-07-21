@@ -129,6 +129,9 @@
     .timeline-time { color: #69758a; font-size: 12px; }
     .timeline-title { margin: 3px 0; font-weight: 700; }
     .timeline-note { color: #4c596e; font-size: 14px; white-space: pre-wrap; }
+    .bulk-actions { display: grid; grid-template-columns: auto 1fr 160px auto; align-items: center; gap: 10px; margin-top: 14px; padding: 12px; border: 1px solid #dce6f3; border-radius: 12px; background: #f8fbff; }
+    .bulk-actions strong { color: #1769e0; white-space: nowrap; }
+    .bulk-actions input, .bulk-actions select { width: 100%; padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; background: white; font: inherit; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -137,11 +140,12 @@
       .filters { grid-template-columns: 1fr; }
       .actions { flex-wrap: wrap; }
       .detail-grid { grid-template-columns: 1fr; }
+      .bulk-actions { grid-template-columns: 1fr; }
     }
     @media print {
       body { display: block; padding: 0; background: white; }
       main { width: 100%; padding: 0; border: 0; box-shadow: none; }
-      textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, dialog { display: none !important; }
+      textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, .no-print, dialog { display: none !important; }
       .history { margin-top: 18px; }
       table { font-size: 11px; }
     }
@@ -250,9 +254,20 @@
           <option value="none">未设期限</option>
         </select>
       </div>
+      <div class="bulk-actions no-print">
+        <strong id="selectedCount">已选择 0 条</strong>
+        <input id="bulkOwner" aria-label="批量指定负责人" placeholder="批量指定负责人（留空则不修改）">
+        <select id="bulkStatus" aria-label="批量修改状态">
+          <option value="">状态不修改</option>
+          <option>待派单</option>
+          <option>处理中</option>
+          <option>已完成</option>
+        </select>
+        <button class="primary" id="applyBulk" type="button">应用到已选记录</button>
+      </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
+          <thead><tr><th class="no-print"><input id="selectAll" type="checkbox" aria-label="选择当前筛选结果中的全部记录"></th><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -293,10 +308,15 @@
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
+    const selectAll = document.querySelector('#selectAll');
+    const selectedCount = document.querySelector('#selectedCount');
+    const bulkOwner = document.querySelector('#bulkOwner');
+    const bulkStatus = document.querySelector('#bulkStatus');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
     let photoData = '';
+    const selectedIndices = new Set();
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -402,6 +422,14 @@
       detailDialog.showModal();
     }
 
+    function updateSelectionSummary() {
+      selectedCount.textContent = `已选择 ${selectedIndices.size} 条`;
+      const visibleCheckboxes = [...recordBody.querySelectorAll('[data-select-index]')];
+      const visibleSelected = visibleCheckboxes.filter(checkbox => selectedIndices.has(Number(checkbox.dataset.selectIndex))).length;
+      selectAll.checked = visibleCheckboxes.length > 0 && visibleSelected === visibleCheckboxes.length;
+      selectAll.indeterminate = visibleSelected > 0 && visibleSelected < visibleCheckboxes.length;
+    }
+
     function renderRecords() {
       const records = getRecords();
       const keyword = searchInput.value.trim().toLowerCase();
@@ -452,6 +480,7 @@
       empty.hidden = visibleRecords.length > 0;
       recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
+          <td class="no-print"><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
           <td>${escapeHtml(record.id || '历史记录')}</td>
           <td>${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
           <td>${escapeHtml(record.description)}</td>
@@ -465,6 +494,7 @@
           <td>${escapeHtml(record.updatedAt || record.time)}</td>
           <td><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
         </tr>`).join('');
+      updateSelectionSummary();
     }
 
     function escapeHtml(value) {
@@ -527,6 +557,7 @@
         showNotice('照片占用空间较大，保存失败；请移除照片后重试');
         return;
       }
+      selectedIndices.clear();
       renderRecords();
       photoData = '';
       photoInput.value = '';
@@ -632,6 +663,66 @@
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
     document.querySelector('#closeDetail').addEventListener('click', () => detailDialog.close());
 
+    recordBody.addEventListener('change', event => {
+      const checkbox = event.target.closest('[data-select-index]');
+      if (!checkbox) return;
+      const index = Number(checkbox.dataset.selectIndex);
+      if (checkbox.checked) selectedIndices.add(index);
+      else selectedIndices.delete(index);
+      updateSelectionSummary();
+    });
+
+    selectAll.addEventListener('change', () => {
+      recordBody.querySelectorAll('[data-select-index]').forEach(checkbox => {
+        const index = Number(checkbox.dataset.selectIndex);
+        checkbox.checked = selectAll.checked;
+        if (selectAll.checked) selectedIndices.add(index);
+        else selectedIndices.delete(index);
+      });
+      updateSelectionSummary();
+    });
+
+    document.querySelector('#applyBulk').addEventListener('click', () => {
+      if (!selectedIndices.size) { showNotice('请先勾选需要批量处理的记录'); return; }
+      const owner = bulkOwner.value.trim();
+      const status = bulkStatus.value;
+      if (!owner && !status) { showNotice('请填写负责人或选择新的处置状态'); return; }
+      const records = getRecords();
+      const updatedAt = new Date().toLocaleString('zh-CN');
+      let changedCount = 0;
+      selectedIndices.forEach(index => {
+        const record = records[index];
+        if (!record) return;
+        const currentOwner = record.owner || '';
+        const currentStatus = record.status || '待派单';
+        const nextOwner = owner || currentOwner;
+        const nextStatus = status || currentStatus;
+        if (nextOwner === currentOwner && nextStatus === currentStatus) return;
+        const changes = [];
+        if (nextOwner !== currentOwner) changes.push(`负责人调整为：${nextOwner}`);
+        if (nextStatus !== currentStatus) changes.push(`状态调整为：${nextStatus}`);
+        records[index] = {
+          ...record,
+          owner: nextOwner,
+          status: nextStatus,
+          updatedAt,
+          timeline: [...getTimeline(record), {
+            time: updatedAt,
+            fromStatus: currentStatus,
+            toStatus: nextStatus,
+            note: `批量处理；${changes.join('；')}`
+          }]
+        };
+        changedCount += 1;
+      });
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      selectedIndices.clear();
+      bulkOwner.value = '';
+      bulkStatus.value = '';
+      renderRecords();
+      showNotice(changedCount ? `已批量更新 ${changedCount} 条记录` : '所选记录无需更新');
+    });
+
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
@@ -701,6 +792,7 @@
       if (!window.confirm('确定删除这条巡查记录吗？')) return;
       records.splice(index, 1);
       localStorage.setItem(storageKey, JSON.stringify(records));
+      selectedIndices.clear();
       renderRecords();
       showNotice('巡查记录已删除');
     });
