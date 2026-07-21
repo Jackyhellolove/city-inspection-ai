@@ -17,7 +17,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
     }
     main {
-      width: min(720px, 100%);
+      width: min(980px, 100%);
       padding: 36px;
       border: 1px solid #dce6f3;
       border-radius: 22px;
@@ -81,10 +81,22 @@
     td:first-child { max-width: 260px; white-space: normal; }
     .empty { padding: 22px 0; color: #7b879b; text-align: center; }
     .notice { min-height: 22px; margin: 10px 0 0; color: #16835d; font-size: 14px; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0 14px; }
     .stat { padding: 16px; border: 1px solid #e1e8f1; border-radius: 12px; background: white; }
     .stat strong { display: block; margin-top: 5px; font-size: 24px; }
     .stat span { color: #6f7b8f; font-size: 13px; }
+    .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+    .chart-card { padding: 18px; border: 1px solid #e1e8f1; border-radius: 14px; background: #fbfdff; }
+    .chart-card h2 { margin: 0 0 16px; font-size: 17px; }
+    .progress-track { height: 14px; overflow: hidden; border-radius: 999px; background: #e9eef5; }
+    .progress-value { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #16835d, #25ad7d); transition: width .3s ease; }
+    .progress-label { display: flex; justify-content: space-between; margin-top: 9px; color: #637087; font-size: 13px; }
+    .bars { display: grid; gap: 11px; }
+    .bar-row { display: grid; grid-template-columns: 86px 1fr 32px; align-items: center; gap: 9px; font-size: 13px; }
+    .bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { height: 10px; overflow: hidden; border-radius: 999px; background: #e9eef5; }
+    .bar-value { height: 100%; border-radius: inherit; background: #4f86e8; }
+    .chart-empty { color: #7b879b; font-size: 14px; }
     .filters { display: grid; grid-template-columns: 1fr 160px; gap: 12px; margin-top: 14px; }
     .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
@@ -95,6 +107,7 @@
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr 1fr; }
+      .dashboard { grid-template-columns: 1fr; }
       .filters { grid-template-columns: 1fr; }
       .actions { flex-wrap: wrap; }
     }
@@ -154,6 +167,19 @@
       <div class="stat"><span>待派单</span><strong id="pendingCount">0</strong></div>
       <div class="stat"><span>处理中</span><strong id="processingCount">0</strong></div>
       <div class="stat"><span>已完成</span><strong id="completedCount">0</strong></div>
+      <div class="stat"><span>办结率</span><strong id="completionRate">0%</strong></div>
+    </section>
+
+    <section class="dashboard" aria-label="巡查数据看板">
+      <div class="chart-card">
+        <h2>问题办结进度</h2>
+        <div class="progress-track" aria-hidden="true"><div class="progress-value" id="completionBar"></div></div>
+        <div class="progress-label"><span id="completionText">尚无巡查记录</span><span id="completionRatio">0 / 0</span></div>
+      </div>
+      <div class="chart-card">
+        <h2>问题类型分布</h2>
+        <div class="bars" id="typeChart"><span class="chart-empty">尚无巡查记录</span></div>
+      </div>
     </section>
 
     <section class="history">
@@ -242,10 +268,33 @@
           return (!keyword || searchable.includes(keyword)) && (!selectedStatus || status === selectedStatus);
         });
 
+      const pendingCount = records.filter(record => (record.status || '待派单') === '待派单').length;
+      const processingCount = records.filter(record => record.status === '处理中').length;
+      const completedCount = records.filter(record => record.status === '已完成').length;
+      const completionRate = records.length ? Math.round(completedCount / records.length * 100) : 0;
       document.querySelector('#totalCount').textContent = records.length;
-      document.querySelector('#pendingCount').textContent = records.filter(record => (record.status || '待派单') === '待派单').length;
-      document.querySelector('#processingCount').textContent = records.filter(record => record.status === '处理中').length;
-      document.querySelector('#completedCount').textContent = records.filter(record => record.status === '已完成').length;
+      document.querySelector('#pendingCount').textContent = pendingCount;
+      document.querySelector('#processingCount').textContent = processingCount;
+      document.querySelector('#completedCount').textContent = completedCount;
+      document.querySelector('#completionRate').textContent = `${completionRate}%`;
+      document.querySelector('#completionBar').style.width = `${completionRate}%`;
+      document.querySelector('#completionText').textContent = records.length ? `已完成 ${completionRate}%` : '尚无巡查记录';
+      document.querySelector('#completionRatio').textContent = `${completedCount} / ${records.length}`;
+
+      const typeCounts = records.reduce((counts, record) => {
+        const type = record.type || '其他问题';
+        counts[type] = (counts[type] || 0) + 1;
+        return counts;
+      }, {});
+      const maxTypeCount = Math.max(0, ...Object.values(typeCounts));
+      document.querySelector('#typeChart').innerHTML = records.length
+        ? Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).map(([type, count]) => `
+          <div class="bar-row">
+            <span class="bar-label" title="${escapeHtml(type)}">${escapeHtml(type)}</span>
+            <div class="bar-track" aria-hidden="true"><div class="bar-value" style="width:${count / maxTypeCount * 100}%"></div></div>
+            <strong>${count}</strong>
+          </div>`).join('')
+        : '<span class="chart-empty">尚无巡查记录</span>';
 
       empty.textContent = records.length ? '没有符合筛选条件的记录' : '暂时没有保存的记录';
       empty.hidden = visibleRecords.length > 0;
