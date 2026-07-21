@@ -81,9 +81,18 @@
     td:first-child { max-width: 260px; white-space: normal; }
     .empty { padding: 22px 0; color: #7b879b; text-align: center; }
     .notice { min-height: 22px; margin: 10px 0 0; color: #16835d; font-size: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+    .stat { padding: 16px; border: 1px solid #e1e8f1; border-radius: 12px; background: white; }
+    .stat strong { display: block; margin-top: 5px; font-size: 24px; }
+    .stat span { color: #6f7b8f; font-size: 13px; }
+    .filters { display: grid; grid-template-columns: 1fr 160px; gap: 12px; margin-top: 14px; }
+    .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
+    .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .filters { grid-template-columns: 1fr; }
       .actions { flex-wrap: wrap; }
     }
   </style>
@@ -130,14 +139,30 @@
 
     <p class="notice" id="notice" aria-live="polite"></p>
 
+    <section class="stats" aria-label="巡查状态统计">
+      <div class="stat"><span>全部问题</span><strong id="totalCount">0</strong></div>
+      <div class="stat"><span>待派单</span><strong id="pendingCount">0</strong></div>
+      <div class="stat"><span>处理中</span><strong id="processingCount">0</strong></div>
+      <div class="stat"><span>已完成</span><strong id="completedCount">0</strong></div>
+    </section>
+
     <section class="history">
       <div class="history-head">
         <h2>巡查记录</h2>
         <button class="secondary" id="export">导出 CSV 表格</button>
       </div>
+      <div class="filters">
+        <input id="search" aria-label="搜索巡查记录" placeholder="搜索编号、描述、地点或负责人">
+        <select id="statusFilter" aria-label="按处置状态筛选">
+          <option value="">全部状态</option>
+          <option>待派单</option>
+          <option>处理中</option>
+          <option>已完成</option>
+        </select>
+      </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>记录时间</th></tr></thead>
+          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>记录时间</th><th>操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -155,6 +180,8 @@
     const locationInput = document.querySelector('#location');
     const ownerInput = document.querySelector('#owner');
     const statusInput = document.querySelector('#status');
+    const searchInput = document.querySelector('#search');
+    const statusFilter = document.querySelector('#statusFilter');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
@@ -189,8 +216,24 @@
 
     function renderRecords() {
       const records = getRecords();
-      empty.hidden = records.length > 0;
-      recordBody.innerHTML = records.map(record => `
+      const keyword = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusFilter.value;
+      const visibleRecords = records
+        .map((record, index) => ({ ...record, storageIndex: index }))
+        .filter(record => {
+          const searchable = [record.id, record.description, record.location, record.owner].join(' ').toLowerCase();
+          const status = record.status || '待派单';
+          return (!keyword || searchable.includes(keyword)) && (!selectedStatus || status === selectedStatus);
+        });
+
+      document.querySelector('#totalCount').textContent = records.length;
+      document.querySelector('#pendingCount').textContent = records.filter(record => (record.status || '待派单') === '待派单').length;
+      document.querySelector('#processingCount').textContent = records.filter(record => record.status === '处理中').length;
+      document.querySelector('#completedCount').textContent = records.filter(record => record.status === '已完成').length;
+
+      empty.textContent = records.length ? '没有符合筛选条件的记录' : '暂时没有保存的记录';
+      empty.hidden = visibleRecords.length > 0;
+      recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
           <td>${escapeHtml(record.id || '历史记录')}</td>
           <td>${escapeHtml(record.description)}</td>
@@ -201,6 +244,7 @@
           <td>${escapeHtml(record.owner || '未指定')}</td>
           <td>${escapeHtml(record.status || '待派单')}</td>
           <td>${escapeHtml(record.time)}</td>
+          <td><button class="delete" data-index="${record.storageIndex}">删除</button></td>
         </tr>`).join('');
     }
 
@@ -268,6 +312,18 @@
       link.click();
       URL.revokeObjectURL(link.href);
       showNotice('CSV 表格已导出');
+    });
+
+    searchInput.addEventListener('input', renderRecords);
+    statusFilter.addEventListener('change', renderRecords);
+    recordBody.addEventListener('click', event => {
+      const button = event.target.closest('.delete');
+      if (!button || !window.confirm('确定删除这条巡查记录吗？')) return;
+      const records = getRecords();
+      records.splice(Number(button.dataset.index), 1);
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      renderRecords();
+      showNotice('巡查记录已删除');
     });
 
     renderRecords();
