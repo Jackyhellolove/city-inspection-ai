@@ -39,6 +39,17 @@
       font-size: 17px;
     }
     textarea:focus { border-color: #1769e0; box-shadow: 0 0 0 4px #1769e01c; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .field label { margin-bottom: 7px; font-size: 14px; }
+    .field input, .field select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #cbd8e8;
+      border-radius: 9px;
+      background: white;
+      color: #172033;
+      font: inherit;
+    }
     .actions { display: flex; gap: 12px; margin: 18px 0 26px; }
     button {
       padding: 11px 20px;
@@ -70,7 +81,11 @@
     td:first-child { max-width: 260px; white-space: normal; }
     .empty { padding: 22px 0; color: #7b879b; text-align: center; }
     .notice { min-height: 22px; margin: 10px 0 0; color: #16835d; font-size: 14px; }
-    @media (max-width: 560px) { main { padding: 24px; } }
+    @media (max-width: 680px) {
+      main { padding: 24px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .actions { flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
@@ -80,6 +95,25 @@
 
     <label for="issue">巡查问题</label>
     <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+
+    <div class="field-grid">
+      <div class="field">
+        <label for="location">发现地点</label>
+        <input id="location" placeholder="例如：和平路与胜利街路口">
+      </div>
+      <div class="field">
+        <label for="owner">负责人</label>
+        <input id="owner" placeholder="例如：张三">
+      </div>
+      <div class="field">
+        <label for="status">处置状态</label>
+        <select id="status">
+          <option>待派单</option>
+          <option>处理中</option>
+          <option>已完成</option>
+        </select>
+      </div>
+    </div>
 
     <div class="actions">
       <button class="primary" id="analyze">开始识别</button>
@@ -103,7 +137,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题描述</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>记录时间</th></tr></thead>
+          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>记录时间</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -118,6 +152,9 @@
       priority: document.querySelector('#priority')
     };
     const notice = document.querySelector('#notice');
+    const locationInput = document.querySelector('#location');
+    const ownerInput = document.querySelector('#owner');
+    const statusInput = document.querySelector('#status');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
@@ -143,15 +180,26 @@
       window.setTimeout(() => { notice.textContent = ''; }, 2500);
     }
 
+    function createRecordId(records) {
+      const date = new Date();
+      const day = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('');
+      const count = records.filter(record => String(record.id || '').startsWith(`XC-${day}-`)).length + 1;
+      return `XC-${day}-${String(count).padStart(3, '0')}`;
+    }
+
     function renderRecords() {
       const records = getRecords();
       empty.hidden = records.length > 0;
       recordBody.innerHTML = records.map(record => `
         <tr>
+          <td>${escapeHtml(record.id || '历史记录')}</td>
           <td>${escapeHtml(record.description)}</td>
+          <td>${escapeHtml(record.location || '未填写')}</td>
           <td>${escapeHtml(record.type)}</td>
           <td>${escapeHtml(record.department)}</td>
           <td>${escapeHtml(record.priority)}</td>
+          <td>${escapeHtml(record.owner || '未指定')}</td>
+          <td>${escapeHtml(record.status || '待派单')}</td>
           <td>${escapeHtml(record.time)}</td>
         </tr>`).join('');
     }
@@ -171,6 +219,9 @@
 
     document.querySelector('#clear').addEventListener('click', () => {
       issue.value = '';
+      locationInput.value = '';
+      ownerInput.value = '';
+      statusInput.value = '待派单';
       Object.values(output).forEach(element => element.textContent = '等待识别');
       issue.focus();
     });
@@ -183,7 +234,17 @@
       output.department.textContent = department;
       output.priority.textContent = priority;
       const records = getRecords();
-      records.unshift({ description, type, department, priority, time: new Date().toLocaleString('zh-CN') });
+      records.unshift({
+        id: createRecordId(records),
+        description,
+        location: locationInput.value.trim(),
+        type,
+        department,
+        priority,
+        owner: ownerInput.value.trim(),
+        status: statusInput.value,
+        time: new Date().toLocaleString('zh-CN')
+      });
       localStorage.setItem(storageKey, JSON.stringify(records));
       renderRecords();
       showNotice('巡查记录已保存到当前浏览器');
@@ -194,8 +255,11 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题描述', '问题类型', '处理部门', '优先级', '记录时间'],
-        ...records.map(record => [record.description, record.type, record.department, record.priority, record.time])
+        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '记录时间'],
+        ...records.map(record => [
+          record.id || '历史记录', record.description, record.location || '', record.type,
+          record.department, record.priority, record.owner || '', record.status || '待派单', record.time
+        ])
       ];
       const csv = '\ufeff' + rows.map(row => row.map(quote).join(',')).join('\r\n');
       const link = document.createElement('a');
