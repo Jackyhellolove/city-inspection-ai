@@ -108,6 +108,16 @@
     .deadline-soon { color: #8a4b08; background: #fff3d6; }
     .deadline-overdue { color: #b42318; background: #fff0ee; }
     .deadline-done { color: #116548; background: #e8f7f0; }
+    .photo-picker { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px; border: 1px dashed #b9c9dc; border-radius: 12px; background: #f8fbff; }
+    .photo-picker input { max-width: 260px; }
+    .photo-preview, .photo-thumb { object-fit: cover; border-radius: 8px; background: #edf2f8; }
+    .photo-preview { width: 72px; height: 72px; }
+    .photo-thumb { width: 54px; height: 54px; cursor: zoom-in; }
+    .photo-remove { padding: 7px 10px; color: #b42318; background: #fff0ee; }
+    dialog { width: min(900px, 92vw); padding: 14px; border: 0; border-radius: 16px; box-shadow: 0 24px 80px #17203355; }
+    dialog::backdrop { background: #172033aa; }
+    dialog img { display: block; width: 100%; max-height: 78vh; object-fit: contain; border-radius: 10px; }
+    .dialog-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -119,7 +129,7 @@
     @media print {
       body { display: block; padding: 0; background: white; }
       main { width: 100%; padding: 0; border: 0; box-shadow: none; }
-      textarea, .field-grid, .actions, .notice, .filters, .data-actions, .row-actions { display: none !important; }
+      textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, dialog { display: none !important; }
       .history { margin-top: 18px; }
       table { font-size: 11px; }
     }
@@ -154,6 +164,15 @@
         <label for="deadline">完成期限</label>
         <input id="deadline" type="date">
       </div>
+    </div>
+
+    <div class="photo-picker">
+      <div class="field">
+        <label for="photo">现场照片（可选）</label>
+        <input id="photo" type="file" accept="image/*" capture="environment">
+      </div>
+      <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
+      <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
     </div>
 
     <div class="actions">
@@ -221,13 +240,17 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>问题编号</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
+          <thead><tr><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
       </div>
     </section>
   </main>
+  <dialog id="photoDialog">
+    <img id="photoLarge" alt="现场照片大图">
+    <div class="dialog-actions"><button class="secondary" id="closePhoto" type="button">关闭</button></div>
+  </dialog>
   <script>
     const issue = document.querySelector('#issue');
     const output = {
@@ -240,12 +263,18 @@
     const ownerInput = document.querySelector('#owner');
     const statusInput = document.querySelector('#status');
     const deadlineInput = document.querySelector('#deadline');
+    const photoInput = document.querySelector('#photo');
+    const photoPreview = document.querySelector('#photoPreview');
+    const removePhotoButton = document.querySelector('#removePhoto');
+    const photoDialog = document.querySelector('#photoDialog');
+    const photoLarge = document.querySelector('#photoLarge');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
+    let photoData = '';
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -292,6 +321,31 @@
       if (state === 'overdue') return `<span class="deadline deadline-overdue">${escapeHtml(record.deadline)} · 已逾期</span>`;
       if (state === 'soon') return `<span class="deadline deadline-soon">${escapeHtml(record.deadline)} · 即将到期</span>`;
       return `<span class="deadline deadline-normal">${escapeHtml(record.deadline)}</span>`;
+    }
+
+    function safePhoto(value) {
+      return typeof value === 'string' && value.startsWith('data:image/jpeg;base64,') ? value : '';
+    }
+
+    function compressPhoto(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = reject;
+          image.onload = () => {
+            const scale = Math.min(1, 960 / Math.max(image.width, image.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.width * scale));
+            canvas.height = Math.max(1, Math.round(image.height * scale));
+            canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', .72));
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
     function renderRecords() {
@@ -345,6 +399,7 @@
       recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
           <td>${escapeHtml(record.id || '历史记录')}</td>
+          <td>${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
           <td>${escapeHtml(record.description)}</td>
           <td>${escapeHtml(record.location || '未填写')}</td>
           <td>${escapeHtml(record.type)}</td>
@@ -377,6 +432,10 @@
       ownerInput.value = '';
       statusInput.value = '待派单';
       deadlineInput.value = '';
+      photoInput.value = '';
+      photoData = '';
+      photoPreview.hidden = true;
+      removePhotoButton.hidden = true;
       Object.values(output).forEach(element => element.textContent = '等待识别');
       issue.focus();
     });
@@ -399,10 +458,20 @@
         owner: ownerInput.value.trim(),
         status: statusInput.value,
         deadline: deadlineInput.value,
+        photo: photoData,
         time: new Date().toLocaleString('zh-CN')
       });
-      localStorage.setItem(storageKey, JSON.stringify(records));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(records));
+      } catch {
+        showNotice('照片占用空间较大，保存失败；请移除照片后重试');
+        return;
+      }
       renderRecords();
+      photoData = '';
+      photoInput.value = '';
+      photoPreview.hidden = true;
+      removePhotoButton.hidden = true;
       showNotice('巡查记录已保存到当前浏览器');
     });
 
@@ -411,9 +480,9 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题编号', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
+        ['问题编号', '现场照片', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
         ...records.map(record => [
-          record.id || '历史记录', record.description, record.location || '', record.type,
+          record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.type,
           record.department, record.priority, record.owner || '', record.status || '待派单', record.deadline || '', getDeadlineState(record), record.time,
           record.updatedAt || record.time
         ])
@@ -466,6 +535,41 @@
     });
 
     document.querySelector('#printReport').addEventListener('click', () => window.print());
+
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showNotice('请选择图片文件'); return; }
+      showNotice('正在处理现场照片…');
+      try {
+        photoData = await compressPhoto(file);
+        photoPreview.src = photoData;
+        photoPreview.hidden = false;
+        removePhotoButton.hidden = false;
+        showNotice('现场照片已准备好');
+      } catch {
+        photoData = '';
+        showNotice('照片读取失败，请重新选择');
+      }
+    });
+
+    removePhotoButton.addEventListener('click', () => {
+      photoData = '';
+      photoInput.value = '';
+      photoPreview.hidden = true;
+      removePhotoButton.hidden = true;
+      showNotice('现场照片已移除');
+    });
+
+    recordBody.addEventListener('click', event => {
+      const thumbnail = event.target.closest('[data-photo-index]');
+      if (!thumbnail) return;
+      const photo = safePhoto(getRecords()[Number(thumbnail.dataset.photoIndex)]?.photo);
+      if (!photo) return;
+      photoLarge.src = photo;
+      photoDialog.showModal();
+    });
+    document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
 
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
