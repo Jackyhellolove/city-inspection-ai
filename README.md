@@ -101,6 +101,26 @@ python3 web_app.py
 
 运行 `supabase-assignee-access.sql` 后，派单会关联具体账号；负责人登录后可查看和更新分配给自己的巡查记录，管理员仍可管理全部记录。
 
+### 现场照片 AI 识别（本机试用版）
+
+运行 `supabase-ai-analysis.sql` 后，照片 AI 的分类、风险、建议和置信度会随巡查记录保存到云端。它仅用于辅助判断，保存前仍应结合现场情况人工复核。
+
+为保护 API 密钥，浏览器不会直接调用 AI 服务。请在项目文件夹中完成以下一次性配置：
+
+```bash
+cp .env.example .env
+```
+
+随后用 VS Code 打开 `.env`，只在本机填写 `OPENAI_API_KEY`。不要把密钥发到聊天、截图中，或提交到 GitHub。可在 `.env` 中按自己的 OpenAI API 项目可用模型调整 `OPENAI_VISION_MODEL`。
+
+完成配置后，使用下面的命令启动网页（不要再用 `python3 -m http.server`）：
+
+```bash
+python3 web_app.py
+```
+
+选择或拍摄一张现场照片，再点击“AI 识别现场照片”。网页会把照片交给 Mac 上的本地服务转发，密钥始终只由本地服务读取；识别结果会显示为“请人工复核”。
+
 ### 命令行版本
 
 ```bash
