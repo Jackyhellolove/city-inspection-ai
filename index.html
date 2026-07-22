@@ -132,6 +132,12 @@
     .bulk-actions { display: grid; grid-template-columns: auto 1fr 160px auto; align-items: center; gap: 10px; margin-top: 14px; padding: 12px; border: 1px solid #dce6f3; border-radius: 12px; background: #f8fbff; }
     .bulk-actions strong { color: #1769e0; white-space: nowrap; }
     .bulk-actions input, .bulk-actions select { width: 100%; padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; background: white; font: inherit; }
+    .edit-form { display: grid; gap: 14px; }
+    .edit-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .edit-form label { margin-bottom: 6px; font-size: 14px; }
+    .edit-form input, .edit-form select, .edit-form textarea { width: 100%; min-height: auto; padding: 11px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
+    .edit-form textarea { min-height: 100px; resize: vertical; }
+    .edit-form .full { grid-column: 1 / -1; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -141,6 +147,8 @@
       .actions { flex-wrap: wrap; }
       .detail-grid { grid-template-columns: 1fr; }
       .bulk-actions { grid-template-columns: 1fr; }
+      .edit-form-grid { grid-template-columns: 1fr; }
+      .edit-form .full { grid-column: auto; }
     }
     @media print {
       body { display: block; padding: 0; background: white; }
@@ -285,6 +293,41 @@
     <div class="timeline" id="detailTimeline"></div>
     <div class="dialog-actions"><button class="secondary" id="closeDetail" type="button">关闭</button></div>
   </dialog>
+  <dialog id="editDialog">
+    <h2>编辑巡查记录</h2>
+    <form class="edit-form" id="editForm">
+      <div class="edit-form-grid">
+        <div class="full">
+          <label for="editDescription">问题描述</label>
+          <textarea id="editDescription" required></textarea>
+        </div>
+        <div>
+          <label for="editLocation">发现地点</label>
+          <input id="editLocation">
+        </div>
+        <div>
+          <label for="editOwner">负责人</label>
+          <input id="editOwner">
+        </div>
+        <div>
+          <label for="editStatus">处置状态</label>
+          <select id="editStatus"><option>待派单</option><option>处理中</option><option>已完成</option></select>
+        </div>
+        <div>
+          <label for="editDeadline">完成期限</label>
+          <input id="editDeadline" type="date">
+        </div>
+        <div class="full">
+          <label for="editNote">本次处理说明（可选）</label>
+          <textarea id="editNote" placeholder="例如：已联系养护单位，预计今日完成处理"></textarea>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="secondary" id="cancelEdit" type="button">取消</button>
+        <button class="primary" type="submit">保存修改</button>
+      </div>
+    </form>
+  </dialog>
   <script>
     const issue = document.querySelector('#issue');
     const output = {
@@ -305,6 +348,14 @@
     const detailDialog = document.querySelector('#detailDialog');
     const detailContent = document.querySelector('#detailContent');
     const detailTimeline = document.querySelector('#detailTimeline');
+    const editDialog = document.querySelector('#editDialog');
+    const editForm = document.querySelector('#editForm');
+    const editDescription = document.querySelector('#editDescription');
+    const editLocation = document.querySelector('#editLocation');
+    const editOwner = document.querySelector('#editOwner');
+    const editStatus = document.querySelector('#editStatus');
+    const editDeadline = document.querySelector('#editDeadline');
+    const editNote = document.querySelector('#editNote');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
@@ -317,6 +368,7 @@
     const storageKey = 'city-inspection-records';
     let photoData = '';
     const selectedIndices = new Set();
+    let activeEditIndex = -1;
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -420,6 +472,18 @@
           <div class="timeline-note">${escapeHtml(item.note || '未填写处理说明')}</div>
         </div>`).join('');
       detailDialog.showModal();
+    }
+
+    function openEditDialog(record, index) {
+      activeEditIndex = index;
+      editDescription.value = record.description || '';
+      editLocation.value = record.location || '';
+      editOwner.value = record.owner || '';
+      editStatus.value = record.status || '待派单';
+      editDeadline.value = record.deadline || '';
+      editNote.value = '';
+      editDialog.showModal();
+      editDescription.focus();
     }
 
     function updateSelectionSummary() {
@@ -723,6 +787,58 @@
       showNotice(changedCount ? `已批量更新 ${changedCount} 条记录` : '所选记录无需更新');
     });
 
+    document.querySelector('#cancelEdit').addEventListener('click', () => {
+      activeEditIndex = -1;
+      editDialog.close();
+    });
+
+    editForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const records = getRecords();
+      const record = records[activeEditIndex];
+      if (!record) { editDialog.close(); showNotice('未找到需要编辑的记录'); return; }
+      const description = editDescription.value.trim();
+      if (!description) { editDescription.focus(); return; }
+      const location = editLocation.value.trim();
+      const owner = editOwner.value.trim();
+      const status = editStatus.value;
+      const deadline = editDeadline.value;
+      const note = editNote.value.trim();
+      const currentStatus = record.status || '待派单';
+      const changes = [];
+      if (description !== record.description) changes.push('修改问题描述');
+      if (location !== (record.location || '')) changes.push('修改发现地点');
+      if (owner !== (record.owner || '')) changes.push(`负责人调整为：${owner || '未指定'}`);
+      if (status !== currentStatus) changes.push(`状态调整为：${status}`);
+      if (deadline !== (record.deadline || '')) changes.push(`完成期限调整为：${deadline || '未设置'}`);
+      if (!changes.length && !note) { editDialog.close(); activeEditIndex = -1; showNotice('没有需要保存的修改'); return; }
+      const [type, department, priority] = classify(description);
+      const updatedAt = new Date().toLocaleString('zh-CN');
+      records[activeEditIndex] = {
+        ...record,
+        description,
+        location,
+        owner,
+        status,
+        deadline,
+        type,
+        department,
+        priority,
+        updatedAt,
+        timeline: [...getTimeline(record), {
+          time: updatedAt,
+          fromStatus: currentStatus,
+          toStatus: status,
+          note: note || changes.join('；')
+        }]
+      };
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      editDialog.close();
+      activeEditIndex = -1;
+      renderRecords();
+      showNotice('巡查记录已更新');
+    });
+
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
@@ -738,54 +854,7 @@
       }
 
       if (button.classList.contains('edit')) {
-        const record = records[index];
-        const description = window.prompt('修改问题描述', record.description);
-        if (description === null) return;
-        const location = window.prompt('修改发现地点', record.location || '');
-        if (location === null) return;
-        const owner = window.prompt('修改负责人', record.owner || '');
-        if (owner === null) return;
-        const status = window.prompt('修改处置状态：待派单、处理中或已完成', record.status || '待派单');
-        if (status === null) return;
-        if (!['待派单', '处理中', '已完成'].includes(status.trim())) {
-          showNotice('处置状态只能填写：待派单、处理中或已完成');
-          return;
-        }
-        const deadline = window.prompt('修改完成期限（格式：年-月-日，留空表示不设置）', record.deadline || '');
-        if (deadline === null) return;
-        if (deadline.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(deadline.trim())) {
-          showNotice('完成期限格式应为：年-月-日');
-          return;
-        }
-        const note = window.prompt('填写本次处理说明（可留空）', '');
-        if (note === null) return;
-        const [type, department, priority] = classify(description);
-        const updatedAt = new Date().toLocaleString('zh-CN');
-        const timeline = getTimeline(record);
-        if ((record.status || '待派单') !== status.trim() || note.trim()) {
-          timeline.push({
-            time: updatedAt,
-            fromStatus: record.status || '待派单',
-            toStatus: status.trim(),
-            note: note.trim() || '更新处置状态'
-          });
-        }
-        records[index] = {
-          ...record,
-          description: description.trim() || record.description,
-          location: location.trim(),
-          owner: owner.trim(),
-          status: status.trim(),
-          deadline: deadline.trim(),
-          timeline,
-          type,
-          department,
-          priority,
-          updatedAt
-        };
-        localStorage.setItem(storageKey, JSON.stringify(records));
-        renderRecords();
-        showNotice('巡查记录已更新');
+        openEditDialog(records[index], index);
         return;
       }
 
