@@ -583,6 +583,7 @@
     try { recordCache = JSON.parse(localStorage.getItem(storageKey)) || []; }
     catch { recordCache = []; }
     let recordsSubscription = null;
+    let pendingRetryActive = false;
 
     function getRecords() { return recordCache; }
 
@@ -687,14 +688,17 @@
         return result;
       }, {});
       const localPhotos = new Map(recordCache.map(record => [record.cloudId, record.photo || '']));
+      const cloudRecordNumbers = new Set((records || []).map(record => record.record_no));
+      const pendingRecords = recordCache.filter(record => !record.cloudId && !cloudRecordNumbers.has(record.id));
       const cloudRecords = (records || []).map(record => localRecordFromCloud(
         record,
         updatesByRecord[record.id] || [],
         localPhotos.get(record.id) || ''
       ));
-      saveRecords(await addCloudPhotos(cloudRecords));
+      saveRecords([...pendingRecords, ...await addCloudPhotos(cloudRecords)]);
       selectedIndices.clear();
       renderRecords();
+      if (pendingRecords.length) void retryPendingCloudRecords(pendingRecords);
     }
 
     async function createCloudTimeline(recordId, actorId, entry) {
@@ -711,11 +715,19 @@
     async function createCloudRecord(record) {
       const { data: authData } = await supabaseClient.auth.getUser();
       if (!authData.user) throw new Error('登录状态已失效，请重新登录');
-      const { data, error } = await supabaseClient
+      let { data, error } = await supabaseClient
         .from('inspection_records')
         .insert(cloudRecordFromLocal(record, authData.user.id))
         .select()
         .single();
+      if (error?.code === '23505') {
+        record.id = createRecordId();
+        ({ data, error } = await supabaseClient
+          .from('inspection_records')
+          .insert(cloudRecordFromLocal(record, authData.user.id))
+          .select()
+          .single());
+      }
       if (error) throw error;
       const initialEntry = record.timeline?.[record.timeline.length - 1] || {
         fromStatus: '', toStatus: record.status || '待派单', note: '创建巡查记录'
@@ -741,6 +753,33 @@
         created_at: data.created_at
       }], record.photo || '');
       return { ...localRecord, photo: savedRecord.photo_path ? await getCloudPhotoUrl(savedRecord.photo_path) : localRecord.photo };
+    }
+
+    async function retryPendingCloudRecords(pendingRecords) {
+      if (pendingRetryActive || !pendingRecords.length) return;
+      pendingRetryActive = true;
+      let syncedCount = 0;
+      try {
+        for (const pendingRecord of pendingRecords) {
+          try {
+            const cloudRecord = await createCloudRecord(pendingRecord);
+            const index = recordCache.findIndex(record => record === pendingRecord);
+            if (index < 0) continue;
+            const next = recordCache.slice();
+            next[index] = { ...cloudRecord, photo: pendingRecord.photo, timeline: pendingRecord.timeline };
+            saveRecords(next);
+            syncedCount += 1;
+          } catch {
+            // 保留暂存记录，等待下一次打开页面时再次尝试。
+          }
+        }
+      } finally {
+        pendingRetryActive = false;
+      }
+      if (syncedCount) {
+        renderRecords();
+        showNotice(`已自动同步 ${syncedCount} 条本机暂存记录`);
+      }
     }
 
     async function updateCloudRecord(record) {
@@ -778,11 +817,12 @@
       locationStatus.title = message;
     }
 
-    function createRecordId(records) {
+    function createRecordId() {
       const date = new Date();
       const day = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('');
-      const count = records.filter(record => String(record.id || '').startsWith(`XC-${day}-`)).length + 1;
-      return `XC-${day}-${String(count).padStart(3, '0')}`;
+      const randomPart = globalThis.crypto?.randomUUID?.().slice(0, 8).toUpperCase()
+        || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
+      return `XC-${day}-${randomPart}`;
     }
 
     function getDeadlineState(record) {
