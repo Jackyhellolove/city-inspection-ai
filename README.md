@@ -83,7 +83,9 @@ python3 web_app.py
 
 项目已支持 PWA 安装和基础离线缓存：部署到 HTTPS 后，可在手机浏览器中添加到主屏幕；支持安装提示的浏览器会显示“安装应用”按钮。iPhone 可在 Safari 的分享菜单中选择“添加到主屏幕”。
 
-当前版本已预留 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。登录功能已接入 Supabase Auth，巡查记录云端同步将在下一阶段接入。
+当前版本已接入 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。
+
+巡查记录云端同步启用后，新增、编辑、批量修改和删除会同步到 Supabase 的 `inspection_records` 表；首次登录会读取当前账号有权限查看的云端台账。要让已打开的手机和 Mac 页面自动刷新，请在 Supabase SQL Editor 中运行 `supabase-realtime.sql`。现场照片和完整处置时间线仍保存在当前设备，后续会迁移到云端文件存储和独立的处置记录表。
 
 ### 命令行版本
 

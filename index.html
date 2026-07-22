@@ -558,6 +558,8 @@
     async function refreshLoginState(session) {
       if (!session?.user) { showLoggedOutState(); return; }
       showLoggedInState(await getProfile(session.user));
+      await loadCloudRecords();
+      subscribeToCloudRecords();
     }
 
     function requireSupabaseConfig() {
@@ -577,9 +579,104 @@
       return ['其他问题', '城市管理部门', '一般'];
     }
 
-    function getRecords() {
-      try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
-      catch { return []; }
+    let recordCache;
+    try { recordCache = JSON.parse(localStorage.getItem(storageKey)) || []; }
+    catch { recordCache = []; }
+    let recordsSubscription = null;
+
+    function getRecords() { return recordCache; }
+
+    function saveRecords(records) {
+      recordCache = records;
+      localStorage.setItem(storageKey, JSON.stringify(records));
+    }
+
+    function cloudRecordFromLocal(record, userId = null) {
+      const cloudRecord = {
+        record_no: record.id,
+        description: record.description,
+        location: record.location || null,
+        issue_type: record.type || null,
+        department: record.department || null,
+        priority: record.priority || null,
+        owner_name: record.owner || null,
+        status: record.status || '待派单',
+        deadline: record.deadline || null,
+        latitude: record.latitude ?? null,
+        longitude: record.longitude ?? null,
+        updated_at: new Date().toISOString()
+      };
+      if (userId) cloudRecord.created_by = userId;
+      return cloudRecord;
+    }
+
+    function localRecordFromCloud(record) {
+      const createdTime = record.created_at ? new Date(record.created_at).toLocaleString('zh-CN') : '时间未知';
+      const updatedTime = record.updated_at ? new Date(record.updated_at).toLocaleString('zh-CN') : createdTime;
+      return {
+        cloudId: record.id,
+        id: record.record_no,
+        description: record.description,
+        location: record.location || '',
+        type: record.issue_type || '其他问题',
+        department: record.department || '城市管理部门',
+        priority: record.priority || '一般',
+        owner: record.owner_name || '',
+        status: record.status || '待派单',
+        deadline: record.deadline || '',
+        latitude: record.latitude,
+        longitude: record.longitude,
+        photo: '',
+        time: createdTime,
+        updatedAt: updatedTime,
+        timeline: [{ time: createdTime, fromStatus: '', toStatus: record.status || '待派单', note: '已从云端同步' }]
+      };
+    }
+
+    async function loadCloudRecords() {
+      if (!supabaseClient) return;
+      const { data, error } = await supabaseClient
+        .from('inspection_records')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) { showNotice(`云端记录读取失败：${error.message}`); return; }
+      saveRecords((data || []).map(localRecordFromCloud));
+      selectedIndices.clear();
+      renderRecords();
+    }
+
+    async function createCloudRecord(record) {
+      const { data: authData } = await supabaseClient.auth.getUser();
+      if (!authData.user) throw new Error('登录状态已失效，请重新登录');
+      const { data, error } = await supabaseClient
+        .from('inspection_records')
+        .insert(cloudRecordFromLocal(record, authData.user.id))
+        .select()
+        .single();
+      if (error) throw error;
+      return localRecordFromCloud(data);
+    }
+
+    async function updateCloudRecord(record) {
+      if (!supabaseClient || !record.cloudId) return record;
+      const { data: authData } = await supabaseClient.auth.getUser();
+      if (!authData.user) throw new Error('登录状态已失效，请重新登录');
+      const { data, error } = await supabaseClient
+        .from('inspection_records')
+        .update(cloudRecordFromLocal(record))
+        .eq('id', record.cloudId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { ...localRecordFromCloud(data), photo: record.photo, timeline: record.timeline };
+    }
+
+    function subscribeToCloudRecords() {
+      if (!supabaseClient || recordsSubscription) return;
+      recordsSubscription = supabaseClient
+        .channel('inspection-records-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inspection_records' }, () => loadCloudRecords())
+        .subscribe();
     }
 
     function showNotice(message) {
@@ -835,15 +932,16 @@
       issue.focus();
     });
 
-    document.querySelector('#save').addEventListener('click', () => {
+    document.querySelector('#save').addEventListener('click', async () => {
       const description = issue.value.trim();
       if (!description) { showNotice('请先输入巡查问题'); issue.focus(); return; }
+      if (!supabaseClient) { showNotice('请先完成云端登录配置'); return; }
       const [type, department, priority] = classify(description);
       output.type.textContent = type;
       output.department.textContent = department;
       output.priority.textContent = priority;
       const records = getRecords();
-      records.unshift({
+      const newRecord = {
         id: createRecordId(records),
         description,
         location: locationInput.value.trim(),
@@ -863,9 +961,10 @@
           toStatus: statusInput.value,
           note: '创建巡查记录'
         }]
-      });
+      };
+      records.unshift(newRecord);
       try {
-        localStorage.setItem(storageKey, JSON.stringify(records));
+        saveRecords(records);
       } catch {
         showNotice('照片占用空间较大，保存失败；请移除照片后重试');
         return;
@@ -878,7 +977,20 @@
       removePhotoButton.hidden = true;
       currentCoordinates = null;
       setLocationStatus('尚未定位');
-      showNotice('巡查记录已保存到当前浏览器');
+      showNotice('正在保存到云端…');
+      try {
+        const cloudRecord = await createCloudRecord(newRecord);
+        const index = getRecords().findIndex(record => record === newRecord);
+        if (index >= 0) {
+          const next = getRecords().slice();
+          next[index] = { ...cloudRecord, photo: newRecord.photo, timeline: newRecord.timeline };
+          saveRecords(next);
+          renderRecords();
+        }
+        showNotice('巡查记录已保存到云端');
+      } catch (error) {
+        showNotice(`云端保存失败，记录暂存本机：${error.message}`);
+      }
     });
 
     document.querySelector('#export').addEventListener('click', () => {
@@ -930,7 +1042,7 @@
           keys.add(key);
           return true;
         });
-        localStorage.setItem(storageKey, JSON.stringify([...current, ...imported]));
+        saveRecords([...current, ...imported]);
         renderRecords();
         showNotice(`成功恢复 ${imported.length} 条新记录`);
       } catch {
@@ -1039,7 +1151,7 @@
       updateSelectionSummary();
     });
 
-    document.querySelector('#applyBulk').addEventListener('click', () => {
+    document.querySelector('#applyBulk').addEventListener('click', async () => {
       if (!selectedIndices.size) { showNotice('请先勾选需要批量处理的记录'); return; }
       const owner = bulkOwner.value.trim();
       const status = bulkStatus.value;
@@ -1047,6 +1159,7 @@
       const records = getRecords();
       const updatedAt = new Date().toLocaleString('zh-CN');
       let changedCount = 0;
+      const changedCloudRecords = [];
       selectedIndices.forEach(index => {
         const record = records[index];
         if (!record) return;
@@ -1070,14 +1183,21 @@
             note: `批量处理；${changes.join('；')}`
           }]
         };
+        if (records[index].cloudId) changedCloudRecords.push(records[index]);
         changedCount += 1;
       });
-      localStorage.setItem(storageKey, JSON.stringify(records));
+      saveRecords(records);
       selectedIndices.clear();
       bulkOwner.value = '';
       bulkStatus.value = '';
       renderRecords();
-      showNotice(changedCount ? `已批量更新 ${changedCount} 条记录` : '所选记录无需更新');
+      if (!changedCount) { showNotice('所选记录无需更新'); return; }
+      try {
+        await Promise.all(changedCloudRecords.map(updateCloudRecord));
+        showNotice(`已批量更新 ${changedCount} 条记录并同步云端`);
+      } catch (error) {
+        showNotice(`已更新本机记录，云端同步失败：${error.message}`);
+      }
     });
 
     document.querySelector('#cancelEdit').addEventListener('click', () => {
@@ -1085,7 +1205,7 @@
       editDialog.close();
     });
 
-    editForm.addEventListener('submit', event => {
+    editForm.addEventListener('submit', async event => {
       event.preventDefault();
       const records = getRecords();
       const record = records[activeEditIndex];
@@ -1118,7 +1238,8 @@
       if (!changes.length && !note) { editDialog.close(); activeEditIndex = -1; showNotice('没有需要保存的修改'); return; }
       const [type, department, priority] = classify(description);
       const updatedAt = new Date().toLocaleString('zh-CN');
-      records[activeEditIndex] = {
+      const editedIndex = activeEditIndex;
+      records[editedIndex] = {
         ...record,
         description,
         location,
@@ -1138,17 +1259,25 @@
           note: note || changes.join('；')
         }]
       };
-      localStorage.setItem(storageKey, JSON.stringify(records));
+      saveRecords(records);
       editDialog.close();
       activeEditIndex = -1;
       renderRecords();
-      showNotice('巡查记录已更新');
+      try {
+        const cloudRecord = await updateCloudRecord(records[editedIndex]);
+        records[editedIndex] = cloudRecord;
+        saveRecords(records);
+        renderRecords();
+        showNotice('巡查记录已更新并同步云端');
+      } catch (error) {
+        showNotice(`已更新本机记录，云端同步失败：${error.message}`);
+      }
     });
 
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
-    recordBody.addEventListener('click', event => {
+    recordBody.addEventListener('click', async event => {
       const button = event.target.closest('button[data-index]');
       if (!button) return;
       const records = getRecords();
@@ -1165,8 +1294,13 @@
       }
 
       if (!window.confirm('确定删除这条巡查记录吗？')) return;
+      const record = records[index];
+      if (supabaseClient && record.cloudId) {
+        const { error } = await supabaseClient.from('inspection_records').delete().eq('id', record.cloudId);
+        if (error) { showNotice(`云端删除失败：${error.message}`); return; }
+      }
       records.splice(index, 1);
-      localStorage.setItem(storageKey, JSON.stringify(records));
+      saveRecords(records);
       selectedIndices.clear();
       renderRecords();
       showNotice('巡查记录已删除');
