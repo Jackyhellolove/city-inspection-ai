@@ -3,6 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1769e0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="巡查助手">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <title>城市巡查 AI 助手</title>
   <style>
     * { box-sizing: border-box; }
@@ -155,6 +162,10 @@
     .report-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 34px; }
     .report-signatures div { padding-top: 20px; border-top: 1px solid #34425a; }
     .print-signatures { display: none; }
+    .install-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: -12px 0 22px; padding: 12px 14px; border: 1px solid #bcd3f2; border-radius: 12px; color: #24436d; background: #edf5ff; }
+    .install-card[hidden] { display: none; }
+    .install-card p { margin: 0; font-size: 14px; }
+    .install-card button { flex: none; padding: 8px 12px; color: white; background: #1769e0; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -166,12 +177,13 @@
       .bulk-actions { grid-template-columns: 1fr; }
       .edit-form-grid { grid-template-columns: 1fr; }
       .edit-form .full { grid-column: auto; }
+      .install-card { align-items: flex-start; flex-direction: column; }
     }
     @media print {
       @page { size: A4 landscape; margin: 12mm; }
       body { display: block; padding: 0; background: white; }
       main { width: 100%; padding: 0; border: 0; box-shadow: none; }
-      textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, .no-print, dialog { display: none !important; }
+      textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, .no-print, .install-card, dialog { display: none !important; }
       main > h1, main > .intro, main > label, main > .results, main > .stats, main > .dashboard, .history-head { display: none !important; }
       .print-report { display: block; }
       .print-signatures { display: grid; }
@@ -190,6 +202,10 @@
   <main>
     <h1>城市巡查 AI 助手</h1>
     <p class="intro">输入巡查现场发现的问题，系统将给出初步分类和处置建议。</p>
+    <aside class="install-card" id="installCard" hidden>
+      <p id="installText">把巡查助手安装到桌面，打开更方便，并可在无网络时使用已缓存的页面。</p>
+      <button id="installApp" type="button" hidden>安装应用</button>
+    </aside>
 
     <label for="issue">巡查问题</label>
     <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
@@ -439,10 +455,14 @@
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
+    const installCard = document.querySelector('#installCard');
+    const installText = document.querySelector('#installText');
+    const installButton = document.querySelector('#installApp');
     let photoData = '';
     const selectedIndices = new Set();
     let activeEditIndex = -1;
     let currentCoordinates = null;
+    let deferredInstallPrompt = null;
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -1049,6 +1069,52 @@
       renderRecords();
       showNotice('巡查记录已删除');
     });
+
+    function isAppInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      installText.textContent = '巡查助手已准备好，可以安装到当前设备桌面。';
+      installButton.hidden = false;
+      installCard.hidden = false;
+    });
+
+    installButton.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      if (choice.outcome === 'accepted') installCard.hidden = true;
+      else installButton.hidden = true;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      installCard.hidden = true;
+      showNotice('巡查助手已安装到设备');
+    });
+
+    if (!isAppInstalled()) {
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (isIOS && window.isSecureContext) {
+        installText.textContent = '在 Safari 中点击“分享”，再选择“添加到主屏幕”即可安装。';
+        installCard.hidden = false;
+      } else if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+        installText.textContent = '部署为 HTTPS 后，即可安装到手机桌面并使用离线页面。';
+        installCard.hidden = false;
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {
+          if (window.isSecureContext) showNotice('离线功能暂未启用，请刷新后重试');
+        });
+      });
+    }
 
     renderRecords();
   </script>
