@@ -145,6 +145,16 @@
     .location-tools .location-success { color: #116548; font-weight: 700; }
     .location-tools .location-error { color: #b42318; font-weight: 700; }
     .map-link { display: inline-block; margin-top: 4px; color: #1769e0; font-size: 12px; font-weight: 700; text-decoration: none; }
+    .print-report { display: none; }
+    .report-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .report-meta div { padding: 9px; border: 1px solid #dce3ec; }
+    .report-meta span { display: block; color: #69758a; font-size: 11px; }
+    .report-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 14px 0 18px; }
+    .report-summary div { padding: 10px; border: 1px solid #ccd7e5; text-align: center; }
+    .report-summary strong { display: block; margin-top: 4px; font-size: 20px; }
+    .report-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 34px; }
+    .report-signatures div { padding-top: 20px; border-top: 1px solid #34425a; }
+    .print-signatures { display: none; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -158,11 +168,21 @@
       .edit-form .full { grid-column: auto; }
     }
     @media print {
+      @page { size: A4 landscape; margin: 12mm; }
       body { display: block; padding: 0; background: white; }
       main { width: 100%; padding: 0; border: 0; box-shadow: none; }
       textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, .no-print, dialog { display: none !important; }
+      main > h1, main > .intro, main > label, main > .results, main > .stats, main > .dashboard, .history-head { display: none !important; }
+      .print-report { display: block; }
+      .print-signatures { display: grid; }
+      .print-report h1 { margin: 0; font-size: 24px; text-align: center; }
+      .print-report .report-unit { margin: 6px 0 0; text-align: center; }
       .history { margin-top: 18px; }
-      table { font-size: 11px; }
+      .table-wrap { overflow: visible; }
+      table { font-size: 9px; }
+      th, td { padding: 6px 4px; white-space: normal; }
+      tr { break-inside: avoid; }
+      .photo-thumb { width: 34px; height: 34px; }
     }
   </style>
 </head>
@@ -244,6 +264,22 @@
     </section>
 
     <section class="history">
+      <section class="print-report" aria-hidden="true">
+        <h1 id="reportOutputTitle">城市巡查工作报告</h1>
+        <p class="report-unit" id="reportOutputUnit"></p>
+        <div class="report-meta">
+          <div><span>报告周期</span><strong id="reportOutputPeriod"></strong></div>
+          <div><span>统计范围</span><strong id="reportOutputScope"></strong></div>
+          <div><span>生成时间</span><strong id="reportOutputTime"></strong></div>
+        </div>
+        <div class="report-summary">
+          <div><span>问题总数</span><strong id="reportTotal">0</strong></div>
+          <div><span>待派单</span><strong id="reportPending">0</strong></div>
+          <div><span>处理中</span><strong id="reportProcessing">0</strong></div>
+          <div><span>已完成</span><strong id="reportCompleted">0</strong></div>
+          <div><span>已逾期</span><strong id="reportOverdue">0</strong></div>
+        </div>
+      </section>
       <div class="history-head">
         <h2>巡查记录</h2>
         <button class="secondary" id="export">导出 CSV 表格</button>
@@ -283,11 +319,12 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th class="no-print"><input id="selectAll" type="checkbox" aria-label="选择当前筛选结果中的全部记录"></th><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th>操作</th></tr></thead>
+          <thead><tr><th class="no-print"><input id="selectAll" type="checkbox" aria-label="选择当前筛选结果中的全部记录"></th><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th class="no-print">操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
       </div>
+      <div class="report-signatures print-signatures"><div>编制人：<span id="reportOutputAuthor"></span></div><div>复核人：</div><div>日期：</div></div>
     </section>
   </main>
   <dialog id="photoDialog">
@@ -344,6 +381,18 @@
       </div>
     </form>
   </dialog>
+  <dialog id="reportDialog">
+    <h2>生成规范巡查报告</h2>
+    <form class="edit-form" id="reportForm">
+      <div class="edit-form-grid">
+        <div class="full"><label for="reportTitle">报告名称</label><input id="reportTitle" value="城市巡查工作报告" required></div>
+        <div><label for="reportUnit">单位名称</label><input id="reportUnit" placeholder="例如：某某城市运营有限公司"></div>
+        <div><label for="reportAuthor">编制人</label><input id="reportAuthor" placeholder="例如：张三"></div>
+      </div>
+      <p class="intro">报告将使用当前搜索和筛选结果，并自动生成统计、周期和签字栏。</p>
+      <div class="dialog-actions"><button class="secondary" id="cancelReport" type="button">取消</button><button class="primary" type="submit">预览并打印</button></div>
+    </form>
+  </dialog>
   <script>
     const issue = document.querySelector('#issue');
     const output = {
@@ -375,6 +424,11 @@
     const editLatitude = document.querySelector('#editLatitude');
     const editLongitude = document.querySelector('#editLongitude');
     const editNote = document.querySelector('#editNote');
+    const reportDialog = document.querySelector('#reportDialog');
+    const reportForm = document.querySelector('#reportForm');
+    const reportTitle = document.querySelector('#reportTitle');
+    const reportUnit = document.querySelector('#reportUnit');
+    const reportAuthor = document.querySelector('#reportAuthor');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
@@ -603,7 +657,7 @@
           <td>${escapeHtml(record.status || '待派单')}</td>
           <td>${renderDeadline(record)}</td>
           <td>${escapeHtml(record.updatedAt || record.time)}</td>
-          <td><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
+          <td class="no-print"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">编辑</button><button class="delete" data-index="${record.storageIndex}">删除</button></div></td>
         </tr>`).join('');
       updateSelectionSummary();
     }
@@ -764,7 +818,49 @@
       }
     });
 
-    document.querySelector('#printReport').addEventListener('click', () => window.print());
+    function getVisibleRecords() {
+      const records = getRecords();
+      return [...recordBody.querySelectorAll('[data-select-index]')]
+        .map(checkbox => records[Number(checkbox.dataset.selectIndex)])
+        .filter(Boolean);
+    }
+
+    document.querySelector('#printReport').addEventListener('click', () => {
+      if (!getVisibleRecords().length) { showNotice('当前筛选结果中没有可生成报告的记录'); return; }
+      reportDialog.showModal();
+      reportTitle.focus();
+    });
+
+    document.querySelector('#cancelReport').addEventListener('click', () => reportDialog.close());
+
+    reportForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const records = getVisibleRecords();
+      if (!records.length) { reportDialog.close(); showNotice('当前筛选结果中没有记录'); return; }
+      const pending = records.filter(record => (record.status || '待派单') === '待派单').length;
+      const processing = records.filter(record => record.status === '处理中').length;
+      const completed = records.filter(record => record.status === '已完成').length;
+      const overdue = records.filter(record => getDeadlineState(record) === 'overdue').length;
+      const newestDate = String(records[0].time || '').split(' ')[0] || '未知';
+      const oldestDate = String(records[records.length - 1].time || '').split(' ')[0] || '未知';
+      const scope = [];
+      if (searchInput.value.trim()) scope.push(`关键词：${searchInput.value.trim()}`);
+      if (statusFilter.value) scope.push(`状态：${statusFilter.value}`);
+      if (deadlineFilter.value) scope.push(`期限：${deadlineFilter.options[deadlineFilter.selectedIndex].text}`);
+      document.querySelector('#reportOutputTitle').textContent = reportTitle.value.trim() || '城市巡查工作报告';
+      document.querySelector('#reportOutputUnit').textContent = reportUnit.value.trim();
+      document.querySelector('#reportOutputPeriod').textContent = oldestDate === newestDate ? newestDate : `${oldestDate} 至 ${newestDate}`;
+      document.querySelector('#reportOutputScope').textContent = scope.length ? scope.join('；') : '全部巡查记录';
+      document.querySelector('#reportOutputTime').textContent = new Date().toLocaleString('zh-CN');
+      document.querySelector('#reportOutputAuthor').textContent = reportAuthor.value.trim();
+      document.querySelector('#reportTotal').textContent = records.length;
+      document.querySelector('#reportPending').textContent = pending;
+      document.querySelector('#reportProcessing').textContent = processing;
+      document.querySelector('#reportCompleted').textContent = completed;
+      document.querySelector('#reportOverdue').textContent = overdue;
+      reportDialog.close();
+      window.setTimeout(() => window.print(), 100);
+    });
 
     photoInput.addEventListener('change', async () => {
       const file = photoInput.files[0];
