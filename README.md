@@ -99,6 +99,8 @@ python3 web_app.py
 
 运行 `supabase-user-management.sql` 后，管理员可在系统内维护已注册账号的部门、角色和在岗状态；停用账号会从负责人派单名单中移除。
 
+运行 `supabase-assignee-access.sql` 后，派单会关联具体账号；负责人登录后可查看和更新分配给自己的巡查记录，管理员仍可管理全部记录。
+
 ### 命令行版本
 
 ```bash
