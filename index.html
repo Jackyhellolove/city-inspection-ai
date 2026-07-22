@@ -139,8 +139,11 @@
     .edit-form textarea { min-height: 100px; resize: vertical; }
     .edit-form .full { grid-column: 1 / -1; }
     .location-tools { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
-    .location-tools button { padding: 7px 10px; color: #1557a6; background: #edf5ff; }
-    .location-tools span { color: #69758a; font-size: 12px; }
+    .location-tools button { flex: none; padding: 7px 10px; color: #1557a6; background: #edf5ff; }
+    .location-tools span { min-width: 0; overflow: hidden; color: #69758a; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .location-tools .location-loading { color: #8a4b08; }
+    .location-tools .location-success { color: #116548; font-weight: 700; }
+    .location-tools .location-error { color: #b42318; font-weight: 700; }
     .map-link { display: inline-block; margin-top: 4px; color: #1769e0; font-size: 12px; font-weight: 700; text-decoration: none; }
     @media (max-width: 680px) {
       main { padding: 24px; }
@@ -408,6 +411,12 @@
       window.setTimeout(() => { notice.textContent = ''; }, 2500);
     }
 
+    function setLocationStatus(message, state = '') {
+      locationStatus.textContent = message;
+      locationStatus.className = state ? `location-${state}` : '';
+      locationStatus.title = message;
+    }
+
     function createRecordId(records) {
       const date = new Date();
       const day = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('');
@@ -613,25 +622,24 @@
     });
 
     document.querySelector('#getLocation').addEventListener('click', () => {
-      if (!navigator.geolocation) { showNotice('当前浏览器不支持定位'); return; }
+      if (!navigator.geolocation) { setLocationStatus('定位失败：浏览器不支持', 'error'); return; }
       const button = document.querySelector('#getLocation');
       button.disabled = true;
-      locationStatus.textContent = '正在定位…';
+      setLocationStatus('正在定位…', 'loading');
       navigator.geolocation.getCurrentPosition(position => {
         currentCoordinates = {
           latitude: Number(position.coords.latitude.toFixed(6)),
           longitude: Number(position.coords.longitude.toFixed(6))
         };
-        locationStatus.textContent = `${currentCoordinates.latitude}, ${currentCoordinates.longitude}`;
+        setLocationStatus('定位成功', 'success');
         button.disabled = false;
-        showNotice('当前位置已获取');
       }, error => {
         currentCoordinates = null;
         button.disabled = false;
-        locationStatus.textContent = '定位未成功';
-        const insecureHint = !window.isSecureContext ? '；局域网 HTTP 预览可能被浏览器限制，HTTPS 版本可正常使用' : '';
-        const reason = error.code === 1 ? '请允许浏览器访问位置' : '暂时无法获取位置';
-        showNotice(`${reason}${insecureHint}`);
+        const reason = !window.isSecureContext
+          ? '定位失败：需要 HTTPS'
+          : error.code === 1 ? '定位失败：请允许位置权限' : '定位失败：暂时无法获取';
+        setLocationStatus(reason, 'error');
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
     });
 
@@ -642,7 +650,7 @@
       statusInput.value = '待派单';
       deadlineInput.value = '';
       currentCoordinates = null;
-      locationStatus.textContent = '尚未定位';
+      setLocationStatus('尚未定位');
       photoInput.value = '';
       photoData = '';
       photoPreview.hidden = true;
@@ -693,7 +701,7 @@
       photoPreview.hidden = true;
       removePhotoButton.hidden = true;
       currentCoordinates = null;
-      locationStatus.textContent = '尚未定位';
+      setLocationStatus('尚未定位');
       showNotice('巡查记录已保存到当前浏览器');
     });
 
