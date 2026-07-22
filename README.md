@@ -85,9 +85,11 @@ python3 web_app.py
 
 当前版本已接入 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。
 
-巡查记录云端同步启用后，新增、编辑、批量修改和删除会同步到 Supabase 的 `inspection_records` 表；首次登录会读取当前账号有权限查看的云端台账。要让已打开的手机和 Mac 页面自动刷新，请在 Supabase SQL Editor 中运行 `supabase-realtime.sql`。现场照片和完整处置时间线仍保存在当前设备，后续会迁移到云端文件存储和独立的处置记录表。
+巡查记录云端同步启用后，新增、编辑、批量修改和删除会同步到 Supabase 的 `inspection_records` 表；首次登录会读取当前账号有权限查看的云端台账。要让已打开的手机和 Mac 页面自动刷新，请在 Supabase SQL Editor 中运行 `supabase-realtime.sql`。
 
-运行 `supabase-timeline.sql` 后，创建记录、编辑记录和批量处理产生的状态变化及处理说明会写入 `inspection_updates` 表；问题详情将从云端读取并展示完整处置时间线。现场照片仍在当前设备，后续迁移到云端文件存储。
+运行 `supabase-timeline.sql` 后，创建记录、编辑记录和批量处理产生的状态变化及处理说明会写入 `inspection_updates` 表；问题详情将从云端读取并展示完整处置时间线。
+
+运行 `supabase-photos.sql` 后，新增巡查记录时选择的现场照片会压缩后上传至私有的 Supabase Storage 桶。巡查员只能查看自己上传的照片，管理员可查看全部照片；换设备登录后照片仍可显示。
 
 ### 命令行版本
 

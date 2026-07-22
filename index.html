@@ -610,7 +610,7 @@
       return cloudRecord;
     }
 
-    function localRecordFromCloud(record, updates = []) {
+    function localRecordFromCloud(record, updates = [], localPhoto = '') {
       const createdTime = record.created_at ? new Date(record.created_at).toLocaleString('zh-CN') : '时间未知';
       const updatedTime = record.updated_at ? new Date(record.updated_at).toLocaleString('zh-CN') : createdTime;
       return {
@@ -626,7 +626,8 @@
         deadline: record.deadline || '',
         latitude: record.latitude,
         longitude: record.longitude,
-        photo: '',
+        photo: localPhoto,
+        photoPath: record.photo_path || '',
         time: createdTime,
         updatedAt: updatedTime,
         timeline: updates.length
@@ -638,6 +639,31 @@
           }))
           : [{ time: createdTime, fromStatus: '', toStatus: record.status || '待派单', note: '已从云端同步' }]
       };
+    }
+
+    async function getCloudPhotoUrl(photoPath) {
+      if (!photoPath || !supabaseClient) return '';
+      const { data, error } = await supabaseClient.storage
+        .from('inspection-photos')
+        .createSignedUrl(photoPath, 60 * 60);
+      return error ? '' : (data?.signedUrl || '');
+    }
+
+    async function addCloudPhotos(records) {
+      return Promise.all(records.map(async record => ({
+        ...record,
+        photo: record.photoPath ? await getCloudPhotoUrl(record.photoPath) : record.photo
+      })));
+    }
+
+    async function uploadCloudPhoto(photoPath, photoData) {
+      if (!photoPath || !photoData || !supabaseClient) return;
+      const response = await fetch(photoData);
+      const photoBlob = await response.blob();
+      const { error } = await supabaseClient.storage
+        .from('inspection-photos')
+        .upload(photoPath, photoBlob, { contentType: 'image/jpeg', upsert: true });
+      if (error) throw error;
     }
 
     async function loadCloudRecords() {
@@ -660,7 +686,13 @@
         (result[update.record_id] ||= []).push(update);
         return result;
       }, {});
-      saveRecords((records || []).map(record => localRecordFromCloud(record, updatesByRecord[record.id] || [])));
+      const localPhotos = new Map(recordCache.map(record => [record.cloudId, record.photo || '']));
+      const cloudRecords = (records || []).map(record => localRecordFromCloud(
+        record,
+        updatesByRecord[record.id] || [],
+        localPhotos.get(record.id) || ''
+      ));
+      saveRecords(await addCloudPhotos(cloudRecords));
       selectedIndices.clear();
       renderRecords();
     }
@@ -689,12 +721,26 @@
         fromStatus: '', toStatus: record.status || '待派单', note: '创建巡查记录'
       };
       await createCloudTimeline(data.id, authData.user.id, initialEntry);
-      return localRecordFromCloud(data, [{
+      let savedRecord = data;
+      if (record.photo) {
+        const photoPath = `${authData.user.id}/${data.id}.jpg`;
+        await uploadCloudPhoto(photoPath, record.photo);
+        const { data: recordWithPhoto, error: photoPathError } = await supabaseClient
+          .from('inspection_records')
+          .update({ photo_path: photoPath, updated_at: new Date().toISOString() })
+          .eq('id', data.id)
+          .select()
+          .single();
+        if (photoPathError) throw photoPathError;
+        savedRecord = recordWithPhoto;
+      }
+      const localRecord = localRecordFromCloud(savedRecord, [{
         from_status: initialEntry.fromStatus,
         to_status: initialEntry.toStatus,
         note: initialEntry.note,
         created_at: data.created_at
-      }]);
+      }], record.photo || '');
+      return { ...localRecord, photo: savedRecord.photo_path ? await getCloudPhotoUrl(savedRecord.photo_path) : localRecord.photo };
     }
 
     async function updateCloudRecord(record) {
@@ -710,7 +756,7 @@
       if (error) throw error;
       const latestEntry = record.timeline?.[record.timeline.length - 1];
       if (latestEntry) await createCloudTimeline(data.id, authData.user.id, latestEntry);
-      return { ...localRecordFromCloud(data), photo: record.photo, timeline: record.timeline };
+      return { ...localRecordFromCloud(data), photo: record.photo, photoPath: data.photo_path || record.photoPath || '', timeline: record.timeline };
     }
 
     function subscribeToCloudRecords() {
@@ -777,7 +823,7 @@
     }
 
     function safePhoto(value) {
-      return typeof value === 'string' && value.startsWith('data:image/jpeg;base64,') ? value : '';
+      return typeof value === 'string' && (value.startsWith('data:image/jpeg;base64,') || value.startsWith('https://')) ? value : '';
     }
 
     function compressPhoto(file) {
