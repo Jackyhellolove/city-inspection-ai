@@ -166,6 +166,22 @@
     .install-card[hidden] { display: none; }
     .install-card p { margin: 0; font-size: 14px; }
     .install-card button { flex: none; padding: 8px 12px; color: white; background: #1769e0; }
+    .account-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: -8px 0 22px; padding: 12px 14px; border: 1px solid #dce6f3; border-radius: 12px; background: #f8fbff; }
+    .account-bar[hidden], .login-screen[hidden] { display: none; }
+    .account-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .account-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .role-badge { display: inline-block; padding: 4px 9px; border-radius: 999px; color: #1557a6; background: #e7f0ff; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .role-note { margin: 4px 0 0; color: #69758a; font-size: 13px; }
+    .account-bar button { flex: none; padding: 8px 12px; color: #34425a; background: #edf2f8; }
+    .login-screen { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 24px; background: linear-gradient(135deg, #e8f2ff, #f8fbff 50%, #eaf9f2); }
+    .login-card { width: min(440px, 100%); padding: 32px; border: 1px solid #dce6f3; border-radius: 20px; background: white; box-shadow: 0 22px 60px rgba(31, 72, 118, .16); }
+    .login-card h1 { margin-bottom: 8px; }
+    .login-card p { color: #647087; line-height: 1.6; }
+    .login-card label { margin-top: 18px; }
+    .login-card input, .login-card select { width: 100%; padding: 12px; border: 1px solid #cbd8e8; border-radius: 9px; color: #172033; font: inherit; }
+    .login-card button { width: 100%; margin-top: 22px; color: white; background: #1769e0; }
+    .demo-tip { margin-top: 18px; padding: 12px; border-radius: 10px; color: #4c596e; background: #f5f8fc; font-size: 13px; line-height: 1.65; }
+    .login-error { min-height: 20px; margin: 12px 0 0; color: #b42318; font-size: 14px; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -178,6 +194,7 @@
       .edit-form-grid { grid-template-columns: 1fr; }
       .edit-form .full { grid-column: auto; }
       .install-card { align-items: flex-start; flex-direction: column; }
+      .account-bar { align-items: flex-start; flex-direction: column; }
     }
     @media print {
       @page { size: A4 landscape; margin: 12mm; }
@@ -199,9 +216,29 @@
   </style>
 </head>
 <body>
+  <section class="login-screen" id="loginScreen" aria-label="登录">
+    <form class="login-card" id="loginForm">
+      <h1>城市巡查 AI 助手</h1>
+      <p>登录后进入巡查台账。此阶段用于演示管理员与巡查员的角色区分。</p>
+      <label for="loginAccount">账号</label>
+      <input id="loginAccount" autocomplete="username" required placeholder="请输入账号">
+      <label for="loginPassword">密码</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="请输入密码">
+      <button type="submit">登录</button>
+      <p class="login-error" id="loginError" aria-live="polite"></p>
+      <div class="demo-tip">演示账号：管理员 <strong>admin / admin123</strong>；巡查员 <strong>inspector / inspector123</strong>。<br>账号信息只保存在本浏览器，下一阶段接入云端后才会变成真实权限。</div>
+    </form>
+  </section>
   <main>
     <h1>城市巡查 AI 助手</h1>
     <p class="intro">输入巡查现场发现的问题，系统将给出初步分类和处置建议。</p>
+    <section class="account-bar" id="accountBar" hidden>
+      <div class="account-info">
+        <span class="role-badge" id="roleBadge"></span>
+        <div><strong id="currentUserName"></strong><p class="role-note" id="roleNote"></p></div>
+      </div>
+      <button id="logout" type="button">退出登录</button>
+    </section>
     <aside class="install-card" id="installCard" hidden>
       <p id="installText">把巡查助手安装到桌面，打开更方便，并可在无网络时使用已缓存的页面。</p>
       <button id="installApp" type="button" hidden>安装应用</button>
@@ -455,6 +492,20 @@
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
+    const sessionKey = 'city-inspection-current-user';
+    const demoUsers = {
+      admin: { password: 'admin123', name: '系统管理员', role: '管理员', note: '可查看台账、分派任务、导出报告和管理数据。' },
+      inspector: { password: 'inspector123', name: '巡查员', role: '巡查员', note: '可录入巡查问题、查看处理进度和提交现场信息。' }
+    };
+    const loginScreen = document.querySelector('#loginScreen');
+    const loginForm = document.querySelector('#loginForm');
+    const loginAccount = document.querySelector('#loginAccount');
+    const loginPassword = document.querySelector('#loginPassword');
+    const loginError = document.querySelector('#loginError');
+    const accountBar = document.querySelector('#accountBar');
+    const currentUserName = document.querySelector('#currentUserName');
+    const roleBadge = document.querySelector('#roleBadge');
+    const roleNote = document.querySelector('#roleNote');
     const installCard = document.querySelector('#installCard');
     const installText = document.querySelector('#installText');
     const installButton = document.querySelector('#installApp');
@@ -463,6 +514,31 @@
     let activeEditIndex = -1;
     let currentCoordinates = null;
     let deferredInstallPrompt = null;
+
+    function getCurrentUser() {
+      try {
+        const user = JSON.parse(sessionStorage.getItem(sessionKey));
+        return user && user.name && user.role ? user : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function showLoggedInState(user) {
+      currentUserName.textContent = user.name;
+      roleBadge.textContent = user.role;
+      roleNote.textContent = `${user.note} 当前为本地演示登录，真实权限将在云端版启用。`;
+      accountBar.hidden = false;
+      loginScreen.hidden = true;
+    }
+
+    function showLoggedOutState() {
+      accountBar.hidden = true;
+      loginScreen.hidden = false;
+      loginPassword.value = '';
+      loginError.textContent = '';
+      window.setTimeout(() => loginAccount.focus(), 0);
+    }
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -1116,7 +1192,30 @@
       });
     }
 
+    loginForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const account = loginAccount.value.trim().toLowerCase();
+      const user = demoUsers[account];
+      if (!user || user.password !== loginPassword.value) {
+        loginError.textContent = '账号或密码不正确，请使用下方演示账号。';
+        loginPassword.focus();
+        return;
+      }
+      const sessionUser = { name: user.name, role: user.role, note: user.note };
+      sessionStorage.setItem(sessionKey, JSON.stringify(sessionUser));
+      showLoggedInState(sessionUser);
+      showNotice(`欢迎回来，${user.name}`);
+    });
+
+    document.querySelector('#logout').addEventListener('click', () => {
+      sessionStorage.removeItem(sessionKey);
+      showLoggedOutState();
+    });
+
     renderRecords();
+    const currentUser = getCurrentUser();
+    if (currentUser) showLoggedInState(currentUser);
+    else showLoggedOutState();
   </script>
 </body>
 </html>
