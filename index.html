@@ -122,6 +122,11 @@
     .photo-preview { width: 72px; height: 72px; }
     .photo-thumb { width: 54px; height: 54px; cursor: zoom-in; }
     .photo-remove { padding: 7px 10px; color: #b42318; background: #fff0ee; }
+    .evidence-picker { margin-top: 4px; padding: 12px; border: 1px dashed #b9c9dc; border-radius: 10px; background: #f8fbff; }
+    .evidence-preview, .evidence-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 10px; }
+    .evidence-card { padding: 8px; border: 1px solid #dce6f3; border-radius: 10px; background: #fff; }
+    .evidence-card img { width: 100%; height: 90px; object-fit: cover; cursor: zoom-in; }
+    .evidence-card small { display: block; margin-top: 6px; color: #69758a; overflow-wrap: anywhere; }
     dialog { width: min(900px, 92vw); padding: 14px; border: 0; border-radius: 16px; box-shadow: 0 24px 80px #17203355; }
     dialog::backdrop { background: #172033aa; }
     dialog img { display: block; width: 100%; max-height: 78vh; object-fit: contain; border-radius: 10px; }
@@ -391,6 +396,8 @@
   <dialog id="detailDialog">
     <h2 id="detailTitle">巡查问题详情</h2>
     <div id="detailContent"></div>
+    <h3>整改凭证照片</h3>
+    <div class="evidence-gallery" id="detailEvidence"></div>
     <h3>处置时间线</h3>
     <div class="timeline" id="detailTimeline"></div>
     <div class="dialog-actions"><button class="secondary" id="closeDetail" type="button">关闭</button></div>
@@ -430,6 +437,11 @@
         <div class="full">
           <label for="editNote">本次处理说明（可选）</label>
           <textarea id="editNote" placeholder="例如：已联系养护单位，预计今日完成处理"></textarea>
+        </div>
+        <div class="full evidence-picker">
+          <label for="editEvidencePhotos">整改凭证照片（可多选，每次最多 6 张）</label>
+          <input id="editEvidencePhotos" type="file" accept="image/*" capture="environment" multiple>
+          <div class="evidence-preview" id="editEvidencePreview"></div>
         </div>
       </div>
       <div class="dialog-actions">
@@ -472,6 +484,7 @@
     const photoLarge = document.querySelector('#photoLarge');
     const detailDialog = document.querySelector('#detailDialog');
     const detailContent = document.querySelector('#detailContent');
+    const detailEvidence = document.querySelector('#detailEvidence');
     const detailTimeline = document.querySelector('#detailTimeline');
     const editDialog = document.querySelector('#editDialog');
     const editForm = document.querySelector('#editForm');
@@ -483,6 +496,8 @@
     const editLatitude = document.querySelector('#editLatitude');
     const editLongitude = document.querySelector('#editLongitude');
     const editNote = document.querySelector('#editNote');
+    const editEvidencePhotos = document.querySelector('#editEvidencePhotos');
+    const editEvidencePreview = document.querySelector('#editEvidencePreview');
     const reportDialog = document.querySelector('#reportDialog');
     const reportForm = document.querySelector('#reportForm');
     const reportTitle = document.querySelector('#reportTitle');
@@ -516,6 +531,7 @@
     const installText = document.querySelector('#installText');
     const installButton = document.querySelector('#installApp');
     let photoData = '';
+    let editEvidenceData = [];
     const selectedIndices = new Set();
     let activeEditIndex = -1;
     let currentCoordinates = null;
@@ -611,7 +627,7 @@
       return cloudRecord;
     }
 
-    function localRecordFromCloud(record, updates = [], localPhoto = '') {
+    function localRecordFromCloud(record, updates = [], localPhoto = '', attachments = []) {
       const createdTime = record.created_at ? new Date(record.created_at).toLocaleString('zh-CN') : '时间未知';
       const updatedTime = record.updated_at ? new Date(record.updated_at).toLocaleString('zh-CN') : createdTime;
       return {
@@ -629,6 +645,7 @@
         longitude: record.longitude,
         photo: localPhoto,
         photoPath: record.photo_path || '',
+        attachments,
         time: createdTime,
         updatedAt: updatedTime,
         timeline: updates.length
@@ -657,6 +674,13 @@
       })));
     }
 
+    async function addCloudAttachmentUrls(attachments) {
+      return Promise.all((attachments || []).map(async attachment => ({
+        ...attachment,
+        url: await getCloudPhotoUrl(attachment.storage_path)
+      })));
+    }
+
     async function uploadCloudPhoto(photoPath, photoData) {
       if (!photoPath || !photoData || !supabaseClient) return;
       const response = await fetch(photoData);
@@ -667,9 +691,30 @@
       if (error) throw error;
     }
 
+    async function createCloudAttachments(recordId, photoItems, note) {
+      if (!recordId || !photoItems.length) return [];
+      const { data: authData } = await supabaseClient.auth.getUser();
+      if (!authData.user) throw new Error('登录状态已失效，请重新登录');
+      const created = [];
+      for (const item of photoItems) {
+        const attachmentId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const storagePath = `${authData.user.id}/${recordId}/evidence-${attachmentId}.jpg`;
+        await uploadCloudPhoto(storagePath, item.data);
+        const { data, error } = await supabaseClient.from('inspection_attachments').insert({
+          record_id: recordId,
+          storage_path: storagePath,
+          note: note || '整改处置凭证',
+          uploaded_by: authData.user.id
+        }).select().single();
+        if (error) throw error;
+        created.push({ ...data, url: await getCloudPhotoUrl(storagePath) });
+      }
+      return created;
+    }
+
     async function loadCloudRecords() {
       if (!supabaseClient) return;
-      const [{ data: records, error: recordsError }, { data: updates, error: updatesError }] = await Promise.all([
+      const [{ data: records, error: recordsError }, { data: updates, error: updatesError }, { data: attachments, error: attachmentsError }] = await Promise.all([
         supabaseClient
         .from('inspection_records')
         .select('*')
@@ -677,10 +722,11 @@
         supabaseClient
           .from('inspection_updates')
           .select('*')
-          .order('created_at', { ascending: true })
+          .order('created_at', { ascending: true }),
+        supabaseClient.from('inspection_attachments').select('*').order('created_at', { ascending: true })
       ]);
-      if (recordsError || updatesError) {
-        showNotice(`云端记录读取失败：${(recordsError || updatesError).message}`);
+      if (recordsError || updatesError || attachmentsError) {
+        showNotice(`云端记录读取失败：${(recordsError || updatesError || attachmentsError).message}`);
         return;
       }
       const updatesByRecord = (updates || []).reduce((result, update) => {
@@ -688,12 +734,17 @@
         return result;
       }, {});
       const localPhotos = new Map(recordCache.map(record => [record.cloudId, record.photo || '']));
+      const attachmentsByRecord = (await addCloudAttachmentUrls(attachments || [])).reduce((result, attachment) => {
+        (result[attachment.record_id] ||= []).push(attachment);
+        return result;
+      }, {});
       const cloudRecordNumbers = new Set((records || []).map(record => record.record_no));
       const pendingRecords = recordCache.filter(record => !record.cloudId && !cloudRecordNumbers.has(record.id));
       const cloudRecords = (records || []).map(record => localRecordFromCloud(
         record,
         updatesByRecord[record.id] || [],
-        localPhotos.get(record.id) || ''
+        localPhotos.get(record.id) || '',
+        attachmentsByRecord[record.id] || []
       ));
       saveRecords([...pendingRecords, ...await addCloudPhotos(cloudRecords)]);
       selectedIndices.clear();
@@ -911,6 +962,14 @@
           <div class="detail-item"><span>坐标</span><strong>${hasCoordinates(record) ? `${Number(record.latitude).toFixed(6)}, ${Number(record.longitude).toFixed(6)}` : '未记录'}</strong></div>
           <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
         </div>`;
+      detailEvidence.innerHTML = (record.attachments || []).length
+        ? record.attachments.slice().reverse().map(item => `
+          <div class="evidence-card">
+            <img src="${safePhoto(item.url)}" alt="整改凭证照片" data-evidence-url="${safePhoto(item.url)}">
+            <small>${escapeHtml(item.note || '整改处置凭证')}</small>
+            <small>${escapeHtml(item.created_at ? new Date(item.created_at).toLocaleString('zh-CN') : '时间未知')}</small>
+          </div>`).join('')
+        : '<span class="chart-empty">尚未上传整改凭证照片</span>';
       detailTimeline.innerHTML = getTimeline(record).slice().reverse().map(item => `
         <div class="timeline-item">
           <div class="timeline-time">${escapeHtml(item.time || '时间未知')}</div>
@@ -930,9 +989,26 @@
       editLatitude.value = hasCoordinates(record) ? Number(record.latitude) : '';
       editLongitude.value = hasCoordinates(record) ? Number(record.longitude) : '';
       editNote.value = '';
+      editEvidenceData = [];
+      editEvidencePhotos.value = '';
+      editEvidencePreview.innerHTML = '';
       editDialog.showModal();
       editDescription.focus();
     }
+
+    editEvidencePhotos.addEventListener('change', async () => {
+      const files = [...editEvidencePhotos.files].filter(file => file.type.startsWith('image/')).slice(0, 6);
+      showNotice('正在处理整改凭证照片…');
+      try {
+        editEvidenceData = await Promise.all(files.map(async file => ({ name: file.name, data: await compressPhoto(file) })));
+        editEvidencePreview.innerHTML = editEvidenceData.map(item => `<div class="evidence-card"><img src="${item.data}" alt="${escapeHtml(item.name)}"><small>${escapeHtml(item.name)}</small></div>`).join('');
+        showNotice(`已准备 ${editEvidenceData.length} 张整改凭证照片`);
+      } catch {
+        editEvidenceData = [];
+        editEvidencePreview.innerHTML = '';
+        showNotice('整改凭证照片读取失败，请重新选择');
+      }
+    });
 
     function updateSelectionSummary() {
       selectedCount.textContent = `已选择 ${selectedIndices.size} 条`;
@@ -1259,6 +1335,12 @@
     });
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
     document.querySelector('#closeDetail').addEventListener('click', () => detailDialog.close());
+    detailEvidence.addEventListener('click', event => {
+      const image = event.target.closest('[data-evidence-url]');
+      if (!image) return;
+      photoLarge.src = image.dataset.evidenceUrl;
+      photoDialog.showModal();
+    });
 
     recordBody.addEventListener('change', event => {
       const checkbox = event.target.closest('[data-select-index]');
@@ -1363,7 +1445,8 @@
       const oldLatitude = hasCoordinates(record) ? Number(record.latitude) : null;
       const oldLongitude = hasCoordinates(record) ? Number(record.longitude) : null;
       if (latitude !== oldLatitude || longitude !== oldLongitude) changes.push(latitude === null ? '清除位置坐标' : '更新位置坐标');
-      if (!changes.length && !note) { editDialog.close(); activeEditIndex = -1; showNotice('没有需要保存的修改'); return; }
+      if (!changes.length && !note && !editEvidenceData.length) { editDialog.close(); activeEditIndex = -1; showNotice('没有需要保存的修改'); return; }
+      if (editEvidenceData.length) changes.push(`上传 ${editEvidenceData.length} 张整改凭证照片`);
       const [type, department, priority] = classify(description);
       const updatedAt = new Date().toLocaleString('zh-CN');
       const editedIndex = activeEditIndex;
@@ -1393,10 +1476,15 @@
       renderRecords();
       try {
         const cloudRecord = await updateCloudRecord(records[editedIndex]);
-        records[editedIndex] = cloudRecord;
+        const newAttachments = await createCloudAttachments(cloudRecord.cloudId, editEvidenceData, note);
+        records[editedIndex] = {
+          ...cloudRecord,
+          attachments: [...(record.attachments || []), ...newAttachments]
+        };
         saveRecords(records);
         renderRecords();
-        showNotice('巡查记录已更新并同步云端');
+        editEvidenceData = [];
+        showNotice(newAttachments.length ? `已同步记录和 ${newAttachments.length} 张整改凭证照片` : '巡查记录已更新并同步云端');
       } catch (error) {
         showNotice(`已更新本机记录，云端同步失败：${error.message}`);
       }
