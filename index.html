@@ -179,7 +179,9 @@
     .login-card p { color: #647087; line-height: 1.6; }
     .login-card label { margin-top: 18px; }
     .login-card input, .login-card select { width: 100%; padding: 12px; border: 1px solid #cbd8e8; border-radius: 9px; color: #172033; font: inherit; }
-    .login-card button { width: 100%; margin-top: 22px; color: white; background: #1769e0; }
+    .login-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+    .login-card button { width: 100%; color: white; background: #1769e0; }
+    .login-card button.secondary { color: #34425a; background: #edf2f8; }
     .demo-tip { margin-top: 18px; padding: 12px; border-radius: 10px; color: #4c596e; background: #f5f8fc; font-size: 13px; line-height: 1.65; }
     .login-error { min-height: 20px; margin: 12px 0 0; color: #b42318; font-size: 14px; }
     @media (max-width: 680px) {
@@ -219,14 +221,16 @@
   <section class="login-screen" id="loginScreen" aria-label="登录">
     <form class="login-card" id="loginForm">
       <h1>城市巡查 AI 助手</h1>
-      <p>登录后进入巡查台账。此阶段用于演示管理员与巡查员的角色区分。</p>
-      <label for="loginAccount">账号</label>
-      <input id="loginAccount" autocomplete="username" required placeholder="请输入账号">
+      <p>使用真实邮箱账号登录。巡查数据将在后续步骤同步到云端。</p>
+      <label for="loginAccount">邮箱</label>
+      <input id="loginAccount" type="email" autocomplete="email" required placeholder="请输入邮箱">
       <label for="loginPassword">密码</label>
-      <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="请输入密码">
-      <button type="submit">登录</button>
+      <input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位密码">
+      <label for="loginName">姓名（注册时填写）</label>
+      <input id="loginName" autocomplete="name" placeholder="例如：张三">
+      <div class="login-actions"><button type="submit">登录</button><button class="secondary" id="signUp" type="button">注册新账号</button></div>
       <p class="login-error" id="loginError" aria-live="polite"></p>
-      <div class="demo-tip">演示账号：管理员 <strong>admin / admin123</strong>；巡查员 <strong>inspector / inspector123</strong>。<br>账号信息只保存在本浏览器，下一阶段接入云端后才会变成真实权限。</div>
+      <div class="demo-tip">首次使用请选择“注册新账号”。若项目启用了邮箱验证，请按邮件提示完成验证后再登录。</div>
     </form>
   </section>
   <main>
@@ -446,6 +450,8 @@
       <div class="dialog-actions"><button class="secondary" id="cancelReport" type="button">取消</button><button class="primary" type="submit">预览并打印</button></div>
     </form>
   </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
   <script>
     const issue = document.querySelector('#issue');
     const output = {
@@ -492,15 +498,15 @@
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
-    const sessionKey = 'city-inspection-current-user';
-    const demoUsers = {
-      admin: { password: 'admin123', name: '系统管理员', role: '管理员', note: '可查看台账、分派任务、导出报告和管理数据。' },
-      inspector: { password: 'inspector123', name: '巡查员', role: '巡查员', note: '可录入巡查问题、查看处理进度和提交现场信息。' }
-    };
+    const supabaseConfig = window.SUPABASE_CONFIG || {};
+    const supabaseClient = supabaseConfig.url && supabaseConfig.publishableKey && window.supabase
+      ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey)
+      : null;
     const loginScreen = document.querySelector('#loginScreen');
     const loginForm = document.querySelector('#loginForm');
     const loginAccount = document.querySelector('#loginAccount');
     const loginPassword = document.querySelector('#loginPassword');
+    const loginName = document.querySelector('#loginName');
     const loginError = document.querySelector('#loginError');
     const accountBar = document.querySelector('#accountBar');
     const currentUserName = document.querySelector('#currentUserName');
@@ -514,15 +520,6 @@
     let activeEditIndex = -1;
     let currentCoordinates = null;
     let deferredInstallPrompt = null;
-
-    function getCurrentUser() {
-      try {
-        const user = JSON.parse(sessionStorage.getItem(sessionKey));
-        return user && user.name && user.role ? user : null;
-      } catch {
-        return null;
-      }
-    }
 
     function showLoggedInState(user) {
       currentUserName.textContent = user.name;
@@ -538,6 +535,35 @@
       loginPassword.value = '';
       loginError.textContent = '';
       window.setTimeout(() => loginAccount.focus(), 0);
+    }
+
+    async function getProfile(user) {
+      const fallbackName = user.user_metadata?.display_name || user.email || '已登录用户';
+      const fallback = { name: fallbackName, role: '巡查员', note: '可录入巡查问题、查看自己提交记录的处理进度。' };
+      if (!supabaseClient) return fallback;
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('display_name, role')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error || !data) return fallback;
+      const isAdmin = data.role === 'admin';
+      return {
+        name: data.display_name || fallbackName,
+        role: isAdmin ? '管理员' : '巡查员',
+        note: isAdmin ? '可查看台账、分派任务、导出报告和管理数据。' : fallback.note
+      };
+    }
+
+    async function refreshLoginState(session) {
+      if (!session?.user) { showLoggedOutState(); return; }
+      showLoggedInState(await getProfile(session.user));
+    }
+
+    function requireSupabaseConfig() {
+      if (supabaseClient) return true;
+      loginError.textContent = '请先在 supabase-config.js 中填写项目 URL 和 publishable key。';
+      return false;
     }
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
@@ -1194,28 +1220,55 @@
 
     loginForm.addEventListener('submit', event => {
       event.preventDefault();
-      const account = loginAccount.value.trim().toLowerCase();
-      const user = demoUsers[account];
-      if (!user || user.password !== loginPassword.value) {
-        loginError.textContent = '账号或密码不正确，请使用下方演示账号。';
-        loginPassword.focus();
-        return;
+      if (!requireSupabaseConfig()) return;
+      loginError.textContent = '正在登录…';
+      supabaseClient.auth.signInWithPassword({
+        email: loginAccount.value.trim(),
+        password: loginPassword.value
+      }).then(({ data, error }) => {
+        if (error) {
+          loginError.textContent = `登录失败：${error.message}`;
+          return;
+        }
+        loginError.textContent = '';
+        refreshLoginState(data.session);
+        showNotice('登录成功');
+      });
+    });
+
+    document.querySelector('#signUp').addEventListener('click', async () => {
+      if (!requireSupabaseConfig()) return;
+      const email = loginAccount.value.trim();
+      const password = loginPassword.value;
+      if (!email || !password) { loginError.textContent = '请先填写邮箱和密码。'; return; }
+      loginError.textContent = '正在注册…';
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: loginName.value.trim() || email.split('@')[0] } }
+      });
+      if (error) { loginError.textContent = `注册失败：${error.message}`; return; }
+      if (data.session) {
+        loginError.textContent = '';
+        await refreshLoginState(data.session);
+        showNotice('注册并登录成功');
+      } else {
+        loginError.textContent = '注册成功，请到邮箱完成验证后再登录。';
       }
-      const sessionUser = { name: user.name, role: user.role, note: user.note };
-      sessionStorage.setItem(sessionKey, JSON.stringify(sessionUser));
-      showLoggedInState(sessionUser);
-      showNotice(`欢迎回来，${user.name}`);
     });
 
     document.querySelector('#logout').addEventListener('click', () => {
-      sessionStorage.removeItem(sessionKey);
-      showLoggedOutState();
+      if (!supabaseClient) { showLoggedOutState(); return; }
+      supabaseClient.auth.signOut().then(() => showLoggedOutState());
     });
 
     renderRecords();
-    const currentUser = getCurrentUser();
-    if (currentUser) showLoggedInState(currentUser);
-    else showLoggedOutState();
+    if (supabaseClient) {
+      supabaseClient.auth.getSession().then(({ data }) => refreshLoginState(data.session));
+      supabaseClient.auth.onAuthStateChange((_event, session) => refreshLoginState(session));
+    } else {
+      showLoggedOutState();
+    }
   </script>
 </body>
 </html>

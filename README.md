@@ -83,7 +83,7 @@ python3 web_app.py
 
 项目已支持 PWA 安装和基础离线缓存：部署到 HTTPS 后，可在手机浏览器中添加到主屏幕；支持安装提示的浏览器会显示“安装应用”按钮。iPhone 可在 Safari 的分享菜单中选择“添加到主屏幕”。
 
-当前版本新增了登录界面，用于学习管理员与巡查员两种角色的业务分工。演示账号为 `admin / admin123`（管理员）和 `inspector / inspector123`（巡查员）。登录状态只保存在当前浏览器会话中，并不是真实的账号或权限系统；后续接入云端数据库后，才会实现安全登录、真实权限和多设备同步。
+当前版本已预留 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。登录功能已接入 Supabase Auth，巡查记录云端同步将在下一阶段接入。
 
 ### 命令行版本
 
