@@ -610,7 +610,7 @@
       return cloudRecord;
     }
 
-    function localRecordFromCloud(record) {
+    function localRecordFromCloud(record, updates = []) {
       const createdTime = record.created_at ? new Date(record.created_at).toLocaleString('zh-CN') : '时间未知';
       const updatedTime = record.updated_at ? new Date(record.updated_at).toLocaleString('zh-CN') : createdTime;
       return {
@@ -629,20 +629,51 @@
         photo: '',
         time: createdTime,
         updatedAt: updatedTime,
-        timeline: [{ time: createdTime, fromStatus: '', toStatus: record.status || '待派单', note: '已从云端同步' }]
+        timeline: updates.length
+          ? updates.map(update => ({
+            time: update.created_at ? new Date(update.created_at).toLocaleString('zh-CN') : '时间未知',
+            fromStatus: update.from_status || '',
+            toStatus: update.to_status || record.status || '待派单',
+            note: update.note || '未填写处理说明'
+          }))
+          : [{ time: createdTime, fromStatus: '', toStatus: record.status || '待派单', note: '已从云端同步' }]
       };
     }
 
     async function loadCloudRecords() {
       if (!supabaseClient) return;
-      const { data, error } = await supabaseClient
+      const [{ data: records, error: recordsError }, { data: updates, error: updatesError }] = await Promise.all([
+        supabaseClient
         .from('inspection_records')
         .select('*')
-        .order('created_at', { ascending: false });
-      if (error) { showNotice(`云端记录读取失败：${error.message}`); return; }
-      saveRecords((data || []).map(localRecordFromCloud));
+        .order('created_at', { ascending: false }),
+        supabaseClient
+          .from('inspection_updates')
+          .select('*')
+          .order('created_at', { ascending: true })
+      ]);
+      if (recordsError || updatesError) {
+        showNotice(`云端记录读取失败：${(recordsError || updatesError).message}`);
+        return;
+      }
+      const updatesByRecord = (updates || []).reduce((result, update) => {
+        (result[update.record_id] ||= []).push(update);
+        return result;
+      }, {});
+      saveRecords((records || []).map(record => localRecordFromCloud(record, updatesByRecord[record.id] || [])));
       selectedIndices.clear();
       renderRecords();
+    }
+
+    async function createCloudTimeline(recordId, actorId, entry) {
+      const { error } = await supabaseClient.from('inspection_updates').insert({
+        record_id: recordId,
+        actor_id: actorId,
+        from_status: entry.fromStatus || null,
+        to_status: entry.toStatus || '待派单',
+        note: entry.note || '未填写处理说明'
+      });
+      if (error) throw error;
     }
 
     async function createCloudRecord(record) {
@@ -654,7 +685,16 @@
         .select()
         .single();
       if (error) throw error;
-      return localRecordFromCloud(data);
+      const initialEntry = record.timeline?.[record.timeline.length - 1] || {
+        fromStatus: '', toStatus: record.status || '待派单', note: '创建巡查记录'
+      };
+      await createCloudTimeline(data.id, authData.user.id, initialEntry);
+      return localRecordFromCloud(data, [{
+        from_status: initialEntry.fromStatus,
+        to_status: initialEntry.toStatus,
+        note: initialEntry.note,
+        created_at: data.created_at
+      }]);
     }
 
     async function updateCloudRecord(record) {
@@ -668,6 +708,8 @@
         .select()
         .single();
       if (error) throw error;
+      const latestEntry = record.timeline?.[record.timeline.length - 1];
+      if (latestEntry) await createCloudTimeline(data.id, authData.user.id, latestEntry);
       return { ...localRecordFromCloud(data), photo: record.photo, timeline: record.timeline };
     }
 

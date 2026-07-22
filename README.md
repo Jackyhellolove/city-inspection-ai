@@ -87,6 +87,8 @@ python3 web_app.py
 
 巡查记录云端同步启用后，新增、编辑、批量修改和删除会同步到 Supabase 的 `inspection_records` 表；首次登录会读取当前账号有权限查看的云端台账。要让已打开的手机和 Mac 页面自动刷新，请在 Supabase SQL Editor 中运行 `supabase-realtime.sql`。现场照片和完整处置时间线仍保存在当前设备，后续会迁移到云端文件存储和独立的处置记录表。
 
+运行 `supabase-timeline.sql` 后，创建记录、编辑记录和批量处理产生的状态变化及处理说明会写入 `inspection_updates` 表；问题详情将从云端读取并展示完整处置时间线。现场照片仍在当前设备，后续迁移到云端文件存储。
+
 ### 命令行版本
 
 ```bash
