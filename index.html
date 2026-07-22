@@ -264,7 +264,7 @@
       </div>
       <div class="field">
         <label for="owner">负责人</label>
-        <input id="owner" placeholder="例如：张三">
+        <input id="owner" list="ownerOptions" placeholder="选择或填写负责人">
       </div>
       <div class="field">
         <label for="status">处置状态</label>
@@ -323,6 +323,10 @@
         <h2>问题类型分布</h2>
         <div class="bars" id="typeChart"><span class="chart-empty">尚无巡查记录</span></div>
       </div>
+      <div class="chart-card">
+        <h2>负责人待办</h2>
+        <div class="bars" id="ownerChart"><span class="chart-empty">尚无已派单问题</span></div>
+      </div>
     </section>
 
     <section class="history">
@@ -367,10 +371,11 @@
           <option value="normal">期限正常</option>
           <option value="none">未设期限</option>
         </select>
+        <select id="ownerFilter" aria-label="按负责人筛选"><option value="">全部负责人</option></select>
       </div>
       <div class="bulk-actions no-print">
         <strong id="selectedCount">已选择 0 条</strong>
-        <input id="bulkOwner" aria-label="批量指定负责人" placeholder="批量指定负责人（留空则不修改）">
+        <input id="bulkOwner" list="ownerOptions" aria-label="批量指定负责人" placeholder="批量指定负责人（留空则不修改）">
         <select id="bulkStatus" aria-label="批量修改状态">
           <option value="">状态不修改</option>
           <option>待派单</option>
@@ -393,6 +398,7 @@
     <img id="photoLarge" alt="现场照片大图">
     <div class="dialog-actions"><button class="secondary" id="closePhoto" type="button">关闭</button></div>
   </dialog>
+  <datalist id="ownerOptions"></datalist>
   <dialog id="detailDialog">
     <h2 id="detailTitle">巡查问题详情</h2>
     <div id="detailContent"></div>
@@ -416,7 +422,7 @@
         </div>
         <div>
           <label for="editOwner">负责人</label>
-          <input id="editOwner">
+          <input id="editOwner" list="ownerOptions">
         </div>
         <div>
           <label for="editStatus">处置状态</label>
@@ -506,6 +512,8 @@
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
+    const ownerFilter = document.querySelector('#ownerFilter');
+    const ownerOptions = document.querySelector('#ownerOptions');
     const selectAll = document.querySelector('#selectAll');
     const selectedCount = document.querySelector('#selectedCount');
     const bulkOwner = document.querySelector('#bulkOwner');
@@ -575,6 +583,7 @@
       if (!session?.user) { showLoggedOutState(); return; }
       showLoggedInState(await getProfile(session.user));
       await loadCloudRecords();
+      await loadAssignees();
       subscribeToCloudRecords();
     }
 
@@ -600,12 +609,24 @@
     catch { recordCache = []; }
     let recordsSubscription = null;
     let pendingRetryActive = false;
+    let assignees = [];
 
     function getRecords() { return recordCache; }
 
     function saveRecords(records) {
       recordCache = records;
       localStorage.setItem(storageKey, JSON.stringify(records));
+    }
+
+    async function loadAssignees() {
+      if (!supabaseClient) return;
+      const { data, error } = await supabaseClient.from('profiles').select('display_name, department, is_active').eq('is_active', true).order('display_name');
+      if (error) return;
+      assignees = data || [];
+      ownerOptions.innerHTML = assignees.map(person => `<option value="${escapeHtml(person.display_name || '')}">${escapeHtml(person.department || '未设部门')}</option>`).join('');
+      const selected = ownerFilter.value;
+      ownerFilter.innerHTML = `<option value="">全部负责人</option>${assignees.map(person => `<option value="${escapeHtml(person.display_name || '')}">${escapeHtml(person.display_name || '')}${person.department ? ` · ${escapeHtml(person.department)}` : ''}</option>`).join('')}`;
+      ownerFilter.value = selected;
     }
 
     function cloudRecordFromLocal(record, userId = null) {
@@ -1023,6 +1044,7 @@
       const keyword = searchInput.value.trim().toLowerCase();
       const selectedStatus = statusFilter.value;
       const selectedDeadline = deadlineFilter.value;
+      const selectedOwner = ownerFilter.value;
       const visibleRecords = records
         .map((record, index) => ({ ...record, storageIndex: index }))
         .filter(record => {
@@ -1031,7 +1053,8 @@
           const deadlineState = getDeadlineState(record);
           return (!keyword || searchable.includes(keyword))
             && (!selectedStatus || status === selectedStatus)
-            && (!selectedDeadline || deadlineState === selectedDeadline);
+            && (!selectedDeadline || deadlineState === selectedDeadline)
+            && (!selectedOwner || (record.owner || '') === selectedOwner);
         });
 
       const pendingCount = records.filter(record => (record.status || '待派单') === '待派单').length;
@@ -1063,6 +1086,14 @@
             <strong>${count}</strong>
           </div>`).join('')
         : '<span class="chart-empty">尚无巡查记录</span>';
+      const ownerCounts = records.filter(record => record.owner && record.status !== '已完成').reduce((counts, record) => {
+        counts[record.owner] = (counts[record.owner] || 0) + 1;
+        return counts;
+      }, {});
+      const maxOwnerCount = Math.max(0, ...Object.values(ownerCounts));
+      document.querySelector('#ownerChart').innerHTML = maxOwnerCount
+        ? Object.entries(ownerCounts).sort((a, b) => b[1] - a[1]).map(([owner, count]) => `<div class="bar-row"><span class="bar-label" title="${escapeHtml(owner)}">${escapeHtml(owner)}</span><div class="bar-track"><div class="bar-value" style="width:${count / maxOwnerCount * 100}%"></div></div><strong>${count}</strong></div>`).join('')
+        : '<span class="chart-empty">尚无已派单问题</span>';
 
       empty.textContent = records.length ? '没有符合筛选条件的记录' : '暂时没有保存的记录';
       empty.hidden = visibleRecords.length > 0;
@@ -1493,6 +1524,7 @@
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
+    ownerFilter.addEventListener('change', renderRecords);
     recordBody.addEventListener('click', async event => {
       const button = event.target.closest('button[data-index]');
       if (!button) return;
