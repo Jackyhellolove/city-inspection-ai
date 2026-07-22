@@ -78,6 +78,11 @@
     .row { display: grid; grid-template-columns: 100px 1fr; gap: 12px; padding: 9px 0; }
     .name { color: #69758a; }
     .value { font-weight: 700; }
+    .ai-result { margin-top: 14px; padding: 14px; border: 1px solid #bcd3f2; border-radius: 12px; background: #edf5ff; }
+    .ai-result[hidden] { display: none; }
+    .ai-result h3 { margin: 0 0 8px; color: #1557a6; font-size: 15px; }
+    .ai-result p { margin: 7px 0; color: #34425a; line-height: 1.55; }
+    .ai-result strong { color: #172033; }
     .history { margin-top: 24px; }
     .history-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .history-head h2 { margin: 0; font-size: 20px; }
@@ -291,6 +296,7 @@
 
     <div class="actions">
       <button class="primary" id="analyze">开始识别</button>
+      <button class="secondary" id="analyzePhoto" type="button">AI 识别现场照片</button>
       <button class="success" id="save">保存记录</button>
       <button class="secondary" id="clear">清空输入</button>
     </div>
@@ -300,6 +306,13 @@
       <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
       <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
       <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
+      <div class="row"><span class="name">识别方式</span><span class="value" id="analysisSource">等待识别</span></div>
+      <div class="ai-result" id="aiResult" hidden>
+        <h3>照片 AI 辅助判断（请人工复核）</h3>
+        <p><strong id="aiSummary"></strong></p>
+        <p>建议处置：<span id="aiRecommendation"></span></p>
+        <p>判断置信度：<span id="aiConfidence"></span>；注意事项：<span id="aiCaution"></span></p>
+      </div>
     </section>
 
     <p class="notice" id="notice" aria-live="polite"></p>
@@ -483,6 +496,13 @@
       department: document.querySelector('#department'),
       priority: document.querySelector('#priority')
     };
+    const analysisSource = document.querySelector('#analysisSource');
+    const analyzePhotoButton = document.querySelector('#analyzePhoto');
+    const aiResult = document.querySelector('#aiResult');
+    const aiSummary = document.querySelector('#aiSummary');
+    const aiRecommendation = document.querySelector('#aiRecommendation');
+    const aiConfidence = document.querySelector('#aiConfidence');
+    const aiCaution = document.querySelector('#aiCaution');
     const notice = document.querySelector('#notice');
     const locationInput = document.querySelector('#location');
     const locationStatus = document.querySelector('#locationStatus');
@@ -548,6 +568,7 @@
     const userDialog = document.querySelector('#userDialog');
     const userRows = document.querySelector('#userRows');
     let photoData = '';
+    let currentAiAnalysis = null;
     let editEvidenceData = [];
     const selectedIndices = new Set();
     let activeEditIndex = -1;
@@ -617,6 +638,31 @@
       return ['其他问题', '城市管理部门', '一般'];
     }
 
+    function priorityFromRisk(riskLevel) {
+      if (riskLevel === '高') return '高';
+      if (riskLevel === '中') return '较高';
+      if (riskLevel === '低') return '一般';
+      return '待确认';
+    }
+
+    function renderAiAnalysis(analysis) {
+      currentAiAnalysis = analysis || null;
+      aiResult.hidden = !analysis;
+      if (!analysis) return;
+      aiSummary.textContent = analysis.issue_summary || '未给出具体问题';
+      aiRecommendation.textContent = analysis.recommended_action || '请人工确认处置措施';
+      aiConfidence.textContent = `${Number(analysis.confidence) || 0}%`;
+      aiCaution.textContent = analysis.caution || 'AI 判断仅供辅助，请结合现场情况复核。';
+    }
+
+    function applyAiAnalysis(analysis) {
+      output.type.textContent = analysis.category || '无法判断';
+      output.department.textContent = analysis.department || '待人工确认';
+      output.priority.textContent = priorityFromRisk(analysis.risk_level);
+      analysisSource.textContent = '照片 AI 识别（请人工复核）';
+      renderAiAnalysis(analysis);
+    }
+
     let recordCache;
     try { recordCache = JSON.parse(localStorage.getItem(storageKey)) || []; }
     catch { recordCache = []; }
@@ -668,6 +714,7 @@
         deadline: record.deadline || null,
         latitude: record.latitude ?? null,
         longitude: record.longitude ?? null,
+        ...(record.aiAnalysis ? { ai_analysis: record.aiAnalysis } : {}),
         updated_at: new Date().toISOString()
       };
       if (userId) cloudRecord.created_by = userId;
@@ -691,6 +738,7 @@
         deadline: record.deadline || '',
         latitude: record.latitude,
         longitude: record.longitude,
+        aiAnalysis: record.ai_analysis || null,
         photo: localPhoto,
         photoPath: record.photo_path || '',
         attachments,
@@ -1009,6 +1057,7 @@
           <div class="detail-item"><span>完成期限</span><strong>${escapeHtml(record.deadline || '未设置')}</strong></div>
           <div class="detail-item"><span>坐标</span><strong>${hasCoordinates(record) ? `${Number(record.latitude).toFixed(6)}, ${Number(record.longitude).toFixed(6)}` : '未记录'}</strong></div>
           <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
+          ${record.aiAnalysis ? `<div class="detail-item"><span>AI 辅助判断（需复核）</span><strong>${escapeHtml(record.aiAnalysis.issue_summary || '未给出具体问题')}</strong><br><small>置信度 ${escapeHtml(String(record.aiAnalysis.confidence ?? 0))}% · ${escapeHtml(record.aiAnalysis.caution || '请结合现场情况复核')}</small></div>` : ''}
         </div>`;
       detailEvidence.innerHTML = (record.attachments || []).length
         ? record.attachments.slice().reverse().map(item => `
@@ -1154,6 +1203,32 @@
       output.type.textContent = type;
       output.department.textContent = department;
       output.priority.textContent = priority;
+      analysisSource.textContent = '文字规则识别';
+      renderAiAnalysis(null);
+    });
+
+    analyzePhotoButton.addEventListener('click', async () => {
+      if (!photoData) { showNotice('请先选择或拍摄一张现场照片'); photoInput.focus(); return; }
+      const originalText = analyzePhotoButton.textContent;
+      analyzePhotoButton.disabled = true;
+      analyzePhotoButton.textContent = 'AI 正在识别…';
+      showNotice('正在发送现场照片进行 AI 辅助识别…');
+      try {
+        const response = await fetch('/api/analyze-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: photoData })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.analysis) throw new Error(payload.error || 'AI 识别失败，请重试');
+        applyAiAnalysis(payload.analysis);
+        showNotice('AI 识别完成，请核对结果后再保存');
+      } catch (error) {
+        showNotice(`AI 识别失败：${error.message}`);
+      } finally {
+        analyzePhotoButton.disabled = false;
+        analyzePhotoButton.textContent = originalText;
+      }
     });
 
     document.querySelector('#getLocation').addEventListener('click', () => {
@@ -1191,6 +1266,8 @@
       photoPreview.hidden = true;
       removePhotoButton.hidden = true;
       Object.values(output).forEach(element => element.textContent = '等待识别');
+      analysisSource.textContent = '等待识别';
+      renderAiAnalysis(null);
       issue.focus();
     });
 
@@ -1198,10 +1275,14 @@
       const description = issue.value.trim();
       if (!description) { showNotice('请先输入巡查问题'); issue.focus(); return; }
       if (!supabaseClient) { showNotice('请先完成云端登录配置'); return; }
-      const [type, department, priority] = classify(description);
+      const [fallbackType, fallbackDepartment, fallbackPriority] = classify(description);
+      const type = currentAiAnalysis?.category || fallbackType;
+      const department = currentAiAnalysis?.department || fallbackDepartment;
+      const priority = currentAiAnalysis ? priorityFromRisk(currentAiAnalysis.risk_level) : fallbackPriority;
       output.type.textContent = type;
       output.department.textContent = department;
       output.priority.textContent = priority;
+      analysisSource.textContent = currentAiAnalysis ? '照片 AI 识别（请人工复核）' : '文字规则识别';
       const records = getRecords();
       const newRecord = {
         id: createRecordId(records),
@@ -1217,6 +1298,7 @@
         latitude: currentCoordinates?.latitude ?? null,
         longitude: currentCoordinates?.longitude ?? null,
         photo: photoData,
+        aiAnalysis: currentAiAnalysis,
         time: new Date().toLocaleString('zh-CN'),
         timeline: [{
           time: new Date().toLocaleString('zh-CN'),
@@ -1238,6 +1320,9 @@
       photoInput.value = '';
       photoPreview.hidden = true;
       removePhotoButton.hidden = true;
+      renderAiAnalysis(null);
+      analysisSource.textContent = '等待识别';
+      Object.values(output).forEach(element => element.textContent = '等待识别');
       currentCoordinates = null;
       setLocationStatus('尚未定位');
       showNotice('正在保存到云端…');
@@ -1369,6 +1454,8 @@
         photoPreview.src = photoData;
         photoPreview.hidden = false;
         removePhotoButton.hidden = false;
+        renderAiAnalysis(null);
+        analysisSource.textContent = '等待识别';
         showNotice('现场照片已准备好');
       } catch {
         photoData = '';
@@ -1381,6 +1468,8 @@
       photoInput.value = '';
       photoPreview.hidden = true;
       removePhotoButton.hidden = true;
+      renderAiAnalysis(null);
+      analysisSource.textContent = '等待识别';
       showNotice('现场照片已移除');
     });
 
