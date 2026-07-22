@@ -138,6 +138,10 @@
     .edit-form input, .edit-form select, .edit-form textarea { width: 100%; min-height: auto; padding: 11px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .edit-form textarea { min-height: 100px; resize: vertical; }
     .edit-form .full { grid-column: 1 / -1; }
+    .location-tools { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+    .location-tools button { padding: 7px 10px; color: #1557a6; background: #edf5ff; }
+    .location-tools span { color: #69758a; font-size: 12px; }
+    .map-link { display: inline-block; margin-top: 4px; color: #1769e0; font-size: 12px; font-weight: 700; text-decoration: none; }
     @media (max-width: 680px) {
       main { padding: 24px; }
       .field-grid { grid-template-columns: 1fr; }
@@ -171,6 +175,7 @@
       <div class="field">
         <label for="location">发现地点</label>
         <input id="location" placeholder="例如：和平路与胜利街路口">
+        <div class="location-tools"><button id="getLocation" type="button">获取当前位置</button><span id="locationStatus">尚未定位</span></div>
       </div>
       <div class="field">
         <label for="owner">负责人</label>
@@ -317,6 +322,14 @@
           <label for="editDeadline">完成期限</label>
           <input id="editDeadline" type="date">
         </div>
+        <div>
+          <label for="editLatitude">纬度</label>
+          <input id="editLatitude" type="number" step="any" min="-90" max="90" placeholder="例如：36.7069">
+        </div>
+        <div>
+          <label for="editLongitude">经度</label>
+          <input id="editLongitude" type="number" step="any" min="-180" max="180" placeholder="例如：119.1618">
+        </div>
         <div class="full">
           <label for="editNote">本次处理说明（可选）</label>
           <textarea id="editNote" placeholder="例如：已联系养护单位，预计今日完成处理"></textarea>
@@ -337,6 +350,7 @@
     };
     const notice = document.querySelector('#notice');
     const locationInput = document.querySelector('#location');
+    const locationStatus = document.querySelector('#locationStatus');
     const ownerInput = document.querySelector('#owner');
     const statusInput = document.querySelector('#status');
     const deadlineInput = document.querySelector('#deadline');
@@ -355,6 +369,8 @@
     const editOwner = document.querySelector('#editOwner');
     const editStatus = document.querySelector('#editStatus');
     const editDeadline = document.querySelector('#editDeadline');
+    const editLatitude = document.querySelector('#editLatitude');
+    const editLongitude = document.querySelector('#editLongitude');
     const editNote = document.querySelector('#editNote');
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
@@ -369,6 +385,7 @@
     let photoData = '';
     const selectedIndices = new Set();
     let activeEditIndex = -1;
+    let currentCoordinates = null;
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
@@ -417,6 +434,24 @@
       return `<span class="deadline deadline-normal">${escapeHtml(record.deadline)}</span>`;
     }
 
+    function hasCoordinates(record) {
+      return record.latitude !== null && record.latitude !== undefined && record.latitude !== ''
+        && record.longitude !== null && record.longitude !== undefined && record.longitude !== ''
+        && Number.isFinite(Number(record.latitude)) && Number.isFinite(Number(record.longitude));
+    }
+
+    function getMapUrl(record) {
+      if (!hasCoordinates(record)) return '';
+      const label = encodeURIComponent(record.location || record.id || '巡查位置');
+      return `https://maps.apple.com/?ll=${Number(record.latitude)},${Number(record.longitude)}&q=${label}`;
+    }
+
+    function renderLocation(record) {
+      const location = escapeHtml(record.location || '未填写');
+      const mapUrl = getMapUrl(record);
+      return mapUrl ? `${location}<br><a class="map-link" href="${mapUrl}" target="_blank" rel="noopener">地图查看</a>` : location;
+    }
+
     function safePhoto(value) {
       return typeof value === 'string' && value.startsWith('data:image/jpeg;base64,') ? value : '';
     }
@@ -457,12 +492,13 @@
       detailContent.innerHTML = `
         <div class="detail-grid">
           <div class="detail-item"><span>问题描述</span><strong>${escapeHtml(record.description)}</strong></div>
-          <div class="detail-item"><span>发现地点</span><strong>${escapeHtml(record.location || '未填写')}</strong></div>
+          <div class="detail-item"><span>发现地点</span><strong>${renderLocation(record)}</strong></div>
           <div class="detail-item"><span>问题类型</span><strong>${escapeHtml(record.type || '未分类')}</strong></div>
           <div class="detail-item"><span>处理部门</span><strong>${escapeHtml(record.department || '未指定')}</strong></div>
           <div class="detail-item"><span>负责人</span><strong>${escapeHtml(record.owner || '未指定')}</strong></div>
           <div class="detail-item"><span>当前状态</span><strong>${escapeHtml(record.status || '待派单')}</strong></div>
           <div class="detail-item"><span>完成期限</span><strong>${escapeHtml(record.deadline || '未设置')}</strong></div>
+          <div class="detail-item"><span>坐标</span><strong>${hasCoordinates(record) ? `${Number(record.latitude).toFixed(6)}, ${Number(record.longitude).toFixed(6)}` : '未记录'}</strong></div>
           <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
         </div>`;
       detailTimeline.innerHTML = getTimeline(record).slice().reverse().map(item => `
@@ -481,6 +517,8 @@
       editOwner.value = record.owner || '';
       editStatus.value = record.status || '待派单';
       editDeadline.value = record.deadline || '';
+      editLatitude.value = hasCoordinates(record) ? Number(record.latitude) : '';
+      editLongitude.value = hasCoordinates(record) ? Number(record.longitude) : '';
       editNote.value = '';
       editDialog.showModal();
       editDescription.focus();
@@ -548,7 +586,7 @@
           <td>${escapeHtml(record.id || '历史记录')}</td>
           <td>${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
           <td>${escapeHtml(record.description)}</td>
-          <td>${escapeHtml(record.location || '未填写')}</td>
+          <td>${renderLocation(record)}</td>
           <td>${escapeHtml(record.type)}</td>
           <td>${escapeHtml(record.department)}</td>
           <td>${escapeHtml(record.priority)}</td>
@@ -574,12 +612,37 @@
       output.priority.textContent = priority;
     });
 
+    document.querySelector('#getLocation').addEventListener('click', () => {
+      if (!navigator.geolocation) { showNotice('当前浏览器不支持定位'); return; }
+      const button = document.querySelector('#getLocation');
+      button.disabled = true;
+      locationStatus.textContent = '正在定位…';
+      navigator.geolocation.getCurrentPosition(position => {
+        currentCoordinates = {
+          latitude: Number(position.coords.latitude.toFixed(6)),
+          longitude: Number(position.coords.longitude.toFixed(6))
+        };
+        locationStatus.textContent = `${currentCoordinates.latitude}, ${currentCoordinates.longitude}`;
+        button.disabled = false;
+        showNotice('当前位置已获取');
+      }, error => {
+        currentCoordinates = null;
+        button.disabled = false;
+        locationStatus.textContent = '定位未成功';
+        const insecureHint = !window.isSecureContext ? '；局域网 HTTP 预览可能被浏览器限制，HTTPS 版本可正常使用' : '';
+        const reason = error.code === 1 ? '请允许浏览器访问位置' : '暂时无法获取位置';
+        showNotice(`${reason}${insecureHint}`);
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+    });
+
     document.querySelector('#clear').addEventListener('click', () => {
       issue.value = '';
       locationInput.value = '';
       ownerInput.value = '';
       statusInput.value = '待派单';
       deadlineInput.value = '';
+      currentCoordinates = null;
+      locationStatus.textContent = '尚未定位';
       photoInput.value = '';
       photoData = '';
       photoPreview.hidden = true;
@@ -606,6 +669,8 @@
         owner: ownerInput.value.trim(),
         status: statusInput.value,
         deadline: deadlineInput.value,
+        latitude: currentCoordinates?.latitude ?? null,
+        longitude: currentCoordinates?.longitude ?? null,
         photo: photoData,
         time: new Date().toLocaleString('zh-CN'),
         timeline: [{
@@ -627,6 +692,8 @@
       photoInput.value = '';
       photoPreview.hidden = true;
       removePhotoButton.hidden = true;
+      currentCoordinates = null;
+      locationStatus.textContent = '尚未定位';
       showNotice('巡查记录已保存到当前浏览器');
     });
 
@@ -635,9 +702,9 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题编号', '现场照片', '问题描述', '发现地点', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
+        ['问题编号', '现场照片', '问题描述', '发现地点', '纬度', '经度', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
         ...records.map(record => [
-          record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.type,
+          record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.latitude ?? '', record.longitude ?? '', record.type,
           record.department, record.priority, record.owner || '', record.status || '待派单', record.deadline || '', getDeadlineState(record), record.time,
           record.updatedAt || record.time
         ])
@@ -804,6 +871,14 @@
       const status = editStatus.value;
       const deadline = editDeadline.value;
       const note = editNote.value.trim();
+      const latitudeText = editLatitude.value.trim();
+      const longitudeText = editLongitude.value.trim();
+      if ((latitudeText && !longitudeText) || (!latitudeText && longitudeText)) {
+        showNotice('纬度和经度需要同时填写或同时留空');
+        return;
+      }
+      const latitude = latitudeText ? Number(latitudeText) : null;
+      const longitude = longitudeText ? Number(longitudeText) : null;
       const currentStatus = record.status || '待派单';
       const changes = [];
       if (description !== record.description) changes.push('修改问题描述');
@@ -811,6 +886,9 @@
       if (owner !== (record.owner || '')) changes.push(`负责人调整为：${owner || '未指定'}`);
       if (status !== currentStatus) changes.push(`状态调整为：${status}`);
       if (deadline !== (record.deadline || '')) changes.push(`完成期限调整为：${deadline || '未设置'}`);
+      const oldLatitude = hasCoordinates(record) ? Number(record.latitude) : null;
+      const oldLongitude = hasCoordinates(record) ? Number(record.longitude) : null;
+      if (latitude !== oldLatitude || longitude !== oldLongitude) changes.push(latitude === null ? '清除位置坐标' : '更新位置坐标');
       if (!changes.length && !note) { editDialog.close(); activeEditIndex = -1; showNotice('没有需要保存的修改'); return; }
       const [type, department, priority] = classify(description);
       const updatedAt = new Date().toLocaleString('zh-CN');
@@ -821,6 +899,8 @@
         owner,
         status,
         deadline,
+        latitude,
+        longitude,
         type,
         department,
         priority,
