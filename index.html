@@ -246,7 +246,7 @@
         <span class="role-badge" id="roleBadge"></span>
         <div><strong id="currentUserName"></strong><p class="role-note" id="roleNote"></p></div>
       </div>
-      <button id="logout" type="button">退出登录</button>
+      <div class="actions"><button class="secondary" id="manageUsers" type="button" hidden>人员管理</button><button id="logout" type="button">退出登录</button></div>
     </section>
     <aside class="install-card" id="installCard" hidden>
       <p id="installText">把巡查助手安装到桌面，打开更方便，并可在无网络时使用已缓存的页面。</p>
@@ -398,6 +398,12 @@
     <img id="photoLarge" alt="现场照片大图">
     <div class="dialog-actions"><button class="secondary" id="closePhoto" type="button">关闭</button></div>
   </dialog>
+  <dialog id="userDialog">
+    <h2>人员管理</h2>
+    <p class="intro">管理已注册账号的部门、角色和在岗状态。停用后不会出现在派单名单中。</p>
+    <div class="table-wrap"><table><thead><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userRows"></tbody></table></div>
+    <div class="dialog-actions"><button class="secondary" id="closeUsers" type="button">关闭</button></div>
+  </dialog>
   <datalist id="ownerOptions"></datalist>
   <dialog id="detailDialog">
     <h2 id="detailTitle">巡查问题详情</h2>
@@ -538,22 +544,29 @@
     const installCard = document.querySelector('#installCard');
     const installText = document.querySelector('#installText');
     const installButton = document.querySelector('#installApp');
+    const manageUsersButton = document.querySelector('#manageUsers');
+    const userDialog = document.querySelector('#userDialog');
+    const userRows = document.querySelector('#userRows');
     let photoData = '';
     let editEvidenceData = [];
     const selectedIndices = new Set();
     let activeEditIndex = -1;
     let currentCoordinates = null;
     let deferredInstallPrompt = null;
+    let currentIsAdmin = false;
 
     function showLoggedInState(user) {
+      currentIsAdmin = user.role === '管理员';
       currentUserName.textContent = user.name;
       roleBadge.textContent = user.role;
       roleNote.textContent = `${user.note} 当前为本地演示登录，真实权限将在云端版启用。`;
       accountBar.hidden = false;
+      manageUsersButton.hidden = !currentIsAdmin;
       loginScreen.hidden = true;
     }
 
     function showLoggedOutState() {
+      currentIsAdmin = false;
       accountBar.hidden = true;
       loginScreen.hidden = false;
       loginPassword.value = '';
@@ -627,6 +640,14 @@
       const selected = ownerFilter.value;
       ownerFilter.innerHTML = `<option value="">全部负责人</option>${assignees.map(person => `<option value="${escapeHtml(person.display_name || '')}">${escapeHtml(person.display_name || '')}${person.department ? ` · ${escapeHtml(person.department)}` : ''}</option>`).join('')}`;
       ownerFilter.value = selected;
+    }
+
+    async function openUserManagement() {
+      if (!currentIsAdmin || !supabaseClient) return;
+      const { data, error } = await supabaseClient.from('profiles').select('id, display_name, department, role, is_active').order('display_name');
+      if (error) { showNotice(`人员名单读取失败：${error.message}`); return; }
+      userRows.innerHTML = (data || []).map(person => `<tr data-user-id="${person.id}"><td>${escapeHtml(person.display_name || '未命名')}</td><td><input data-field="department" value="${escapeHtml(person.department || '')}" placeholder="未设置"></td><td><select data-field="role"><option value="inspector" ${person.role !== 'admin' ? 'selected' : ''}>巡查员</option><option value="admin" ${person.role === 'admin' ? 'selected' : ''}>管理员</option></select></td><td><select data-field="is_active"><option value="true" ${person.is_active !== false ? 'selected' : ''}>在岗</option><option value="false" ${person.is_active === false ? 'selected' : ''}>停用</option></select></td><td><button class="primary" data-save-user type="button">保存</button></td></tr>`).join('');
+      userDialog.showModal();
     }
 
     function cloudRecordFromLocal(record, userId = null) {
@@ -1365,6 +1386,20 @@
       photoDialog.showModal();
     });
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
+    manageUsersButton.addEventListener('click', openUserManagement);
+    document.querySelector('#closeUsers').addEventListener('click', () => userDialog.close());
+    userRows.addEventListener('click', async event => {
+      const button = event.target.closest('[data-save-user]');
+      if (!button) return;
+      const row = button.closest('[data-user-id]');
+      const department = row.querySelector('[data-field="department"]').value.trim() || null;
+      const role = row.querySelector('[data-field="role"]').value;
+      const is_active = row.querySelector('[data-field="is_active"]').value === 'true';
+      const { error } = await supabaseClient.from('profiles').update({ department, role, is_active }).eq('id', row.dataset.userId);
+      if (error) { showNotice(`人员信息保存失败：${error.message}`); return; }
+      await loadAssignees();
+      showNotice('人员信息已保存');
+    });
     document.querySelector('#closeDetail').addEventListener('click', () => detailDialog.close());
     detailEvidence.addEventListener('click', event => {
       const image = event.target.closest('[data-evidence-url]');
