@@ -633,13 +633,17 @@
 
     async function loadAssignees() {
       if (!supabaseClient) return;
-      const { data, error } = await supabaseClient.from('profiles').select('display_name, department, is_active').eq('is_active', true).order('display_name');
+      const { data, error } = await supabaseClient.from('profiles').select('id, display_name, department, is_active').eq('is_active', true).order('display_name');
       if (error) return;
       assignees = data || [];
       ownerOptions.innerHTML = assignees.map(person => `<option value="${escapeHtml(person.display_name || '')}">${escapeHtml(person.department || '未设部门')}</option>`).join('');
       const selected = ownerFilter.value;
       ownerFilter.innerHTML = `<option value="">全部负责人</option>${assignees.map(person => `<option value="${escapeHtml(person.display_name || '')}">${escapeHtml(person.display_name || '')}${person.department ? ` · ${escapeHtml(person.department)}` : ''}</option>`).join('')}`;
       ownerFilter.value = selected;
+    }
+
+    function getAssigneeId(ownerName) {
+      return assignees.find(person => person.display_name === ownerName)?.id || null;
     }
 
     async function openUserManagement() {
@@ -659,6 +663,7 @@
         department: record.department || null,
         priority: record.priority || null,
         owner_name: record.owner || null,
+        assignee_id: record.assigneeId || getAssigneeId(record.owner),
         status: record.status || '待派单',
         deadline: record.deadline || null,
         latitude: record.latitude ?? null,
@@ -681,6 +686,7 @@
         department: record.department || '城市管理部门',
         priority: record.priority || '一般',
         owner: record.owner_name || '',
+        assigneeId: record.assignee_id || null,
         status: record.status || '待派单',
         deadline: record.deadline || '',
         latitude: record.latitude,
@@ -1205,6 +1211,7 @@
         department,
         priority,
         owner: ownerInput.value.trim(),
+        assigneeId: getAssigneeId(ownerInput.value.trim()),
         status: statusInput.value,
         deadline: deadlineInput.value,
         latitude: currentCoordinates?.latitude ?? null,
@@ -1450,6 +1457,7 @@
         records[index] = {
           ...record,
           owner: nextOwner,
+          assigneeId: getAssigneeId(nextOwner),
           status: nextStatus,
           updatedAt,
           timeline: [...getTimeline(record), {
@@ -1521,6 +1529,7 @@
         description,
         location,
         owner,
+        assigneeId: getAssigneeId(owner),
         status,
         deadline,
         latitude,
