@@ -85,6 +85,10 @@ python3 web_app.py
 
 当前版本已接入 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。
 
+运行 `supabase-profile-bootstrap.sql` 后，已验证账号会自动补齐人员资料；新注册账号在邮箱验证前不会进入负责人派单名单，验证完成后自动转为在岗。这样可避免误填邮箱产生的未验证账号被派单。
+
+登录页支持“忘记密码”：填写注册邮箱后点击该按钮，按邮件链接返回页面设置新密码。请在 Supabase Authentication 的 Redirect URLs 中加入实际访问地址；本机测试至少加入 `http://127.0.0.1:8000/index.html`，局域网或正式 HTTPS 地址也需分别加入。
+
 巡查记录云端同步启用后，新增、编辑、批量修改和删除会同步到 Supabase 的 `inspection_records` 表；首次登录会读取当前账号有权限查看的云端台账。要让已打开的手机和 Mac 页面自动刷新，请在 Supabase SQL Editor 中运行 `supabase-realtime.sql`。
 
 运行 `supabase-timeline.sql` 后，创建记录、编辑记录和批量处理产生的状态变化及处理说明会写入 `inspection_updates` 表；问题详情将从云端读取并展示完整处置时间线。
@@ -101,6 +105,12 @@ python3 web_app.py
 
 运行 `supabase-assignee-access.sql` 后，派单会关联具体账号；负责人登录后可查看和更新分配给自己的巡查记录，管理员仍可管理全部记录。
 
+负责人界面只提供任务详情、处置状态、处理说明和整改凭证操作；基础问题信息、负责人、期限、批量派单和删除由管理员维护。
+
+运行 `supabase-assignee-field-protection.sql` 后，上述限制同时在数据库层生效：负责人即使绕过网页直接调用接口，也只能修改本人任务的处置状态，不能修改基础字段或删除记录。
+
+负责人看不到已派任务时，请先以管理员登录，在人员管理中确认该账号为“在岗”，再重新选择该负责人并保存任务。随后在 Supabase SQL Editor 依次再执行 `supabase-assignee-access.sql`、`supabase-timeline.sql`、`supabase-attachments.sql` 和 `supabase-photos.sql`，以补齐历史任务的账号关联和负责人的时间线、凭证、现场照片访问权限；同名账号不会自动关联，需使用唯一的显示姓名。
+
 ### 现场照片 AI 识别（本机试用版）
 
 运行 `supabase-ai-analysis.sql` 后，照片 AI 的分类、风险、建议和置信度会随巡查记录保存到云端。它仅用于辅助判断，保存前仍应结合现场情况人工复核。
@@ -111,7 +121,9 @@ python3 web_app.py
 cp .env.example .env
 ```
 
-随后用 VS Code 打开 `.env`，只在本机填写 `OPENAI_API_KEY`。不要把密钥发到聊天、截图中，或提交到 GitHub。可在 `.env` 中按自己的 OpenAI API 项目可用模型调整 `OPENAI_VISION_MODEL`。
+随后用 VS Code 打开 `.env`，只在本机填写 API 密钥。不要把密钥发到聊天、截图中，或提交到 GitHub。
+
+照片 AI 支持通过 `.env` 切换供应商：`AI_PROVIDER=openai` 使用 OpenAI，`AI_PROVIDER=dashscope` 使用阿里云百炼的通义千问视觉模型，`AI_PROVIDER=compatible` 可接入任何兼容 OpenAI Chat Completions 且支持图片输入的服务。统一填写 `AI_API_KEY`、`AI_MODEL`，第三种方式另需填写 `AI_BASE_URL`。每次切换后重启 `python3 web_app.py`。例如，可先用 `dashscope` 与 `qwen3-vl-plus`；DeepSeek 在未来提供适合的视觉模型和兼容接口后，只需改为 `compatible` 并填入其地址与模型名，无需修改代码。
 
 完成配置后，使用下面的命令启动网页（不要再用 `python3 -m http.server`）：
 
@@ -121,8 +133,32 @@ python3 web_app.py
 
 选择或拍摄一张现场照片，再点击“AI 识别现场照片”。网页会把照片交给 Mac 上的本地服务转发，密钥始终只由本地服务读取；识别结果会显示为“请人工复核”。
 
+照片 AI 识别完成后，系统会将 AI 生成的现场问题描述自动写入“巡查问题”输入框，便于直接保存；保存前仍可由巡查人员修改和复核。
+
+每次切换供应商或模型后，可以在正式启动网页前先执行以下命令。它会发送一张极小的测试图片，验证密钥、模型、视觉能力和返回格式，成功后自动退出；这会产生一次模型调用费用：
+
+```bash
+python3 web_app.py --test-ai
+```
+
+要比较模型效果，请对同一张真实巡查照片反复执行下面的命令：先在 `.env` 中切换 `AI_PROVIDER`、`AI_MODEL` 和密钥，再运行一次。终端会输出模型名称、耗时和完整结构化识别结果，便于横向比较。测试图片不会上传或保存到本项目中。
+
+```bash
+python3 web_app.py --test-ai /完整路径/现场照片.jpg
+```
+
+测试成功后，再正常启动：
+
+```bash
+python3 web_app.py
+```
+
 ### 命令行版本
 
 ```bash
 python3 inspection.py
 ```
+
+## HTTPS 部署
+
+项目包含照片 AI 的 Python 服务，不能只部署为静态网站。仓库已提供 `render.yaml`，可在 Render 创建 Blueprint/Web Service；平台会自动提供 HTTPS。部署时在服务环境变量中填写 `AI_API_KEY`、`SUPABASE_URL` 和 `SUPABASE_PUBLISHABLE_KEY`，不要提交 `.env`、secret key 或 service_role key。部署完成后，还需把正式 HTTPS 地址加入 Supabase Authentication 的 Site URL/Redirect URLs。

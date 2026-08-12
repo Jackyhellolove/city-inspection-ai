@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: city-inspection-ai
+    runtime: python
+    plan: free
+    buildCommand: python3 -m py_compile web_app.py
+    startCommand: python3 web_app.py
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: APP_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: dashscope
+      - key: AI_MODEL
+        value: qwen3-vl-plus
+      - key: AI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false

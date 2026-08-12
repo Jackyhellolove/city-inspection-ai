@@ -21,7 +21,11 @@ using (
   exists (
     select 1 from public.inspection_records
     where id = inspection_updates.record_id
-      and (created_by = (select auth.uid()) or (select private.is_admin()))
+      and (
+        created_by = (select auth.uid())
+        or assignee_id = (select auth.uid())
+        or (select private.is_admin())
+      )
   )
 );
 
@@ -33,6 +37,10 @@ with check (
   and exists (
     select 1 from public.inspection_records
     where id = inspection_updates.record_id
-      and (created_by = (select auth.uid()) or (select private.is_admin()))
+      and (
+        created_by = (select auth.uid())
+        or assignee_id = (select auth.uid())
+        or (select private.is_admin())
+      )
   )
 );

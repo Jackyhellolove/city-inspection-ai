@@ -23,7 +23,11 @@ on public.inspection_attachments for select to authenticated
 using (exists (
   select 1 from public.inspection_records record
   where record.id = record_id
-    and (record.created_by = (select auth.uid()) or private.is_admin())
+    and (
+      record.created_by = (select auth.uid())
+      or record.assignee_id = (select auth.uid())
+      or private.is_admin()
+    )
 ));
 
 create policy "为有权限记录新增整改附件"
@@ -31,9 +35,13 @@ on public.inspection_attachments for insert to authenticated
 with check (
   uploaded_by = (select auth.uid())
   and exists (
-    select 1 from public.inspection_records record
-    where record.id = record_id
-      and (record.created_by = (select auth.uid()) or private.is_admin())
+  select 1 from public.inspection_records record
+  where record.id = record_id
+    and (
+      record.created_by = (select auth.uid())
+      or record.assignee_id = (select auth.uid())
+      or private.is_admin()
+    )
   )
 );
 

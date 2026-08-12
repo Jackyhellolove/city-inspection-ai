@@ -17,7 +17,15 @@ create policy "查看巡查现场照片"
 on storage.objects for select to authenticated
 using (
   bucket_id = 'inspection-photos'
-  and (owner_id = (select auth.uid()::text) or private.is_admin())
+  and (
+    owner_id = (select auth.uid()::text)
+    or private.is_admin()
+    or exists (
+      select 1 from public.inspection_records record
+      where record.photo_path = name
+        and record.assignee_id = (select auth.uid())
+    )
+  )
 );
 
 create policy "上传自己的巡查现场照片"
