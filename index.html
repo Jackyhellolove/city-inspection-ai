@@ -1302,7 +1302,10 @@
           latitude: Number(position.coords.latitude.toFixed(6)),
           longitude: Number(position.coords.longitude.toFixed(6))
         };
-        setLocationStatus('定位成功', 'success');
+        if (!locationInput.value.trim() || /^当前位置（纬度 -?\d+(?:\.\d+)?，经度 -?\d+(?:\.\d+)?）$/.test(locationInput.value.trim())) {
+          locationInput.value = `当前位置（纬度 ${currentCoordinates.latitude}，经度 ${currentCoordinates.longitude}）`;
+        }
+        setLocationStatus('定位成功，地点已填入', 'success');
         button.disabled = false;
       }, error => {
         currentCoordinates = null;
