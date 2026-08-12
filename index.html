@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1769e0">
+  <meta name="theme-color" content="#102a43">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -224,12 +224,372 @@
       table { min-width: 1080px; table-layout: auto; }
       th, td { white-space: nowrap; overflow-wrap: normal; }
     }
+    /* 2026 visual refresh: civic, calm and responsive */
+    :root {
+      --navy: #102a43;
+      --navy-soft: #183d5d;
+      --blue: #246bfd;
+      --blue-soft: #eaf1ff;
+      --teal: #0d8b78;
+      --teal-soft: #e6f7f3;
+      --ink: #172b3e;
+      --muted: #64768b;
+      --line: #dce5ed;
+      --canvas: #edf3f7;
+      --surface: #ffffff;
+      --danger: #bd3429;
+      --warning: #a86207;
+      --shadow: 0 16px 42px rgba(28, 55, 80, .08);
+    }
+    body {
+      display: block;
+      min-width: 320px;
+      padding: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 2%, rgba(36, 107, 253, .09), transparent 28rem),
+        radial-gradient(circle at 96% 18%, rgba(13, 139, 120, .09), transparent 24rem),
+        var(--canvas);
+      line-height: 1.55;
+    }
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background-image: linear-gradient(rgba(16, 42, 67, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 42, 67, .025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      content: "";
+      pointer-events: none;
+    }
+    main {
+      width: min(1520px, 100%);
+      margin: 0 auto;
+      padding: 28px clamp(18px, 3.4vw, 52px) 56px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    h1, h2, h3, p { text-wrap: pretty; }
+    button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    button {
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 11px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(36, 107, 253, .2);
+      outline-offset: 2px;
+    }
+    .primary { background: linear-gradient(135deg, #246bfd, #1759d5); box-shadow: 0 8px 18px rgba(36, 107, 253, .2); }
+    .success { background: linear-gradient(135deg, #0d8b78, #08705f); box-shadow: 0 8px 18px rgba(13, 139, 120, .18); }
+    .secondary { color: #30465c; background: #edf2f6; }
+    .secondary:hover { background: #e4ebf1; }
+    .surface, .results, .history, .chart-card, .stat {
+      border: 1px solid rgba(203, 217, 228, .82);
+      background: rgba(255, 255, 255, .94);
+      box-shadow: var(--shadow);
+    }
+    .app-hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 20px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      padding: clamp(24px, 4vw, 44px);
+      border-radius: 26px;
+      color: white;
+      background: linear-gradient(120deg, #102a43 0%, #164a67 58%, #0d7c70 125%);
+      box-shadow: 0 20px 48px rgba(16, 42, 67, .18);
+    }
+    .app-hero::after {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      top: -130px;
+      border: 45px solid rgba(255, 255, 255, .07);
+      border-radius: 50%;
+      content: "";
+    }
+    .brand-mark {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: 64px;
+      height: 64px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .26);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .13);
+      box-shadow: inset 0 1px rgba(255, 255, 255, .16);
+      font-size: 26px;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+    }
+    .hero-copy { position: relative; z-index: 1; }
+    .eyebrow {
+      display: block;
+      margin-bottom: 5px;
+      color: #6f8092;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .app-hero .eyebrow { color: #aaddd4; }
+    .app-hero h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; }
+    .app-hero .intro { max-width: 720px; margin: 7px 0 0; color: rgba(255, 255, 255, .75); font-size: 15px; }
+    .hero-status {
+      position: relative;
+      z-index: 1;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 999px;
+      color: #e6fffa;
+      background: rgba(255, 255, 255, .1);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .account-bar {
+      margin: 0 0 14px;
+      padding: 14px 18px;
+      border-color: rgba(203, 217, 228, .88);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .82);
+      box-shadow: 0 8px 24px rgba(28, 55, 80, .05);
+      backdrop-filter: blur(12px);
+    }
+    .account-info { gap: 13px; }
+    .role-badge { padding: 6px 11px; color: #1759a8; background: #e5efff; }
+    .role-note { margin-top: 2px; color: var(--muted); }
+    .account-bar .actions { margin: 0; }
+    .install-card { margin: 0 0 14px; border-radius: 15px; background: #edf6ff; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(300px, .72fr);
+      align-items: start;
+      gap: 18px;
+    }
+    .entry-card { padding: clamp(20px, 3vw, 30px); border-radius: 20px; }
+    .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .section-heading h2 { margin: 0; color: var(--navy); font-size: 21px; letter-spacing: -.015em; }
+    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .entry-card > label { margin-top: 24px; }
+    label { color: #263d52; }
+    textarea, .field input, .field select, .filters input, .filters select, .bulk-actions input, .bulk-actions select,
+    .edit-form input, .edit-form select, .edit-form textarea, .login-card input, .login-card select {
+      border: 1px solid #c9d6e1;
+      border-radius: 11px;
+      color: var(--ink);
+      background: #fbfdff;
+      box-shadow: inset 0 1px 2px rgba(16, 42, 67, .03);
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    textarea { min-height: 142px; padding: 15px 16px; border-width: 1px; font-size: 16px; }
+    textarea:focus, .field input:focus, .field select:focus, .filters input:focus, .filters select:focus {
+      border-color: #4c83ec;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(36, 107, 253, .09);
+    }
+    .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+    .field input, .field select { min-height: 46px; }
+    .location-tools button { min-height: 36px; border-radius: 9px; }
+    .photo-picker {
+      align-items: center;
+      margin-top: 18px;
+      padding: 15px;
+      border-color: #b9cbd8;
+      border-radius: 14px;
+      background: #f5f9fc;
+    }
+    .photo-picker .field { flex: 1; min-width: 0; }
+    .photo-picker input { max-width: 100%; }
+    .photo-preview { width: 78px; height: 78px; border: 3px solid white; box-shadow: 0 4px 14px rgba(16, 42, 67, .12); }
+    .entry-card > .actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 20px 0 0; }
+    .entry-card > .actions button { padding-inline: 12px; }
+    .results {
+      position: sticky;
+      top: 18px;
+      padding: 24px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff, #f7fafc);
+    }
+    .results .section-heading { margin-bottom: 12px; }
+    .results .row { grid-template-columns: minmax(72px, .6fr) minmax(0, 1fr); padding: 13px 0; border-bottom: 1px solid #e5ecf2; }
+    .results .row:last-of-type { border-bottom: 0; }
+    .results .name { color: var(--muted); font-size: 13px; }
+    .results .value { color: var(--navy); }
+    .ai-result { margin-top: 16px; padding: 16px; border-color: #a8d5cb; border-radius: 14px; background: var(--teal-soft); }
+    .ai-result h3 { color: #08705f; }
+    .notice { margin: 12px 2px 0; font-weight: 600; }
+    .overview-heading { margin: 34px 2px 14px; }
+    .stats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+    .stat { position: relative; overflow: hidden; min-height: 108px; padding: 18px; border-radius: 16px; }
+    .stat::before { position: absolute; inset: 0 0 auto; height: 3px; background: #5b87d8; content: ""; }
+    .stat:nth-child(2)::before { background: #e3a438; }
+    .stat:nth-child(3)::before { background: #4b7fdd; }
+    .stat:nth-child(4)::before, .stat:nth-child(5)::before { background: #27a386; }
+    .stat:nth-child(6)::before { background: #d95c52; }
+    .stat span { color: var(--muted); font-weight: 600; }
+    .stat strong { margin-top: 8px; color: var(--navy); font-size: 28px; letter-spacing: -.025em; }
+    .dashboard { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .chart-card { min-height: 180px; padding: 20px; border-radius: 17px; }
+    .chart-card h2 { color: var(--navy); font-size: 16px; }
+    .progress-value { background: linear-gradient(90deg, #0d8b78, #3bb89e); }
+    .bar-value { background: linear-gradient(90deg, #246bfd, #5a91fb); }
+    .history { margin-top: 0; padding: clamp(20px, 3vw, 28px); border-radius: 20px; }
+    .history-head h2 { color: var(--navy); font-size: 22px; }
+    .data-actions { margin-top: 18px; }
+    .filters { grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(130px, 170px)); gap: 10px; margin-top: 16px; }
+    .filters input, .filters select { min-height: 44px; }
+    .bulk-actions { border-radius: 13px; background: #f3f7fa; }
+    .table-wrap { margin-top: 18px; overflow-x: auto; border: 1px solid #e0e8ef; border-radius: 14px; }
+    table { background: white; }
+    thead { background: #f3f7fa; }
+    th { color: #52687c; font-size: 12px; letter-spacing: .02em; }
+    th, td { padding: 12px 9px; border-color: #e7edf2; }
+    tbody tr { transition: background .15s ease; }
+    tbody tr:hover { background: #f8fbfd; }
+    .photo-thumb { border-radius: 10px; box-shadow: 0 3px 10px rgba(16, 42, 67, .1); }
+    .status-chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; color: #855307; background: #fff2d7; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .status-chip[data-status="处理中"] { color: #1856a6; background: #e7f0ff; }
+    .status-chip[data-status="已完成"] { color: #08705f; background: #e3f5ef; }
+    .row-actions { flex-wrap: wrap; }
+    .row-actions button, .data-actions button { min-height: 36px; }
+    dialog { max-height: min(92dvh, 900px); overflow-y: auto; border-radius: 20px; }
+    .login-screen {
+      padding: 24px;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(36, 107, 253, .18), transparent 30rem),
+        radial-gradient(circle at 86% 84%, rgba(13, 139, 120, .16), transparent 28rem),
+        #eaf1f5;
+    }
+    body:has(.login-screen:not([hidden])) { overflow: hidden; }
+    .login-shell {
+      display: grid;
+      grid-template-columns: minmax(300px, .9fr) minmax(380px, 1fr);
+      width: min(920px, 100%);
+      overflow: hidden;
+      border: 1px solid rgba(203, 217, 228, .9);
+      border-radius: 26px;
+      background: white;
+      box-shadow: 0 30px 80px rgba(16, 42, 67, .18);
+    }
+    .login-brand {
+      position: relative;
+      overflow: hidden;
+      padding: 48px 42px;
+      color: white;
+      background: linear-gradient(145deg, #102a43, #174d67 64%, #0d7c70 140%);
+    }
+    .login-brand::after { position: absolute; width: 260px; height: 260px; right: -120px; bottom: -120px; border: 42px solid rgba(255,255,255,.07); border-radius: 50%; content: ""; }
+    .login-brand .brand-mark { margin-bottom: 70px; }
+    .login-brand h2 { margin: 0 0 12px; font-size: 30px; letter-spacing: -.03em; }
+    .login-brand p { max-width: 300px; margin: 0; color: rgba(255,255,255,.72); }
+    .login-card { width: auto; padding: 44px 42px; border: 0; border-radius: 0; box-shadow: none; }
+    .login-card h1 { color: var(--navy); font-size: 27px; }
+    .login-card > p:first-of-type { margin-top: 5px; }
+    .login-card input { min-height: 46px; }
+    .login-actions { grid-template-columns: 1fr 1fr; }
+    .login-actions button:first-child { grid-column: 1 / -1; }
+    .demo-tip { border: 1px solid #e0e8ef; background: #f6f9fb; }
+    @media (max-width: 1100px) {
+      .workspace { grid-template-columns: 1fr; }
+      .results { position: static; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dashboard .chart-card:first-child { grid-column: 1 / -1; min-height: auto; }
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 720px) {
+      main { padding: 12px 12px calc(34px + env(safe-area-inset-bottom)); }
+      .app-hero { grid-template-columns: auto 1fr; gap: 14px; margin-bottom: 12px; padding: 22px 18px; border-radius: 20px; }
+      .brand-mark { width: 50px; height: 50px; border-radius: 14px; font-size: 21px; }
+      .app-hero h1 { font-size: 25px; }
+      .app-hero .intro { font-size: 13px; }
+      .hero-status { display: none; }
+      .account-bar { align-items: stretch; margin-bottom: 10px; padding: 13px; }
+      .account-info { align-items: flex-start; }
+      .account-info strong { white-space: normal; }
+      .account-bar .actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+      .account-bar .actions button:only-child { grid-column: 1 / -1; }
+      .install-card { margin-bottom: 10px; }
+      .workspace { gap: 12px; }
+      .entry-card, .results, .history { padding: 18px 16px; border-radius: 17px; }
+      .section-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .entry-card > label { margin-top: 20px; }
+      textarea { min-height: 126px; }
+      .field-grid { grid-template-columns: 1fr; gap: 13px; }
+      .photo-picker { align-items: flex-start; flex-wrap: wrap; }
+      .photo-picker .field { flex-basis: 100%; }
+      .entry-card > .actions { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .entry-card > .actions #save { grid-column: 1 / -1; grid-row: 1; }
+      .entry-card > .actions button { min-height: 48px; }
+      .results .row { grid-template-columns: 84px minmax(0, 1fr); }
+      .overview-heading { margin: 26px 4px 11px; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .stat { min-height: 92px; padding: 14px; border-radius: 14px; }
+      .stat strong { font-size: 24px; }
+      .dashboard { grid-template-columns: 1fr; gap: 10px; }
+      .dashboard .chart-card:first-child { grid-column: auto; }
+      .chart-card { min-height: auto; padding: 17px; }
+      .history-head { align-items: stretch; flex-direction: column; }
+      .data-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .data-actions button:last-of-type { grid-column: 1 / -1; }
+      .filters, .bulk-actions { grid-template-columns: 1fr; }
+      .table-wrap { overflow: visible; border: 0; background: transparent; }
+      .history table, .history tbody, .history tr, .history td { display: block; width: 100%; }
+      .history table { min-width: 0; background: transparent; }
+      .history thead { display: none; }
+      .history tbody { display: grid; gap: 12px; }
+      .history tr { position: relative; overflow: hidden; padding: 10px 14px 14px; border: 1px solid #dce5ed; border-radius: 15px; background: white; box-shadow: 0 8px 22px rgba(28, 55, 80, .06); }
+      .history td { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px dashed #e4ebf0; white-space: normal; overflow-wrap: anywhere; }
+      .history td::before { color: #6a7c8e; font-size: 12px; font-weight: 700; content: attr(data-label); }
+      .history td[data-label="问题编号"] { padding-top: 4px; color: var(--navy); font-size: 15px; font-weight: 800; }
+      .history td[data-label="现场照片"] .photo-thumb { width: 84px; height: 66px; }
+      .history td[data-label="操作"] { display: block; padding: 12px 0 0; border: 0; }
+      .history td[data-label="操作"]::before { display: none; }
+      .history td[data-label="选择"] { grid-template-columns: 86px 1fr; }
+      .row-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .row-actions button { width: 100%; min-height: 40px; }
+      dialog { width: calc(100vw - 16px); max-height: 92dvh; padding: 14px; border-radius: 16px; }
+      .detail-grid, .edit-form-grid { grid-template-columns: 1fr; }
+      .edit-form .full { grid-column: auto; }
+      .login-screen { align-items: start; overflow-y: auto; padding: 12px; }
+      .login-shell { grid-template-columns: 1fr; margin: auto 0; border-radius: 20px; }
+      .login-brand { padding: 22px 22px 20px; }
+      .login-brand .brand-mark { margin-bottom: 18px; }
+      .login-brand h2 { font-size: 22px; }
+      .login-brand p { font-size: 13px; }
+      .login-card { padding: 26px 22px 24px; }
+      .login-card h1 { font-size: 24px; }
+      .login-actions { grid-template-columns: 1fr; }
+      .login-actions button:first-child { grid-column: auto; }
+    }
+    @media (max-width: 390px) {
+      .app-hero { grid-template-columns: 1fr; }
+      .app-hero .brand-mark { display: none; }
+      .results .row { grid-template-columns: 76px minmax(0, 1fr); }
+      .data-actions, .entry-card > .actions { grid-template-columns: 1fr; }
+      .entry-card > .actions #save, .data-actions button:last-of-type { grid-column: auto; }
+      .row-actions { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
     @media print {
       @page { size: A4 landscape; margin: 12mm; }
       body { display: block; padding: 0; background: white; }
       main { width: 100%; padding: 0; border: 0; box-shadow: none; }
       textarea, .field-grid, .photo-picker, .actions, .notice, .filters, .data-actions, .row-actions, .no-print, .install-card, dialog { display: none !important; }
-      main > h1, main > .intro, main > label, main > .results, main > .stats, main > .dashboard, .history-head { display: none !important; }
+      .app-hero, .workspace, .account-bar, .overview-heading, .stats, .dashboard, .history-head { display: none !important; }
       .print-report { display: block; }
       .print-signatures { display: grid; }
       .print-report h1 { margin: 0; font-size: 24px; text-align: center; }
@@ -245,23 +605,33 @@
 </head>
 <body>
   <section class="login-screen" id="loginScreen" aria-label="登录">
-    <form class="login-card" id="loginForm">
-      <h1>城市巡查 AI 助手</h1>
-      <p>使用真实邮箱账号登录。巡查数据将在后续步骤同步到云端。</p>
-      <label for="loginAccount">邮箱</label>
-      <input id="loginAccount" type="email" autocomplete="email" required placeholder="请输入邮箱">
-      <label for="loginPassword">密码</label>
-      <input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位密码">
-      <label for="loginName">姓名（注册时填写）</label>
-      <input id="loginName" autocomplete="name" placeholder="例如：张三">
-      <div class="login-actions"><button type="submit">登录</button><button class="secondary" id="signUp" type="button">注册新账号</button><button class="secondary" id="forgotPassword" type="button">忘记密码</button></div>
-      <p class="login-error" id="loginError" aria-live="polite"></p>
-      <div class="demo-tip">首次使用请选择“注册新账号”。若项目启用了邮箱验证，请按邮件提示完成验证后再登录。</div>
-    </form>
+    <div class="login-shell">
+      <aside class="login-brand">
+        <div class="brand-mark" aria-hidden="true">巡</div>
+        <h2>让城市问题处置更清晰</h2>
+        <p>现场发现、智能研判、协同派单与进度追踪，一处完成。</p>
+      </aside>
+      <form class="login-card" id="loginForm">
+        <h1>欢迎使用巡查助手</h1>
+        <p>登录后查看与你相关的巡查任务和处置进度。</p>
+        <label for="loginAccount">邮箱</label>
+        <input id="loginAccount" type="email" autocomplete="email" required placeholder="请输入邮箱">
+        <label for="loginPassword">密码</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位密码">
+        <label for="loginName">姓名（注册时填写）</label>
+        <input id="loginName" autocomplete="name" placeholder="例如：张三">
+        <div class="login-actions"><button type="submit">登录</button><button class="secondary" id="signUp" type="button">注册新账号</button><button class="secondary" id="forgotPassword" type="button">忘记密码</button></div>
+        <p class="login-error" id="loginError" aria-live="polite"></p>
+        <div class="demo-tip">首次使用请选择“注册新账号”。若项目启用了邮箱验证，请按邮件提示完成验证后再登录。</div>
+      </form>
+    </div>
   </section>
   <main>
-    <h1>城市巡查 AI 助手</h1>
-    <p class="intro">输入巡查现场发现的问题，系统将给出初步分类和处置建议。</p>
+    <header class="app-hero">
+      <div class="brand-mark" aria-hidden="true">巡</div>
+      <div class="hero-copy"><span class="eyebrow">CITY INSPECTION</span><h1>城市巡查 AI 助手</h1><p class="intro">记录现场问题，获得智能研判建议，并持续跟踪处置进度。</p></div>
+      <span class="hero-status">AI 智能辅助</span>
+    </header>
     <section class="account-bar" id="accountBar" hidden>
       <div class="account-info">
         <span class="role-badge" id="roleBadge"></span>
@@ -274,10 +644,13 @@
       <button id="installApp" type="button" hidden>安装应用</button>
     </aside>
 
-    <label for="issue">巡查问题</label>
-    <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+    <div class="workspace">
+      <section class="entry-card surface">
+        <div class="section-heading"><div><span class="eyebrow">现场录入</span><h2>新建巡查问题</h2><p>填写现场情况，照片可用于 AI 辅助识别。</p></div></div>
+        <label for="issue">巡查问题</label>
+        <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
 
-    <div class="field-grid">
+        <div class="field-grid">
       <div class="field">
         <label for="location">发现地点</label>
         <input id="location" placeholder="例如：和平路与胜利街路口">
@@ -299,26 +672,27 @@
         <label for="deadline">完成期限</label>
         <input id="deadline" type="date">
       </div>
-    </div>
+        </div>
 
-    <div class="photo-picker">
+        <div class="photo-picker">
       <div class="field">
         <label for="photo">现场照片（可选）</label>
         <input id="photo" type="file" accept="image/*" capture="environment">
       </div>
       <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
       <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
-    </div>
+        </div>
 
-    <div class="actions">
+        <div class="actions">
       <button class="primary" id="analyze">开始识别</button>
       <button class="secondary" id="analyzePhoto" type="button">AI 识别现场照片</button>
       <button class="success" id="save">保存记录</button>
       <button class="secondary" id="clear">清空输入</button>
-    </div>
+        </div>
+      </section>
 
-    <section class="results" aria-live="polite">
-      <h2>识别结果</h2>
+      <section class="results" aria-live="polite">
+      <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>识别结果</h2><p>结果仅作辅助，请结合现场情况复核。</p></div></div>
       <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
       <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
       <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
@@ -329,10 +703,12 @@
         <p>建议处置：<span id="aiRecommendation"></span></p>
         <p>判断置信度：<span id="aiConfidence"></span>；注意事项：<span id="aiCaution"></span></p>
       </div>
-    </section>
+      </section>
+    </div>
 
     <p class="notice" id="notice" aria-live="polite"></p>
 
+    <div class="section-heading overview-heading"><div><span class="eyebrow">实时概览</span><h2>巡查态势</h2><p>快速查看问题数量、办结情况与责任分布。</p></div></div>
     <section class="stats" aria-label="巡查状态统计">
       <div class="stat"><span>全部问题</span><strong id="totalCount">0</strong></div>
       <div class="stat"><span>待派单</span><strong id="pendingCount">0</strong></div>
@@ -1233,19 +1609,19 @@
       empty.hidden = visibleRecords.length > 0;
       recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
-          <td class="no-print admin-only" ${currentIsAdmin ? '' : 'hidden'}><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
-          <td>${escapeHtml(record.id || '历史记录')}</td>
-          <td>${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
-          <td>${escapeHtml(record.description)}</td>
-          <td>${renderLocation(record)}</td>
-          <td>${escapeHtml(record.type)}</td>
-          <td>${escapeHtml(record.department)}</td>
-          <td>${escapeHtml(record.priority)}</td>
-          <td>${escapeHtml(record.owner || '未指定')}</td>
-          <td>${escapeHtml(record.status || '待派单')}</td>
-          <td>${renderDeadline(record)}</td>
-          <td>${escapeHtml(record.updatedAt || record.time)}</td>
-          <td class="no-print"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
+          <td data-label="选择" class="no-print admin-only" ${currentIsAdmin ? '' : 'hidden'}><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
+          <td data-label="问题编号">${escapeHtml(record.id || '历史记录')}</td>
+          <td data-label="现场照片">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
+          <td data-label="问题描述">${escapeHtml(record.description)}</td>
+          <td data-label="发现地点">${renderLocation(record)}</td>
+          <td data-label="问题类型">${escapeHtml(record.type)}</td>
+          <td data-label="处理部门">${escapeHtml(record.department)}</td>
+          <td data-label="优先级">${escapeHtml(record.priority)}</td>
+          <td data-label="负责人">${escapeHtml(record.owner || '未指定')}</td>
+          <td data-label="处置状态"><span class="status-chip" data-status="${escapeHtml(record.status || '待派单')}">${escapeHtml(record.status || '待派单')}</span></td>
+          <td data-label="完成期限">${renderDeadline(record)}</td>
+          <td data-label="更新时间">${escapeHtml(record.updatedAt || record.time)}</td>
+          <td data-label="操作" class="no-print"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
         </tr>`).join('');
       updateSelectionSummary();
     }
