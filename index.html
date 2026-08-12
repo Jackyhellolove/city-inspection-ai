@@ -262,7 +262,7 @@
     main {
       width: min(1520px, 100%);
       margin: 0 auto;
-      padding: 28px clamp(18px, 3.4vw, 52px) 56px;
+      padding: 20px clamp(18px, 3.4vw, 52px) 42px;
       border: 0;
       border-radius: 0;
       background: transparent;
@@ -296,10 +296,10 @@
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
-      gap: 20px;
+      gap: 16px;
       overflow: hidden;
-      margin-bottom: 18px;
-      padding: clamp(24px, 4vw, 44px);
+      margin-bottom: 14px;
+      padding: clamp(22px, 3vw, 32px);
       border-radius: 26px;
       color: white;
       background: linear-gradient(120deg, #102a43 0%, #164a67 58%, #0d7c70 125%);
@@ -319,8 +319,8 @@
       position: relative;
       z-index: 1;
       display: grid;
-      width: 64px;
-      height: 64px;
+      width: 58px;
+      height: 58px;
       place-items: center;
       border: 1px solid rgba(255, 255, 255, .26);
       border-radius: 18px;
@@ -378,15 +378,25 @@
     .install-card { margin: 0 0 14px; border-radius: 15px; background: #edf6ff; }
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(300px, .72fr);
-      align-items: stretch;
-      gap: 18px;
+      grid-template-columns: 1fr;
+      gap: 14px;
     }
-    .entry-card { height: 100%; padding: clamp(20px, 3vw, 30px); border-radius: 20px; }
+    .entry-stage, .results {
+      display: block;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff, #f7fafc);
+    }
+    .entry-stage > .section-heading, .results > .section-heading { margin-bottom: 12px; }
+    .analysis-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 14px; }
+    .analysis-pane { min-width: 0; padding: 15px; border: 1px solid #dce6ed; border-radius: 16px; background: rgba(255,255,255,.76); }
+    .issue-card { display: flex; flex-direction: column; }
+    .issue-card textarea { flex: 1; min-height: 152px; resize: vertical; }
+    .details-card .field-grid { margin-top: 14px; }
     .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
     .section-heading h2 { margin: 0; color: var(--navy); font-size: 21px; letter-spacing: -.015em; }
-    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-    .entry-card > label { margin-top: 24px; }
+    .section-heading p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+    .issue-card > label { margin: 0; }
     label { color: #263d52; }
     textarea, .field input, .field select, .filters input, .filters select, .bulk-actions input, .bulk-actions select,
     .edit-form input, .edit-form select, .edit-form textarea, .login-card input, .login-card select {
@@ -408,13 +418,13 @@
     input[type="date"], select { line-height: normal; }
     input[type="file"] { width: 100%; height: 40px; padding: 4px 7px; border: 1px solid #c9d6e1; border-radius: 11px; background: #fbfdff; }
     input[type="file"]::file-selector-button { height: 30px; margin-right: 10px; padding: 0 11px; border: 0; border-radius: 8px; color: #2d4962; background: #e7eef4; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-    textarea { min-height: 142px; padding: 15px 16px; border-width: 1px; font-size: 16px; }
+    textarea { min-height: 132px; padding: 12px 14px; border-width: 1px; font-size: 16px; }
     textarea:focus, .field input:focus, .field select:focus, .filters input:focus, .filters select:focus {
       border-color: #4c83ec;
       background: white;
       box-shadow: 0 0 0 4px rgba(36, 107, 253, .09);
     }
-    .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+    .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; margin-top: 14px; }
     .field input, .field select { min-height: 40px; }
     .location-tools button { min-height: 32px; padding-block: 5px; border-radius: 9px; }
     .photo-picker {
@@ -428,35 +438,45 @@
     .photo-picker .field { flex: 1; min-width: 0; }
     .photo-picker input { max-width: 100%; }
     .photo-preview { width: 78px; height: 78px; border: 3px solid white; box-shadow: 0 4px 14px rgba(16, 42, 67, .12); }
-    .results {
-      display: flex;
-      height: 100%;
-      flex-direction: column;
-      padding: 24px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, #ffffff, #f7fafc);
-    }
-    .results .section-heading { margin-bottom: 12px; }
-    .analysis-photo { margin: 4px 0 12px; }
-    .analysis-photo .photo-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 13px; }
+    .analysis-input-pane, .analysis-output-pane { display: flex; flex-direction: column; }
+    .analysis-pane-heading { margin-bottom: 9px; }
+    .analysis-pane-heading strong { display: block; color: var(--navy); font-size: 15px; }
+    .analysis-pane-heading span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .analysis-photo { margin: 0 0 9px; }
+    .analysis-photo .photo-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; }
     .analysis-photo .photo-picker .field { min-width: 0; }
-    .analysis-photo .photo-preview { grid-column: 1 / -1; justify-self: center; width: min(100%, 220px); height: 128px; border-radius: 12px; object-fit: cover; }
+    .analysis-photo .photo-preview { grid-column: 1 / -1; justify-self: center; width: min(100%, 200px); height: 108px; border-radius: 12px; object-fit: cover; }
     .analysis-photo .photo-remove { min-height: 38px; padding: 7px 10px; }
-    .analysis-tools { margin: 0 0 8px; padding: 14px; border: 1px solid #d9e5ee; border-radius: 14px; background: linear-gradient(145deg, #f5f9fc, #edf4f8); }
-    .analysis-tools-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .analysis-tools { margin: auto 0 0; padding: 10px; border: 1px solid #d9e5ee; border-radius: 14px; background: linear-gradient(145deg, #f5f9fc, #edf4f8); }
+    .analysis-tools-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
     .analysis-tools-head strong { color: #30485d; font-size: 13px; }
     .analysis-tools-head span { color: #8191a0; font-size: 11px; }
     .analysis-actions { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px; }
-    .analysis-actions button { min-height: 40px; padding: 8px 10px; font-size: 13px; }
+    .analysis-actions button { min-height: 38px; padding: 7px 10px; font-size: 13px; }
     .analysis-actions #analyzePhoto { color: #096c5c; border: 1px solid #b8ded4; background: #e6f6f1; }
     .analysis-actions #analyzePhoto:hover { background: #d8f0e9; }
-    .results .row { grid-template-columns: minmax(72px, .6fr) minmax(0, 1fr); padding: 13px 0; border-bottom: 1px solid #e5ecf2; }
+    .analysis-output-pane .row { grid-template-columns: minmax(72px, .6fr) minmax(0, 1fr); padding: 8px 0; border-bottom: 1px solid #e5ecf2; }
     .results .row:last-of-type { border-bottom: 0; }
     .results .name { color: var(--muted); font-size: 13px; }
     .results .value { color: var(--navy); }
-    .ai-result { margin-top: 16px; padding: 16px; border-color: #a8d5cb; border-radius: 14px; background: var(--teal-soft); }
-    .ai-result h3 { color: #08705f; }
-    .final-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 20px; border-radius: 17px; }
+    .ai-result { display: grid; gap: 8px; min-height: 112px; margin-top: 12px; padding: 12px 13px; border-color: #a8d5cb; border-radius: 14px; background: var(--teal-soft); }
+    .ai-result[hidden] { display: none; }
+    .ai-result-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .ai-result h3 { margin: 0; color: #08705f; font-size: 14px; }
+    .ai-confidence-badge { flex: none; padding: 4px 8px; border-radius: 999px; color: #08705f; background: rgba(255,255,255,.72); font-size: 11px; font-weight: 800; }
+    .ai-summary-clamp { display: -webkit-box; min-height: 43px; margin: 0; overflow: hidden; color: #284759; font-size: 13px; font-weight: 700; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .ai-result-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 7px; border-top: 1px solid rgba(80,154,139,.2); }
+    .ai-result-footer span { color: #688277; font-size: 11px; }
+    .ai-result-footer button { min-height: 32px; padding: 5px 10px; border: 1px solid #a9d6cc; color: #08705f; background: rgba(255,255,255,.72); font-size: 12px; }
+    .ai-result-footer button:hover { background: white; }
+    .ai-analysis-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .ai-analysis-meta { padding: 12px; border: 1px solid #dce7ed; border-radius: 11px; background: white; }
+    .ai-analysis-meta span, .ai-analysis-section span { display: block; margin-bottom: 5px; color: #718394; font-size: 11px; font-weight: 700; }
+    .ai-analysis-meta strong { color: var(--navy); }
+    .ai-analysis-section { margin-top: 12px; padding: 14px 15px; border: 1px solid #dde7ed; border-radius: 12px; background: white; }
+    .ai-analysis-section p { margin: 0; color: #30485d; line-height: 1.75; white-space: pre-wrap; }
+    .ai-analysis-section:first-of-type { border-color: #b9ddd4; background: #f0faf7; }
+    .final-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 18px; border-radius: 17px; }
     .final-actions-copy { min-width: 0; }
     .final-actions-copy strong { display: block; color: var(--navy); font-size: 16px; }
     .final-actions-copy p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
@@ -464,7 +484,7 @@
     .final-action-buttons button { min-height: 42px; }
     .final-action-buttons #save { font-weight: 800; }
     .notice { margin: 12px 2px 0; font-weight: 600; }
-    .overview-heading { margin: 34px 2px 14px; }
+    .overview-heading { margin: 26px 2px 12px; }
     .stats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
     .stat { position: relative; overflow: hidden; min-height: 108px; padding: 18px; border-radius: 16px; }
     .stat::before { position: absolute; inset: 0 0 auto; height: 3px; background: #5b87d8; content: ""; }
@@ -578,20 +598,19 @@
     .account-bar .role-badge { flex: none; padding: 0; font-size: 12px; letter-spacing: .04em; }
     .online-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #65e3bd; box-shadow: 0 0 0 3px rgba(101,227,189,.12); }
     .surface, .results, .history, .chart-card, .stat { backdrop-filter: blur(14px); }
-    .entry-card, .results, .history { position: relative; overflow: hidden; }
-    .entry-card::before, .results::before, .history::before {
+    .entry-stage, .results, .history { position: relative; overflow: hidden; }
+    .entry-stage::before, .results::before, .history::before {
       position: absolute;
       inset: 0 0 auto;
       height: 2px;
       background: linear-gradient(90deg, #246bfd, #0d8b78 70%, transparent);
       content: "";
     }
-    .entry-card > label { display: flex; align-items: center; gap: 8px; }
-    .entry-card > label::before { width: 4px; height: 14px; border-radius: 999px; background: var(--blue); content: ""; }
+    .issue-card > label { display: flex; align-items: center; gap: 8px; }
+    .issue-card > label::before { width: 4px; height: 14px; border-radius: 999px; background: var(--blue); content: ""; }
     .field label { color: #40566a; font-size: 13px; }
     .photo-picker { position: relative; background: linear-gradient(135deg, #f7fafc, #eef5fa); }
     .photo-picker::after { position: absolute; right: 16px; top: 12px; color: #8ca0b2; font-size: 11px; font-weight: 700; letter-spacing: .08em; content: "PHOTO"; }
-    .entry-card > .actions { gap: 9px; padding-top: 18px; border-top: 1px solid #e7edf2; }
     .results .row { align-items: center; }
     .results .value { padding: 5px 8px; border-radius: 8px; background: rgba(237,243,248,.72); }
     .stats .stat { transition: transform .18s ease, box-shadow .18s ease; }
@@ -750,8 +769,6 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @media (max-width: 1100px) {
-      .workspace { grid-template-columns: 1fr; }
-      .results { height: auto; }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard .chart-card:first-child { grid-column: 1 / -1; min-height: auto; }
@@ -759,6 +776,9 @@
       .app-hero { grid-template-columns: auto minmax(0, 1fr); }
     }
     @media (max-width: 900px) {
+      .analysis-layout { grid-template-columns: 1fr; }
+      .issue-card, .details-card { min-height: 0; }
+      .issue-card textarea { min-height: 180px; }
       .history .table-wrap { overflow: visible; border: 0; background: transparent; }
       .history table, .history tbody, .history tr, .history td { display: block; width: 100%; }
       .history td { width: 100% !important; }
@@ -788,9 +808,9 @@
       .account-menu-trigger strong { max-width: 118px; }
       .install-card { margin-bottom: 10px; }
       .workspace { gap: 12px; }
-      .entry-card, .results, .history { padding: 18px 16px; border-radius: 17px; }
+      .entry-stage, .results, .history { padding: 18px 16px; border-radius: 17px; }
       .section-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
-      .entry-card > label { margin-top: 20px; }
+      .issue-card > label { margin-top: 4px; }
       textarea { min-height: 126px; }
       .field-grid { grid-template-columns: 1fr; gap: 13px; }
       .photo-picker { align-items: flex-start; flex-wrap: wrap; }
@@ -799,6 +819,7 @@
       .analysis-photo .photo-preview { grid-column: auto; width: 100%; }
       .analysis-photo .photo-remove { width: 100%; }
       .analysis-actions { grid-template-columns: 1fr; }
+      .ai-analysis-grid { grid-template-columns: 1fr; }
       .final-actions { align-items: stretch; flex-direction: column; gap: 14px; }
       .final-action-buttons { grid-template-columns: 1fr 1.35fr; width: 100%; }
       .results .row { grid-template-columns: 84px minmax(0, 1fr); }
@@ -929,12 +950,18 @@
     </aside>
 
     <div class="workspace">
-      <section class="entry-card surface">
-        <div class="section-heading"><div><span class="eyebrow">现场录入</span><h2>新建巡查问题</h2><p>填写现场情况，照片可用于 AI 辅助识别。</p></div></div>
-        <label for="issue">巡查问题</label>
-        <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+      <section class="entry-stage surface">
+        <div class="section-heading"><div><span class="eyebrow">现场录入</span><h2>新建巡查问题</h2><p>填写现场情况和派单信息，智能研判将在下一步完成。</p></div></div>
+        <div class="analysis-layout">
+          <div class="analysis-pane issue-card">
+            <div class="analysis-pane-heading"><strong>巡查问题</strong><span>描述现场发现的问题、影响范围和需要处置的事项</span></div>
+            <label for="issue">问题描述</label>
+            <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+          </div>
 
-        <div class="field-grid">
+          <div class="analysis-pane details-card">
+            <div class="analysis-pane-heading"><strong>派单与处置设置</strong><span>补充发现位置、负责人、状态和完成期限</span></div>
+            <div class="field-grid">
       <div class="field">
         <label for="location">发现地点</label>
         <input id="location" placeholder="例如：和平路与胜利街路口">
@@ -956,39 +983,47 @@
         <label for="deadline">完成期限</label>
         <input id="deadline" type="date">
       </div>
+            </div>
+          </div>
         </div>
-
       </section>
 
       <section class="results" aria-live="polite">
-      <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>识别结果</h2><p>结果仅作辅助，请结合现场情况复核。</p></div></div>
-      <div class="analysis-photo">
-        <div class="photo-picker">
-          <div class="field">
-            <label for="photo">现场照片（可选）</label>
-            <input id="photo" type="file" accept="image/*" capture="environment">
+        <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>现场识别与研判结果</h2><p>上传现场资料并选择识别方式，结果仅作辅助，请结合实际复核。</p></div></div>
+        <div class="analysis-layout">
+          <div class="analysis-pane analysis-input-pane">
+            <div class="analysis-pane-heading"><strong>现场资料与识别</strong><span>选择照片后可使用多模态 AI，也可根据文字规则识别</span></div>
+            <div class="analysis-photo">
+              <div class="photo-picker">
+                <div class="field">
+                  <label for="photo">现场照片（可选）</label>
+                  <input id="photo" type="file" accept="image/*" capture="environment">
+                </div>
+                <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
+                <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
+              </div>
+            </div>
+            <div class="analysis-tools">
+              <div class="analysis-tools-head"><strong>选择识别方式</strong><span>可根据现场资料任选一种</span></div>
+              <div class="analysis-actions">
+                <button id="analyzePhoto" type="button">AI 识别现场照片</button>
+                <button class="primary" id="analyze" type="button">开始识别</button>
+              </div>
+            </div>
           </div>
-          <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
-          <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
+          <div class="analysis-pane analysis-output-pane">
+            <div class="analysis-pane-heading"><strong>智能研判结果</strong><span>分类、责任部门和优先级将自动写入巡查记录</span></div>
+            <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
+            <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
+            <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
+            <div class="row"><span class="name">识别方式</span><span class="value" id="analysisSource">等待识别</span></div>
+            <div class="ai-result" id="aiResult" hidden>
+              <div class="ai-result-head"><h3>照片 AI 辅助判断</h3><span class="ai-confidence-badge">置信度 <span id="aiConfidence">0%</span></span></div>
+              <p class="ai-summary-clamp" id="aiSummary"></p>
+              <div class="ai-result-footer"><span>结果仅供辅助，请人工复核</span><button id="openAiAnalysis" type="button">查看完整研判</button></div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="analysis-tools">
-        <div class="analysis-tools-head"><strong>选择识别方式</strong><span>可根据现场资料任选一种</span></div>
-        <div class="analysis-actions">
-          <button id="analyzePhoto" type="button">AI 识别现场照片</button>
-          <button class="primary" id="analyze" type="button">开始识别</button>
-        </div>
-      </div>
-      <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
-      <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
-      <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
-      <div class="row"><span class="name">识别方式</span><span class="value" id="analysisSource">等待识别</span></div>
-      <div class="ai-result" id="aiResult" hidden>
-        <h3>照片 AI 辅助判断（请人工复核）</h3>
-        <p><strong id="aiSummary"></strong></p>
-        <p>建议处置：<span id="aiRecommendation"></span></p>
-        <p>判断置信度：<span id="aiConfidence"></span>；注意事项：<span id="aiCaution"></span></p>
-      </div>
       </section>
 
       <section class="final-actions surface" aria-label="巡查记录最终操作">
@@ -1097,6 +1132,20 @@
     <header class="dialog-header"><div><span class="dialog-kicker">现场取证</span><h2>现场照片</h2></div><button class="dialog-close" id="closePhoto" type="button" aria-label="关闭现场照片">×</button></header>
     <div class="photo-stage"><img id="photoLarge" alt="现场照片大图"></div>
   </dialog>
+  <dialog class="app-dialog report-dialog" id="aiAnalysisDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">AI 辅助研判</span><h2>照片识别完整结果</h2><p>请结合现场情况核对问题、责任部门和处置建议。</p></div><button class="dialog-close" id="closeAiAnalysis" type="button" aria-label="关闭完整研判">×</button></header>
+    <div class="dialog-body">
+      <div class="ai-analysis-grid">
+        <div class="ai-analysis-meta"><span>问题类型</span><strong id="aiDetailCategory">待确认</strong></div>
+        <div class="ai-analysis-meta"><span>处理部门</span><strong id="aiDetailDepartment">待确认</strong></div>
+        <div class="ai-analysis-meta"><span>风险与置信度</span><strong id="aiDetailRisk">待确认</strong></div>
+      </div>
+      <section class="ai-analysis-section"><span>问题概述</span><p id="aiDetailSummary"></p></section>
+      <section class="ai-analysis-section"><span>建议处置</span><p id="aiRecommendation"></p></section>
+      <section class="ai-analysis-section"><span>注意事项</span><p id="aiCaution"></p></section>
+    </div>
+    <div class="dialog-actions dialog-footer"><button class="primary" id="confirmAiAnalysis" type="button">已核对，关闭</button></div>
+  </dialog>
   <dialog class="app-dialog wide-dialog" id="userDialog">
     <header class="dialog-header"><div><span class="dialog-kicker">组织与权限</span><h2>人员管理</h2><p>维护部门、角色与在岗状态，确保派单范围准确。</p></div><button class="dialog-close" id="closeUsers" type="button" aria-label="关闭人员管理">×</button></header>
     <div class="dialog-body"><div class="table-wrap dialog-table"><table><thead><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
@@ -1193,6 +1242,11 @@
     const analyzePhotoButton = document.querySelector('#analyzePhoto');
     const aiResult = document.querySelector('#aiResult');
     const aiSummary = document.querySelector('#aiSummary');
+    const aiAnalysisDialog = document.querySelector('#aiAnalysisDialog');
+    const aiDetailSummary = document.querySelector('#aiDetailSummary');
+    const aiDetailCategory = document.querySelector('#aiDetailCategory');
+    const aiDetailDepartment = document.querySelector('#aiDetailDepartment');
+    const aiDetailRisk = document.querySelector('#aiDetailRisk');
     const aiRecommendation = document.querySelector('#aiRecommendation');
     const aiConfidence = document.querySelector('#aiConfidence');
     const aiCaution = document.querySelector('#aiCaution');
@@ -1361,8 +1415,15 @@
     function renderAiAnalysis(analysis) {
       currentAiAnalysis = analysis || null;
       aiResult.hidden = !analysis;
-      if (!analysis) return;
+      if (!analysis) {
+        if (aiAnalysisDialog.open) aiAnalysisDialog.close();
+        return;
+      }
       aiSummary.textContent = analysis.issue_summary || '未给出具体问题';
+      aiDetailSummary.textContent = analysis.issue_summary || '未给出具体问题';
+      aiDetailCategory.textContent = analysis.category || '待人工确认';
+      aiDetailDepartment.textContent = analysis.department || '待人工确认';
+      aiDetailRisk.textContent = `${analysis.risk_level || '待确认'}风险 · ${Number(analysis.confidence) || 0}%`;
       aiRecommendation.textContent = analysis.recommended_action || '请人工确认处置措施';
       aiConfidence.textContent = `${Number(analysis.confidence) || 0}%`;
       aiCaution.textContent = analysis.caution || 'AI 判断仅供辅助，请结合现场情况复核。';
@@ -2294,6 +2355,11 @@
       photoDialog.showModal();
     });
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
+    document.querySelector('#openAiAnalysis').addEventListener('click', () => {
+      if (currentAiAnalysis) aiAnalysisDialog.showModal();
+    });
+    document.querySelector('#closeAiAnalysis').addEventListener('click', () => aiAnalysisDialog.close());
+    document.querySelector('#confirmAiAnalysis').addEventListener('click', () => aiAnalysisDialog.close());
     accountMenuToggle.addEventListener('click', event => {
       event.stopPropagation();
       const willOpen = accountMenu.hidden;
