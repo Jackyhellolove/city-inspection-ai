@@ -3,7 +3,7 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 import argparse
 import base64
@@ -231,6 +231,70 @@ def verify_user_token(authorization):
         raise PermissionError("登录状态无效，请重新登录")
 
 
+def reverse_geocode(latitude, longitude):
+    """把设备坐标反查为适合填写在巡查表单中的道路名称。"""
+    try:
+        latitude = float(latitude)
+        longitude = float(longitude)
+    except (TypeError, ValueError) as error:
+        raise ValueError("位置坐标格式无效") from error
+    if not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
+        raise ValueError("位置坐标超出有效范围")
+
+    query = urlencode({
+        "format": "jsonv2",
+        "lat": f"{latitude:.6f}",
+        "lon": f"{longitude:.6f}",
+        "zoom": "18",
+        "addressdetails": "1",
+        "layer": "address",
+        "accept-language": "zh-CN,zh,en",
+    })
+    request = Request(
+        f"https://nominatim.openstreetmap.org/reverse?{query}",
+        headers={
+            "Accept": "application/json",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
+            "User-Agent": "city-inspection-ai/1.0 (https://city-inspection-ai.onrender.com/)",
+        },
+    )
+    try:
+        with urlopen(request, timeout=12) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        raise RuntimeError(f"道路名称查询失败（HTTP {error.code}）") from error
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError("暂时无法查询道路名称") from error
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("道路名称查询结果无法读取") from error
+
+    address = payload.get("address") if isinstance(payload, dict) else None
+    address = address if isinstance(address, dict) else {}
+    road = next((address.get(key) for key in (
+        "road", "pedestrian", "residential", "service", "footway", "path", "cycleway"
+    ) if address.get(key)), "")
+    house_number = str(address.get("house_number") or "").strip()
+    area = next((address.get(key) for key in (
+        "neighbourhood", "quarter", "suburb", "city_district", "district", "borough"
+    ) if address.get(key)), "")
+    city = next((address.get(key) for key in ("city", "town", "village", "county") if address.get(key)), "")
+
+    if road:
+        road_label = f"{road}{house_number + '号' if house_number and not house_number.endswith('号') else house_number}"
+        parts = [part for part in (city, area, road_label) if part]
+        label = " · ".join(dict.fromkeys(parts))
+        return {"address": label, "road": road, "resolved": True}
+
+    fallback_parts = [part for part in (city, area) if part]
+    if not fallback_parts and isinstance(payload, dict):
+        fallback_parts = [part.strip() for part in str(payload.get("display_name") or "").split(",")[:3] if part.strip()]
+    return {
+        "address": " · ".join(dict.fromkeys(fallback_parts)),
+        "road": "",
+        "resolved": False,
+    }
+
+
 class InspectionHandler(SimpleHTTPRequestHandler):
     """静态网页 + 仅供本机服务读取密钥的 AI 识别接口。"""
 
@@ -307,24 +371,30 @@ class InspectionHandler(SimpleHTTPRequestHandler):
         super().do_HEAD()
 
     def do_POST(self):
-        if self.path != "/api/analyze-photo":
+        path = urlparse(self.path).path
+        if path not in {"/api/analyze-photo", "/api/reverse-geocode"}:
             self.send_json(404, {"error": "接口不存在"})
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if length <= 0 or length > MAX_REQUEST_BYTES:
-                raise ValueError("图片过大或请求无效，请重新选择照片")
+                raise ValueError("请求内容过大或无效")
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
-            image_data = payload.get("image") if isinstance(payload, dict) else None
             verify_user_token(self.headers.get("Authorization", ""))
-            result = analyze_photo(image_data or "")
-            self.send_json(200, {"analysis": result})
+            if path == "/api/reverse-geocode":
+                if not isinstance(payload, dict):
+                    raise ValueError("位置请求格式无效")
+                self.send_json(200, reverse_geocode(payload.get("latitude"), payload.get("longitude")))
+                return
+            image_data = payload.get("image") if isinstance(payload, dict) else None
+            self.send_json(200, {"analysis": analyze_photo(image_data or "")})
         except PermissionError as error:
             self.send_json(401, {"error": str(error)})
         except (ValueError, RuntimeError) as error:
             self.send_json(400, {"error": str(error)})
         except Exception:
-            self.send_json(500, {"error": "AI 识别暂时不可用，请稍后重试"})
+            message = "道路名称查询暂时不可用，请稍后重试" if path == "/api/reverse-geocode" else "AI 识别暂时不可用，请稍后重试"
+            self.send_json(500, {"error": message})
 
     def log_message(self, format_string, *args):
         # 不记录请求正文，避免将现场照片或密钥相关信息写进终端日志。

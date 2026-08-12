@@ -273,8 +273,8 @@
     h1, h2, h3, p { text-wrap: pretty; }
     button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
     button {
-      min-height: 44px;
-      padding: 10px 18px;
+      min-height: 40px;
+      padding: 8px 16px;
       border-radius: 11px;
       transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
     }
@@ -296,7 +296,7 @@
     .app-hero {
       position: relative;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(0, 1fr) minmax(260px, auto);
       align-items: center;
       gap: 20px;
       overflow: hidden;
@@ -345,31 +345,30 @@
     .app-hero .eyebrow { color: #aaddd4; }
     .app-hero h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; }
     .app-hero .intro { max-width: 720px; margin: 7px 0 0; color: rgba(255, 255, 255, .75); font-size: 15px; }
-    .hero-status {
+    .account-bar {
       position: relative;
       z-index: 1;
-      padding: 8px 12px;
-      border: 1px solid rgba(255, 255, 255, .22);
-      border-radius: 999px;
-      color: #e6fffa;
-      background: rgba(255, 255, 255, .1);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .account-bar {
-      margin: 0 0 14px;
-      padding: 14px 18px;
-      border-color: rgba(203, 217, 228, .88);
+      display: grid;
+      justify-items: end;
+      gap: 10px;
+      margin: 0;
+      padding: 13px 14px;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 16px;
-      background: rgba(255, 255, 255, .82);
-      box-shadow: 0 8px 24px rgba(28, 55, 80, .05);
-      backdrop-filter: blur(12px);
+      color: white;
+      background: rgba(255, 255, 255, .1);
+      box-shadow: inset 0 1px rgba(255, 255, 255, .08);
+      backdrop-filter: blur(10px);
     }
-    .account-info { gap: 13px; }
-    .role-badge { padding: 6px 11px; color: #1759a8; background: #e5efff; }
-    .role-note { margin-top: 2px; color: var(--muted); }
-    .account-bar .actions { margin: 0; }
+    .account-bar[hidden] { display: none; }
+    .account-info { justify-content: flex-end; width: 100%; gap: 10px; text-align: right; }
+    .account-info > div { min-width: 0; }
+    .account-info strong { display: block; color: white; }
+    .role-badge { padding: 5px 9px; color: #dffaf5; background: rgba(223, 250, 245, .13); }
+    .account-bar .role-note { max-width: 320px; margin-top: 1px; overflow: hidden; color: rgba(255, 255, 255, .7); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .account-bar .actions { justify-content: flex-end; margin: 0; }
+    .account-bar button { min-height: 34px; padding: 6px 11px; border: 1px solid rgba(255,255,255,.18); color: white; background: rgba(255,255,255,.12); font-size: 12px; }
+    .account-bar button:hover { background: rgba(255,255,255,.2); }
     .install-card { margin: 0 0 14px; border-radius: 15px; background: #edf6ff; }
     .workspace {
       display: grid;
@@ -392,6 +391,17 @@
       box-shadow: inset 0 1px 2px rgba(16, 42, 67, .03);
       transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
+    .field input:not([type="file"]), .field select, .filters input, .filters select, .bulk-actions input, .bulk-actions select,
+    .edit-form input, .edit-form select, .login-card input, .login-card select {
+      width: 100%;
+      height: 40px;
+      min-height: 40px;
+      padding: 0 11px;
+      line-height: 38px;
+    }
+    input[type="date"], select { line-height: normal; }
+    input[type="file"] { width: 100%; height: 40px; padding: 4px 7px; border: 1px solid #c9d6e1; border-radius: 11px; background: #fbfdff; }
+    input[type="file"]::file-selector-button { height: 30px; margin-right: 10px; padding: 0 11px; border: 0; border-radius: 8px; color: #2d4962; background: #e7eef4; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
     textarea { min-height: 142px; padding: 15px 16px; border-width: 1px; font-size: 16px; }
     textarea:focus, .field input:focus, .field select:focus, .filters input:focus, .filters select:focus {
       border-color: #4c83ec;
@@ -399,8 +409,8 @@
       box-shadow: 0 0 0 4px rgba(36, 107, 253, .09);
     }
     .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
-    .field input, .field select { min-height: 46px; }
-    .location-tools button { min-height: 36px; border-radius: 9px; }
+    .field input, .field select { min-height: 40px; }
+    .location-tools button { min-height: 32px; padding-block: 5px; border-radius: 9px; }
     .photo-picker {
       align-items: center;
       margin-top: 18px;
@@ -448,20 +458,38 @@
     .history-head h2 { color: var(--navy); font-size: 22px; }
     .data-actions { margin-top: 18px; }
     .filters { grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(130px, 170px)); gap: 10px; margin-top: 16px; }
-    .filters input, .filters select { min-height: 44px; }
+    .filters input, .filters select { min-height: 40px; }
     .bulk-actions { border-radius: 13px; background: #f3f7fa; }
-    .table-wrap { margin-top: 18px; overflow-x: auto; border: 1px solid #e0e8ef; border-radius: 14px; }
-    table { background: white; }
+    .table-wrap { margin-top: 18px; overflow-x: hidden; border: 1px solid #e0e8ef; border-radius: 14px; }
+    .history table { width: 100%; min-width: 0; table-layout: fixed; background: white; }
     thead { background: #f3f7fa; }
     th { color: #52687c; font-size: 12px; letter-spacing: .02em; }
     th, td { padding: 12px 9px; border-color: #e7edf2; }
     tbody tr { transition: background .15s ease; }
     tbody tr:hover { background: #f8fbfd; }
+    .history th, .history td { min-width: 0; max-width: none; vertical-align: middle; text-align: center; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+    .history .record-select-column { width: 4%; }
+    .history .record-case-column { width: 15%; }
+    .history .record-issue-column { width: 25%; }
+    .history .record-class-column { width: 15%; }
+    .history .record-disposal-column { width: 13%; }
+    .history .record-time-column { width: 14%; }
+    .history .record-action-column { width: 14%; }
+    .record-case, .record-stack { display: grid; align-content: center; justify-items: center; gap: 6px; }
+    .record-case .photo-thumb { width: 64px; height: 52px; }
+    .record-number { color: var(--navy); font-size: 12px; line-height: 1.4; }
+    .record-summary { display: block; color: #263d52; font-size: 13px; line-height: 1.55; }
+    .record-location { margin-top: 7px; color: #6a7d8f; font-size: 12px; line-height: 1.45; }
+    .record-stack strong { color: #30485d; font-size: 13px; }
+    .record-stack small { color: #758798; font-size: 11px; line-height: 1.4; }
+    .record-meta-label { display: block; margin-bottom: 2px; color: #8a9aaa; font-size: 10px; font-weight: 700; }
+    .priority-chip { display: inline-flex; padding: 3px 7px; border-radius: 999px; color: #5f5142; background: #f3eee8; font-size: 11px; font-weight: 800; }
     .photo-thumb { border-radius: 10px; box-shadow: 0 3px 10px rgba(16, 42, 67, .1); }
     .status-chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; color: #855307; background: #fff2d7; font-size: 12px; font-weight: 800; white-space: nowrap; }
     .status-chip[data-status="处理中"] { color: #1856a6; background: #e7f0ff; }
     .status-chip[data-status="已完成"] { color: #08705f; background: #e3f5ef; }
-    .row-actions { flex-wrap: wrap; }
+    .row-actions { display: grid; grid-template-columns: 1fr 1fr; justify-content: center; gap: 6px; }
+    .row-actions .delete:last-child { grid-column: 1 / -1; }
     .row-actions button, .data-actions button { min-height: 36px; }
     dialog { max-height: min(92dvh, 900px); overflow-y: auto; border-radius: 20px; }
     .login-screen {
@@ -496,10 +524,213 @@
     .login-card { width: auto; padding: 44px 42px; border: 0; border-radius: 0; box-shadow: none; }
     .login-card h1 { color: var(--navy); font-size: 27px; }
     .login-card > p:first-of-type { margin-top: 5px; }
-    .login-card input { min-height: 46px; }
+    .login-card input { min-height: 40px; }
     .login-actions { grid-template-columns: 1fr 1fr; }
     .login-actions button:first-child { grid-column: 1 / -1; }
     .demo-tip { border: 1px solid #e0e8ef; background: #f6f9fb; }
+    /* Product polish: identity, work surfaces and modal system */
+    .app-hero { isolation: isolate; }
+    .app-hero::before {
+      position: absolute;
+      z-index: -1;
+      width: 420px;
+      height: 420px;
+      left: 38%;
+      bottom: -350px;
+      border: 70px solid rgba(255, 255, 255, .035);
+      border-radius: 50%;
+      content: "";
+    }
+    .account-bar { width: min(390px, 100%); padding: 12px; }
+    .account-info { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; }
+    .account-avatar {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .24);
+      border-radius: 13px;
+      color: #dffbf5;
+      background: linear-gradient(145deg, rgba(255,255,255,.19), rgba(255,255,255,.07));
+      font-size: 17px;
+      font-weight: 800;
+      box-shadow: inset 0 1px rgba(255,255,255,.16);
+    }
+    .account-copy { min-width: 0; }
+    .account-heading { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+    .account-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .account-bar .role-badge { flex: none; padding: 3px 7px; font-size: 10px; letter-spacing: .04em; }
+    .cloud-note { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin: 3px 0 0; color: rgba(255,255,255,.74); font-size: 11px; }
+    .cloud-note span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .online-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #65e3bd; box-shadow: 0 0 0 3px rgba(101,227,189,.12); }
+    .account-bar .actions { gap: 7px; }
+    .account-bar .actions button { min-height: 30px; padding: 4px 10px; }
+    .surface, .results, .history, .chart-card, .stat { backdrop-filter: blur(14px); }
+    .entry-card, .results, .history { position: relative; overflow: hidden; }
+    .entry-card::before, .results::before, .history::before {
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, #246bfd, #0d8b78 70%, transparent);
+      content: "";
+    }
+    .entry-card > label { display: flex; align-items: center; gap: 8px; }
+    .entry-card > label::before { width: 4px; height: 14px; border-radius: 999px; background: var(--blue); content: ""; }
+    .field label { color: #40566a; font-size: 13px; }
+    .photo-picker { position: relative; background: linear-gradient(135deg, #f7fafc, #eef5fa); }
+    .photo-picker::after { position: absolute; right: 16px; top: 12px; color: #8ca0b2; font-size: 11px; font-weight: 700; letter-spacing: .08em; content: "PHOTO"; }
+    .entry-card > .actions { gap: 9px; padding-top: 18px; border-top: 1px solid #e7edf2; }
+    .results .row { align-items: center; }
+    .results .value { padding: 5px 8px; border-radius: 8px; background: rgba(237,243,248,.72); }
+    .stats .stat { transition: transform .18s ease, box-shadow .18s ease; }
+    .stats .stat:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(28,55,80,.1); }
+    .chart-card { background: linear-gradient(160deg, rgba(255,255,255,.98), rgba(247,250,252,.94)); }
+    .history-head::before {
+      display: grid;
+      flex: none;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      margin-right: 2px;
+      border-radius: 11px;
+      color: #2360c6;
+      background: #e9f1ff;
+      content: "册";
+      font-weight: 800;
+    }
+    .history-head { justify-content: flex-start; }
+    .history-head #export { margin-left: auto; }
+    .data-actions { padding: 12px; border: 1px solid #e1e8ef; border-radius: 13px; background: #f8fafc; }
+    .filters { padding: 12px; border: 1px solid #e1e8ef; border-radius: 13px; background: #f5f8fa; }
+    .table-wrap { scrollbar-color: #aebfcd #edf2f5; scrollbar-width: thin; }
+    .table-wrap::-webkit-scrollbar { height: 10px; }
+    .table-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #edf2f5; }
+    .table-wrap::-webkit-scrollbar-thumb { border: 2px solid #edf2f5; border-radius: 999px; background: #aebfcd; }
+    .history thead { position: sticky; top: 0; z-index: 2; }
+    .history tbody tr:nth-child(even) { background: #fbfcfd; }
+    .history tbody tr:hover { background: #f1f6fb; }
+    .empty { padding: 38px 18px; }
+    #notice:not(:empty) {
+      position: fixed;
+      z-index: 40;
+      left: 50%;
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      max-width: min(560px, calc(100vw - 28px));
+      min-height: auto;
+      margin: 0;
+      padding: 11px 16px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      color: white;
+      background: rgba(16,42,67,.94);
+      box-shadow: 0 14px 38px rgba(16,42,67,.26);
+      transform: translateX(-50%);
+      backdrop-filter: blur(14px);
+    }
+    .login-brand { display: flex; flex-direction: column; }
+    .login-brand > p { line-height: 1.8; }
+    .login-highlights { display: grid; gap: 10px; margin-top: 26px; }
+    .login-highlights span { display: flex; align-items: center; gap: 9px; color: rgba(255,255,255,.82); font-size: 13px; }
+    .login-highlights span::before { width: 7px; height: 7px; border: 2px solid #7de2cb; border-radius: 50%; content: ""; }
+    .login-card label { color: #40566a; font-size: 13px; }
+    .login-card input { background: #f8fafc; }
+    .login-card input:focus { border-color: #4c83ec; background: white; box-shadow: 0 0 0 4px rgba(36,107,253,.09); }
+    .login-card button:first-child { box-shadow: 0 10px 22px rgba(36,107,253,.2); }
+
+    dialog.app-dialog {
+      width: min(760px, calc(100vw - 32px));
+      max-height: min(90dvh, 900px);
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(208,220,229,.9);
+      border-radius: 22px;
+      color: var(--ink);
+      background: #f7f9fb;
+      box-shadow: 0 34px 100px rgba(10,31,48,.34);
+    }
+    dialog.app-dialog[open] { display: flex; flex-direction: column; }
+    dialog.app-dialog[open] { animation: dialog-enter .2s ease-out; }
+    dialog.app-dialog::backdrop { background: rgba(11,29,44,.67); backdrop-filter: blur(7px); }
+    .wide-dialog { width: min(1040px, calc(100vw - 32px)) !important; }
+    .compact-dialog { width: min(500px, calc(100vw - 32px)) !important; }
+    .report-dialog { width: min(680px, calc(100vw - 32px)) !important; }
+    .dialog-header {
+      position: relative;
+      flex: none;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 24px 19px;
+      border-bottom: 1px solid #e0e8ee;
+      background: linear-gradient(145deg, #ffffff, #f2f6f8);
+    }
+    .dialog-header::before { position: absolute; inset: 0 auto 0 0; width: 4px; background: linear-gradient(#246bfd, #0d8b78); content: ""; }
+    .dialog-header h2 { margin: 2px 0 0; color: var(--navy); font-size: 22px; letter-spacing: -.02em; }
+    .dialog-header p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .dialog-kicker { color: #2477a6; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+    .dialog-close {
+      flex: none;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      min-height: 34px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid #dbe4eb;
+      border-radius: 10px;
+      color: #5d7184;
+      background: white;
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 1;
+    }
+    .dialog-close:hover { color: #b42318; background: #fff2f0; }
+    .dialog-body { padding: 22px 24px; overflow-y: auto; }
+    form.dialog-body { display: grid; }
+    .dialog-footer, .app-dialog > .edit-form > .dialog-actions {
+      flex: none;
+      margin: 0;
+      padding: 15px 24px;
+      border-top: 1px solid #e0e8ee;
+      background: white;
+    }
+    .app-dialog .edit-form { min-height: 0; overflow: hidden; }
+    .app-dialog .edit-form-grid.dialog-body { min-height: 0; overflow-y: auto; }
+    .app-dialog label { color: #40566a; font-size: 13px; }
+    .app-dialog input:not([type="file"]), .app-dialog select { height: 40px; min-height: 40px; }
+    .app-dialog textarea { min-height: 94px; border-color: #c9d6e1; }
+    .app-dialog input:disabled, .app-dialog textarea:disabled, .app-dialog select:disabled { color: #6f8091; background: #edf1f4; cursor: not-allowed; }
+    .dialog-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e1e8ee; }
+    .dialog-section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .dialog-section-title span { color: var(--navy); font-size: 16px; font-weight: 800; }
+    .dialog-section-title small { color: #8393a2; }
+    .detail-grid { gap: 12px; padding: 0; }
+    .detail-item { min-height: 78px; padding: 13px 14px; border: 1px solid #e0e8ee; border-radius: 12px; background: white; }
+    .detail-item span { color: #708294; font-weight: 700; }
+    .detail-item strong { color: #263d52; line-height: 1.55; }
+    .evidence-gallery { margin-top: 0; }
+    .evidence-card { border-radius: 13px; box-shadow: 0 6px 16px rgba(28,55,80,.05); }
+    .timeline { gap: 10px; margin-bottom: 0; border-left-color: #c8dae9; }
+    .timeline-item { border: 1px solid #e1e8ee; background: white; }
+    .timeline-item::before { background: var(--teal); }
+    .photo-dialog { width: min(1120px, calc(100vw - 32px)) !important; background: #0e1d29 !important; }
+    .photo-dialog .dialog-header { border-color: rgba(255,255,255,.09); color: white; background: #132737; }
+    .photo-dialog .dialog-header h2 { color: white; }
+    .photo-dialog .dialog-close { border-color: rgba(255,255,255,.12); color: white; background: rgba(255,255,255,.08); }
+    .photo-stage { display: grid; min-height: 280px; padding: 18px; place-items: center; overflow: auto; background: radial-gradient(circle, #1d3547, #0d1a24 65%); }
+    .photo-stage img { width: auto; max-width: 100%; max-height: calc(90dvh - 110px); border-radius: 12px; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+    .dialog-table { margin: 0; border-radius: 13px; }
+    .dialog-table table { min-width: 700px; table-layout: auto; }
+    .dialog-table th, .dialog-table td { width: auto !important; min-width: 110px; max-width: 260px; vertical-align: middle; text-align: center; }
+    .dialog-table input, .dialog-table select { width: 100%; }
+    .dialog-table tbody tr:hover { background: #f4f8fb; }
+    .evidence-picker { border-color: #bad1df; border-radius: 12px; background: #f3f8fb; }
+    .compact-dialog .dialog-actions { margin: 8px -24px -22px; padding: 15px 24px; }
+    @keyframes dialog-enter {
+      from { opacity: 0; transform: translateY(12px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     @media (max-width: 1100px) {
       .workspace { grid-template-columns: 1fr; }
       .results { position: static; }
@@ -507,6 +738,30 @@
       .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard .chart-card:first-child { grid-column: 1 / -1; min-height: auto; }
       .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .app-hero { grid-template-columns: auto minmax(0, 1fr); }
+      .account-bar { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; align-items: center; justify-items: stretch; width: 100%; }
+      .account-info { justify-content: flex-start; text-align: left; }
+      .account-heading, .cloud-note { justify-content: flex-start; }
+    }
+    @media (max-width: 900px) {
+      .history .table-wrap { overflow: visible; border: 0; background: transparent; }
+      .history table, .history tbody, .history tr, .history td { display: block; width: 100%; }
+      .history td { width: 100% !important; }
+      .history table { min-width: 0; background: transparent; }
+      .history thead { display: none; }
+      .history tbody { display: grid; gap: 12px; }
+      .history tr { position: relative; overflow: hidden; padding: 10px 14px 14px; border: 1px solid #dce5ed; border-radius: 15px; background: white; box-shadow: 0 8px 22px rgba(28, 55, 80, .06); }
+      .history td { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e4ebf0; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+      .history td::before { color: #6a7c8e; font-size: 12px; font-weight: 700; content: attr(data-label); }
+      .history td[data-label="案件"] { padding-top: 4px; }
+      .history td[data-label="操作"] { display: block; padding: 12px 0 0; border: 0; }
+      .history td[data-label="操作"]::before { display: none; }
+      .history .record-case, .history .record-stack { align-content: start; justify-items: start; text-align: left; }
+      .history .record-case { grid-template-columns: auto minmax(0, 1fr); align-items: center; }
+      .history .record-location { text-align: left; }
+      .history .row-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .history .row-actions button { width: 100%; min-height: 40px; }
+      .history .row-actions .delete:last-child { grid-column: auto; }
     }
     @media (max-width: 720px) {
       main { padding: 12px 12px calc(34px + env(safe-area-inset-bottom)); }
@@ -514,11 +769,11 @@
       .brand-mark { width: 50px; height: 50px; border-radius: 14px; font-size: 21px; }
       .app-hero h1 { font-size: 25px; }
       .app-hero .intro { font-size: 13px; }
-      .hero-status { display: none; }
-      .account-bar { align-items: stretch; margin-bottom: 10px; padding: 13px; }
+      .account-bar { grid-template-columns: 1fr; align-items: stretch; padding: 11px 12px; }
       .account-info { align-items: flex-start; }
       .account-info strong { white-space: normal; }
-      .account-bar .actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+      .account-bar .role-note { max-width: 100%; text-align: left; }
+      .account-bar .actions { display: flex; width: 100%; }
       .account-bar .actions button:only-child { grid-column: 1 / -1; }
       .install-card { margin-bottom: 10px; }
       .workspace { gap: 12px; }
@@ -531,7 +786,7 @@
       .photo-picker .field { flex-basis: 100%; }
       .entry-card > .actions { grid-template-columns: 1fr 1fr; gap: 9px; }
       .entry-card > .actions #save { grid-column: 1 / -1; grid-row: 1; }
-      .entry-card > .actions button { min-height: 48px; }
+      .entry-card > .actions button { min-height: 42px; }
       .results .row { grid-template-columns: 84px minmax(0, 1fr); }
       .overview-heading { margin: 26px 4px 11px; }
       .stats { grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -546,20 +801,28 @@
       .filters, .bulk-actions { grid-template-columns: 1fr; }
       .table-wrap { overflow: visible; border: 0; background: transparent; }
       .history table, .history tbody, .history tr, .history td { display: block; width: 100%; }
+      .history td { width: 100% !important; }
       .history table { min-width: 0; background: transparent; }
       .history thead { display: none; }
       .history tbody { display: grid; gap: 12px; }
       .history tr { position: relative; overflow: hidden; padding: 10px 14px 14px; border: 1px solid #dce5ed; border-radius: 15px; background: white; box-shadow: 0 8px 22px rgba(28, 55, 80, .06); }
-      .history td { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px dashed #e4ebf0; white-space: normal; overflow-wrap: anywhere; }
+      .history td { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px dashed #e4ebf0; text-align: left; white-space: normal; overflow-wrap: anywhere; }
       .history td::before { color: #6a7c8e; font-size: 12px; font-weight: 700; content: attr(data-label); }
-      .history td[data-label="问题编号"] { padding-top: 4px; color: var(--navy); font-size: 15px; font-weight: 800; }
-      .history td[data-label="现场照片"] .photo-thumb { width: 84px; height: 66px; }
+      .history td[data-label="案件"] { padding-top: 4px; color: var(--navy); font-size: 15px; font-weight: 800; }
+      .history td[data-label="案件"] .photo-thumb { width: 84px; height: 66px; }
       .history td[data-label="操作"] { display: block; padding: 12px 0 0; border: 0; }
       .history td[data-label="操作"]::before { display: none; }
       .history td[data-label="选择"] { grid-template-columns: 86px 1fr; }
       .row-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
       .row-actions button { width: 100%; min-height: 40px; }
-      dialog { width: calc(100vw - 16px); max-height: 92dvh; padding: 14px; border-radius: 16px; }
+      dialog.app-dialog { width: calc(100vw - 16px) !important; max-height: 94dvh; border-radius: 17px; }
+      .dialog-header { padding: 18px 17px 15px; }
+      .dialog-header h2 { font-size: 19px; }
+      .dialog-body { padding: 17px; }
+      .dialog-footer, .app-dialog > .edit-form > .dialog-actions { padding: 13px 17px; }
+      .compact-dialog .dialog-actions { margin: 8px -17px -17px; padding: 13px 17px; }
+      .dialog-table { overflow-x: auto; border: 1px solid #e0e8ee; }
+      .photo-stage { padding: 10px; }
       .detail-grid, .edit-form-grid { grid-template-columns: 1fr; }
       .edit-form .full { grid-column: auto; }
       .login-screen { align-items: start; overflow-y: auto; padding: 12px; }
@@ -576,10 +839,13 @@
     @media (max-width: 390px) {
       .app-hero { grid-template-columns: 1fr; }
       .app-hero .brand-mark { display: none; }
+      .account-bar { grid-column: auto; }
       .results .row { grid-template-columns: 76px minmax(0, 1fr); }
       .data-actions, .entry-card > .actions { grid-template-columns: 1fr; }
       .entry-card > .actions #save, .data-actions button:last-of-type { grid-column: auto; }
-      .row-actions { grid-template-columns: 1fr 1fr; }
+      .history td { grid-template-columns: 78px minmax(0, 1fr); }
+      .history .row-actions { grid-template-columns: 1fr 1fr; }
+      .history .row-actions .delete:last-child { grid-column: 1 / -1; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -610,6 +876,7 @@
         <div class="brand-mark" aria-hidden="true">巡</div>
         <h2>让城市问题处置更清晰</h2>
         <p>现场发现、智能研判、协同派单与进度追踪，一处完成。</p>
+        <div class="login-highlights"><span>AI 辅助研判现场问题</span><span>任务派发与处置留痕</span><span>移动端随时采集上报</span></div>
       </aside>
       <form class="login-card" id="loginForm">
         <h1>欢迎使用巡查助手</h1>
@@ -630,15 +897,18 @@
     <header class="app-hero">
       <div class="brand-mark" aria-hidden="true">巡</div>
       <div class="hero-copy"><span class="eyebrow">CITY INSPECTION</span><h1>城市巡查 AI 助手</h1><p class="intro">记录现场问题，获得智能研判建议，并持续跟踪处置进度。</p></div>
-      <span class="hero-status">AI 智能辅助</span>
+      <section class="account-bar" id="accountBar" aria-label="当前登录人员" hidden>
+        <div class="account-info">
+          <span class="account-avatar" id="profileAvatar" aria-hidden="true">巡</span>
+          <div class="account-copy">
+            <div class="account-heading"><strong id="currentUserName"></strong><span class="role-badge" id="roleBadge"></span></div>
+            <p class="role-note" id="roleNote"></p>
+            <p class="cloud-note"><span class="online-dot" aria-hidden="true"></span><span id="cloudStatus"></span></p>
+          </div>
+        </div>
+        <div class="actions"><button id="manageUsers" type="button" hidden>人员管理</button><button id="logout" type="button">退出</button></div>
+      </section>
     </header>
-    <section class="account-bar" id="accountBar" hidden>
-      <div class="account-info">
-        <span class="role-badge" id="roleBadge"></span>
-        <div><strong id="currentUserName"></strong><p class="role-note" id="roleNote"></p><p class="role-note" id="cloudStatus"></p></div>
-      </div>
-      <div class="actions"><button class="secondary" id="manageUsers" type="button" hidden>人员管理</button><button id="logout" type="button">退出登录</button></div>
-    </section>
     <aside class="install-card" id="installCard" hidden>
       <p id="installText">把巡查助手安装到桌面，打开更方便，并可在无网络时使用已缓存的页面。</p>
       <button id="installApp" type="button" hidden>安装应用</button>
@@ -791,7 +1061,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th class="no-print admin-only"><input id="selectAll" type="checkbox" aria-label="选择当前筛选结果中的全部记录"></th><th>问题编号</th><th>现场照片</th><th>问题描述</th><th>发现地点</th><th>问题类型</th><th>处理部门</th><th>优先级</th><th>负责人</th><th>处置状态</th><th>完成期限</th><th>更新时间</th><th class="no-print">操作</th></tr></thead>
+          <thead><tr><th class="no-print admin-only record-select-column"><input id="selectAll" type="checkbox" aria-label="选择当前筛选结果中的全部记录"></th><th class="record-case-column">案件</th><th class="record-issue-column">问题信息</th><th class="record-class-column">分类研判</th><th class="record-disposal-column">处置情况</th><th class="record-time-column">时间节点</th><th class="no-print record-action-column">操作</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
         <div class="empty" id="empty">暂时没有保存的记录</div>
@@ -799,41 +1069,38 @@
       <div class="report-signatures print-signatures"><div>编制人：<span id="reportOutputAuthor"></span></div><div>复核人：</div><div>日期：</div></div>
     </section>
   </main>
-  <dialog id="photoDialog">
-    <img id="photoLarge" alt="现场照片大图">
-    <div class="dialog-actions"><button class="secondary" id="closePhoto" type="button">关闭</button></div>
+  <dialog class="app-dialog photo-dialog" id="photoDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">现场取证</span><h2>现场照片</h2></div><button class="dialog-close" id="closePhoto" type="button" aria-label="关闭现场照片">×</button></header>
+    <div class="photo-stage"><img id="photoLarge" alt="现场照片大图"></div>
   </dialog>
-  <dialog id="userDialog">
-    <h2>人员管理</h2>
-    <p class="intro">管理已注册账号的部门、角色和在岗状态。停用后不会出现在派单名单中。</p>
-    <div class="table-wrap"><table><thead><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userRows"></tbody></table></div>
-    <div class="dialog-actions"><button class="secondary" id="closeUsers" type="button">关闭</button></div>
+  <dialog class="app-dialog wide-dialog" id="userDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">组织与权限</span><h2>人员管理</h2><p>维护部门、角色与在岗状态，确保派单范围准确。</p></div><button class="dialog-close" id="closeUsers" type="button" aria-label="关闭人员管理">×</button></header>
+    <div class="dialog-body"><div class="table-wrap dialog-table"><table><thead><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
   </dialog>
-  <dialog id="passwordResetDialog">
-    <h2>设置新密码</h2>
-    <form class="edit-form" id="passwordResetForm">
+  <dialog class="app-dialog compact-dialog" id="passwordResetDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">账户安全</span><h2>设置新密码</h2><p>请使用至少 6 位且不易猜测的新密码。</p></div></header>
+    <form class="edit-form dialog-body" id="passwordResetForm">
       <label for="newPassword">新密码</label>
       <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="至少 6 位密码">
       <label for="confirmPassword">确认新密码</label>
       <input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="再次输入新密码">
       <p class="notice" id="passwordResetError" aria-live="polite"></p>
-      <div class="dialog-actions"><button class="primary" type="submit">保存新密码</button></div>
+      <div class="dialog-actions"><button class="secondary" id="cancelPasswordReset" type="button">暂不修改</button><button class="primary" type="submit">保存新密码</button></div>
     </form>
   </dialog>
   <datalist id="ownerOptions"></datalist>
-  <dialog id="detailDialog">
-    <h2 id="detailTitle">巡查问题详情</h2>
-    <div id="detailContent"></div>
-    <h3>整改凭证照片</h3>
-    <div class="evidence-gallery" id="detailEvidence"></div>
-    <h3>处置时间线</h3>
-    <div class="timeline" id="detailTimeline"></div>
-    <div class="dialog-actions"><button class="secondary" id="closeDetail" type="button">关闭</button></div>
+  <dialog class="app-dialog wide-dialog" id="detailDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">案件全景</span><h2 id="detailTitle">巡查问题详情</h2><p>查看案件信息、整改证据与完整处置过程。</p></div><button class="dialog-close" id="closeDetail" type="button" aria-label="关闭巡查问题详情">×</button></header>
+    <div class="dialog-body">
+      <div id="detailContent"></div>
+      <section class="dialog-section"><div class="dialog-section-title"><span>整改凭证</span><small>现场处置照片</small></div><div class="evidence-gallery" id="detailEvidence"></div></section>
+      <section class="dialog-section"><div class="dialog-section-title"><span>处置时间线</span><small>按时间倒序展示</small></div><div class="timeline" id="detailTimeline"></div></section>
+    </div>
   </dialog>
-  <dialog id="editDialog">
-    <h2>编辑巡查记录</h2>
+  <dialog class="app-dialog wide-dialog" id="editDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">协同处置</span><h2>编辑巡查记录</h2><p>更新负责人、期限、处置状态并补充整改证据。</p></div></header>
     <form class="edit-form" id="editForm">
-      <div class="edit-form-grid">
+      <div class="edit-form-grid dialog-body">
         <div class="full">
           <label for="editDescription">问题描述</label>
           <textarea id="editDescription" required></textarea>
@@ -872,22 +1139,21 @@
           <div class="evidence-preview" id="editEvidencePreview"></div>
         </div>
       </div>
-      <div class="dialog-actions">
+      <div class="dialog-actions dialog-footer">
         <button class="secondary" id="cancelEdit" type="button">取消</button>
         <button class="primary" type="submit">保存修改</button>
       </div>
     </form>
   </dialog>
-  <dialog id="reportDialog">
-    <h2>生成规范巡查报告</h2>
+  <dialog class="app-dialog report-dialog" id="reportDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">汇总输出</span><h2>生成规范巡查报告</h2><p>基于当前搜索和筛选结果生成可打印的正式报告。</p></div></header>
     <form class="edit-form" id="reportForm">
-      <div class="edit-form-grid">
+      <div class="edit-form-grid dialog-body">
         <div class="full"><label for="reportTitle">报告名称</label><input id="reportTitle" value="城市巡查工作报告" required></div>
         <div><label for="reportUnit">单位名称</label><input id="reportUnit" placeholder="例如：某某城市运营有限公司"></div>
         <div><label for="reportAuthor">编制人</label><input id="reportAuthor" placeholder="例如：张三"></div>
       </div>
-      <p class="intro">报告将使用当前搜索和筛选结果，并自动生成统计、周期和签字栏。</p>
-      <div class="dialog-actions"><button class="secondary" id="cancelReport" type="button">取消</button><button class="primary" type="submit">预览并打印</button></div>
+      <div class="dialog-actions dialog-footer"><button class="secondary" id="cancelReport" type="button">取消</button><button class="primary" type="submit">预览并打印</button></div>
     </form>
   </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -968,6 +1234,7 @@
     const passwordResetError = document.querySelector('#passwordResetError');
     const accountBar = document.querySelector('#accountBar');
     const currentUserName = document.querySelector('#currentUserName');
+    const profileAvatar = document.querySelector('#profileAvatar');
     const roleBadge = document.querySelector('#roleBadge');
     const roleNote = document.querySelector('#roleNote');
     const cloudStatus = document.querySelector('#cloudStatus');
@@ -989,9 +1256,11 @@
     function showLoggedInState(user) {
       currentIsAdmin = user.role === '管理员';
       currentUserName.textContent = user.name;
+      profileAvatar.textContent = (user.name || user.role || '巡').trim().slice(0, 1).toUpperCase();
       roleBadge.textContent = user.role;
       roleNote.textContent = user.note;
-      cloudStatus.textContent = '';
+      cloudStatus.textContent = '正在连接云端…';
+      cloudStatus.title = '';
       accountBar.hidden = false;
       manageUsersButton.hidden = !currentIsAdmin;
       document.querySelectorAll('.admin-only').forEach(element => { element.hidden = !currentIsAdmin; });
@@ -1002,6 +1271,7 @@
       currentIsAdmin = false;
       accountBar.hidden = true;
       cloudStatus.textContent = '';
+      cloudStatus.title = '';
       loginScreen.hidden = false;
       loginPassword.value = '';
       loginError.textContent = '';
@@ -1271,7 +1541,8 @@
       renderRecords();
       const { data: authData } = await supabaseClient.auth.getUser();
       const accountId = authData.user?.id || '';
-      cloudStatus.textContent = `云端同步：已加载 ${cloudRecords.length} 条任务 · ${authData.user?.email || '当前账号'} · 账号ID ${accountId.slice(0, 8)}…`;
+      cloudStatus.textContent = `已同步 ${cloudRecords.length} 条任务 · ${authData.user?.email || '当前账号'}`;
+      cloudStatus.title = accountId ? `当前账号 ID：${accountId}` : '';
       if (updatesError || attachmentsError) {
         const failedItems = [updatesError && '处置时间线', attachmentsError && '整改凭证'].filter(Boolean).join('、');
         showNotice(`任务已加载；${failedItems}暂未读取，请检查对应云端权限。`);
@@ -1609,19 +1880,13 @@
       empty.hidden = visibleRecords.length > 0;
       recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
-          <td data-label="选择" class="no-print admin-only" ${currentIsAdmin ? '' : 'hidden'}><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
-          <td data-label="问题编号">${escapeHtml(record.id || '历史记录')}</td>
-          <td data-label="现场照片">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '无'}</td>
-          <td data-label="问题描述">${escapeHtml(record.description)}</td>
-          <td data-label="发现地点">${renderLocation(record)}</td>
-          <td data-label="问题类型">${escapeHtml(record.type)}</td>
-          <td data-label="处理部门">${escapeHtml(record.department)}</td>
-          <td data-label="优先级">${escapeHtml(record.priority)}</td>
-          <td data-label="负责人">${escapeHtml(record.owner || '未指定')}</td>
-          <td data-label="处置状态"><span class="status-chip" data-status="${escapeHtml(record.status || '待派单')}">${escapeHtml(record.status || '待派单')}</span></td>
-          <td data-label="完成期限">${renderDeadline(record)}</td>
-          <td data-label="更新时间">${escapeHtml(record.updatedAt || record.time)}</td>
-          <td data-label="操作" class="no-print"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
+          <td data-label="选择" class="no-print admin-only record-select-column" ${currentIsAdmin ? '' : 'hidden'}><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
+          <td data-label="案件" class="record-case-column"><div class="record-case">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '<small>无现场照片</small>'}<strong class="record-number">${escapeHtml(record.id || '历史记录')}</strong></div></td>
+          <td data-label="问题信息" class="record-issue-column"><strong class="record-summary">${escapeHtml(record.description)}</strong><div class="record-location">${renderLocation(record)}</div></td>
+          <td data-label="分类研判" class="record-class-column"><div class="record-stack"><strong>${escapeHtml(record.type || '其他问题')}</strong><small>${escapeHtml(record.department || '待研判部门')}</small><span class="priority-chip">${escapeHtml(record.priority || '普通')}</span></div></td>
+          <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(record.status || '待派单')}">${escapeHtml(record.status || '待派单')}</span></div></td>
+          <td data-label="时间节点" class="record-time-column"><div class="record-stack"><div><span class="record-meta-label">完成期限</span>${renderDeadline(record)}</div><small><span class="record-meta-label">最近更新</span>${escapeHtml(record.updatedAt || record.time || '暂无')}</small></div></td>
+          <td data-label="操作" class="no-print record-action-column"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
         </tr>`).join('');
       updateSelectionSummary();
     }
@@ -1673,16 +1938,38 @@
       const button = document.querySelector('#getLocation');
       button.disabled = true;
       setLocationStatus('正在定位…', 'loading');
-      navigator.geolocation.getCurrentPosition(position => {
+      navigator.geolocation.getCurrentPosition(async position => {
         currentCoordinates = {
           latitude: Number(position.coords.latitude.toFixed(6)),
           longitude: Number(position.coords.longitude.toFixed(6))
         };
-        if (!locationInput.value.trim() || /^当前位置（纬度 -?\d+(?:\.\d+)?，经度 -?\d+(?:\.\d+)?）$/.test(locationInput.value.trim())) {
-          locationInput.value = `当前位置（纬度 ${currentCoordinates.latitude}，经度 ${currentCoordinates.longitude}）`;
+        setLocationStatus('定位成功，正在识别道路名称…', 'loading');
+        try {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          const accessToken = sessionData.session?.access_token;
+          if (!accessToken) throw new Error('登录状态已失效');
+          const response = await fetch('/api/reverse-geocode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+            body: JSON.stringify(currentCoordinates)
+          });
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(payload.error || '道路名称查询失败');
+          if (payload.address) locationInput.value = payload.address;
+          if (payload.resolved) {
+            setLocationStatus(`定位成功：${payload.road}`, 'success');
+          } else {
+            if (!locationInput.value.trim()) locationInput.value = '当前位置（请补充道路名称）';
+            setLocationStatus('定位成功，但未识别到道路名称，请核对地点', 'loading');
+          }
+        } catch (error) {
+          if (!locationInput.value.trim() || /^当前位置（纬度 -?\d+(?:\.\d+)?，经度 -?\d+(?:\.\d+)?）$/.test(locationInput.value.trim())) {
+            locationInput.value = '当前位置（请补充道路名称）';
+          }
+          setLocationStatus(`定位成功，但道路名称获取失败：${error.message}`, 'error');
+        } finally {
+          button.disabled = false;
         }
-        setLocationStatus('定位成功，地点已填入', 'success');
-        button.disabled = false;
       }, error => {
         currentCoordinates = null;
         button.disabled = false;
@@ -2243,6 +2530,13 @@
       passwordResetDialog.close();
       passwordResetError.textContent = '';
       showNotice('密码已更新，请使用新密码登录。');
+    });
+
+    document.querySelector('#cancelPasswordReset').addEventListener('click', () => {
+      newPassword.value = '';
+      confirmPassword.value = '';
+      passwordResetError.textContent = '';
+      passwordResetDialog.close();
     });
 
     document.querySelector('#logout').addEventListener('click', () => {
