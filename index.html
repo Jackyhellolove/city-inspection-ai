@@ -191,8 +191,6 @@
     .install-card button { flex: none; padding: 8px 12px; color: white; background: #1769e0; }
     .account-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: -8px 0 22px; padding: 12px 14px; border: 1px solid #dce6f3; border-radius: 12px; background: #f8fbff; }
     .account-bar[hidden], .login-screen[hidden] { display: none; }
-    .account-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .account-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .role-badge { display: inline-block; padding: 4px 9px; border-radius: 999px; color: #1557a6; background: #e7f0ff; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .role-note { margin: 4px 0 0; color: #69758a; font-size: 13px; }
     .account-bar button { flex: none; padding: 8px 12px; color: #34425a; background: #edf2f8; }
@@ -296,7 +294,7 @@
     .app-hero {
       position: relative;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) minmax(260px, auto);
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
       gap: 20px;
       overflow: hidden;
@@ -346,37 +344,45 @@
     .app-hero h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; }
     .app-hero .intro { max-width: 720px; margin: 7px 0 0; color: rgba(255, 255, 255, .75); font-size: 15px; }
     .account-bar {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      justify-items: end;
-      gap: 10px;
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      z-index: 5;
+      display: block;
+      justify-self: end;
       margin: 0;
-      padding: 13px 14px;
-      border: 1px solid rgba(255, 255, 255, .2);
-      border-radius: 16px;
+      padding: 0;
+      border: 0;
       color: white;
-      background: rgba(255, 255, 255, .1);
-      box-shadow: inset 0 1px rgba(255, 255, 255, .08);
-      backdrop-filter: blur(10px);
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
     }
     .account-bar[hidden] { display: none; }
-    .account-info { justify-content: flex-end; width: 100%; gap: 10px; text-align: right; }
-    .account-info > div { min-width: 0; }
-    .account-info strong { display: block; color: white; }
-    .role-badge { padding: 5px 9px; color: #dffaf5; background: rgba(223, 250, 245, .13); }
-    .account-bar .role-note { max-width: 320px; margin-top: 1px; overflow: hidden; color: rgba(255, 255, 255, .7); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-    .account-bar .actions { justify-content: flex-end; margin: 0; }
-    .account-bar button { min-height: 34px; padding: 6px 11px; border: 1px solid rgba(255,255,255,.18); color: white; background: rgba(255,255,255,.12); font-size: 12px; }
-    .account-bar button:hover { background: rgba(255,255,255,.2); }
+    .account-bar .account-menu-trigger { display: flex; align-items: center; justify-content: flex-end; gap: 7px; min-height: 32px; padding: 3px 0; border: 0; border-radius: 0; color: white; background: transparent; box-shadow: none; cursor: pointer; appearance: none; -webkit-appearance: none; }
+    .account-bar .account-menu-trigger:hover, .account-bar .account-menu-trigger:active, .account-bar .account-menu-trigger[aria-expanded="true"] { color: white; background: transparent; box-shadow: none; }
+    .account-menu-trigger:focus-visible { outline: 2px solid rgba(255,255,255,.72); outline-offset: 2px; }
+    .account-menu-trigger strong { max-width: 150px; overflow: hidden; color: white; font-size: 14px; font-weight: 850; letter-spacing: .01em; text-decoration: underline; text-decoration-color: rgba(255,255,255,.34); text-underline-offset: 4px; text-overflow: ellipsis; white-space: nowrap; }
+    .account-menu-trigger:hover strong, .account-menu-trigger[aria-expanded="true"] strong { text-decoration-color: white; }
+    .role-badge { padding: 0; color: #aeeadf; background: transparent; font-weight: 800; }
+    .account-chevron { width: 7px; height: 7px; margin: -3px 2px 0 1px; border-right: 1.5px solid rgba(255,255,255,.78); border-bottom: 1.5px solid rgba(255,255,255,.78); transform: rotate(45deg); transition: transform .16s ease; }
+    .account-menu-trigger[aria-expanded="true"] .account-chevron { margin-top: 3px; transform: rotate(225deg); }
+    .account-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 218px; overflow: hidden; padding: 7px; border: 1px solid #dce5ec; border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.98); box-shadow: 0 18px 46px rgba(10,31,48,.22); backdrop-filter: blur(18px); }
+    .account-menu[hidden] { display: none; }
+    .account-menu-status { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px; padding: 9px 10px 10px; border-bottom: 1px solid #e8edf1; color: #6f8091; font-size: 11px; line-height: 1.45; }
+    .account-menu-status .online-dot { margin-top: 4px; }
+    .account-menu button { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 8px 10px; border: 0; border-radius: 9px; color: #30485d; background: transparent; box-shadow: none; font-size: 13px; text-align: left; }
+    .account-menu button:hover { color: #174f99; background: #eef4fb; }
+    .account-menu #logout { color: #a43d35; }
+    .account-menu #logout:hover { background: #fff1ef; }
     .install-card { margin: 0 0 14px; border-radius: 15px; background: #edf6ff; }
     .workspace {
       display: grid;
       grid-template-columns: minmax(0, 1.5fr) minmax(300px, .72fr);
-      align-items: start;
+      align-items: stretch;
       gap: 18px;
     }
-    .entry-card { padding: clamp(20px, 3vw, 30px); border-radius: 20px; }
+    .entry-card { height: 100%; padding: clamp(20px, 3vw, 30px); border-radius: 20px; }
     .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
     .section-heading h2 { margin: 0; color: var(--navy); font-size: 21px; letter-spacing: -.015em; }
     .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
@@ -413,7 +419,7 @@
     .location-tools button { min-height: 32px; padding-block: 5px; border-radius: 9px; }
     .photo-picker {
       align-items: center;
-      margin-top: 18px;
+      margin-top: 0;
       padding: 15px;
       border-color: #b9cbd8;
       border-radius: 14px;
@@ -422,22 +428,41 @@
     .photo-picker .field { flex: 1; min-width: 0; }
     .photo-picker input { max-width: 100%; }
     .photo-preview { width: 78px; height: 78px; border: 3px solid white; box-shadow: 0 4px 14px rgba(16, 42, 67, .12); }
-    .entry-card > .actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 20px 0 0; }
-    .entry-card > .actions button { padding-inline: 12px; }
     .results {
-      position: sticky;
-      top: 18px;
+      display: flex;
+      height: 100%;
+      flex-direction: column;
       padding: 24px;
       border-radius: 20px;
       background: linear-gradient(180deg, #ffffff, #f7fafc);
     }
     .results .section-heading { margin-bottom: 12px; }
+    .analysis-photo { margin: 4px 0 12px; }
+    .analysis-photo .photo-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 13px; }
+    .analysis-photo .photo-picker .field { min-width: 0; }
+    .analysis-photo .photo-preview { grid-column: 1 / -1; justify-self: center; width: min(100%, 220px); height: 128px; border-radius: 12px; object-fit: cover; }
+    .analysis-photo .photo-remove { min-height: 38px; padding: 7px 10px; }
+    .analysis-tools { margin: 0 0 8px; padding: 14px; border: 1px solid #d9e5ee; border-radius: 14px; background: linear-gradient(145deg, #f5f9fc, #edf4f8); }
+    .analysis-tools-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .analysis-tools-head strong { color: #30485d; font-size: 13px; }
+    .analysis-tools-head span { color: #8191a0; font-size: 11px; }
+    .analysis-actions { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px; }
+    .analysis-actions button { min-height: 40px; padding: 8px 10px; font-size: 13px; }
+    .analysis-actions #analyzePhoto { color: #096c5c; border: 1px solid #b8ded4; background: #e6f6f1; }
+    .analysis-actions #analyzePhoto:hover { background: #d8f0e9; }
     .results .row { grid-template-columns: minmax(72px, .6fr) minmax(0, 1fr); padding: 13px 0; border-bottom: 1px solid #e5ecf2; }
     .results .row:last-of-type { border-bottom: 0; }
     .results .name { color: var(--muted); font-size: 13px; }
     .results .value { color: var(--navy); }
     .ai-result { margin-top: 16px; padding: 16px; border-color: #a8d5cb; border-radius: 14px; background: var(--teal-soft); }
     .ai-result h3 { color: #08705f; }
+    .final-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 20px; border-radius: 17px; }
+    .final-actions-copy { min-width: 0; }
+    .final-actions-copy strong { display: block; color: var(--navy); font-size: 16px; }
+    .final-actions-copy p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .final-action-buttons { display: grid; flex: none; grid-template-columns: 120px 176px; gap: 9px; }
+    .final-action-buttons button { min-height: 42px; }
+    .final-action-buttons #save { font-weight: 800; }
     .notice { margin: 12px 2px 0; font-weight: 600; }
     .overview-heading { margin: 34px 2px 14px; }
     .stats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
@@ -550,30 +575,8 @@
       border-radius: 50%;
       content: "";
     }
-    .account-bar { width: min(390px, 100%); padding: 12px; }
-    .account-info { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; }
-    .account-avatar {
-      display: grid;
-      width: 44px;
-      height: 44px;
-      place-items: center;
-      border: 1px solid rgba(255, 255, 255, .24);
-      border-radius: 13px;
-      color: #dffbf5;
-      background: linear-gradient(145deg, rgba(255,255,255,.19), rgba(255,255,255,.07));
-      font-size: 17px;
-      font-weight: 800;
-      box-shadow: inset 0 1px rgba(255,255,255,.16);
-    }
-    .account-copy { min-width: 0; }
-    .account-heading { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-    .account-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .account-bar .role-badge { flex: none; padding: 3px 7px; font-size: 10px; letter-spacing: .04em; }
-    .cloud-note { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin: 3px 0 0; color: rgba(255,255,255,.74); font-size: 11px; }
-    .cloud-note span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .account-bar .role-badge { flex: none; padding: 0; font-size: 12px; letter-spacing: .04em; }
     .online-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #65e3bd; box-shadow: 0 0 0 3px rgba(101,227,189,.12); }
-    .account-bar .actions { gap: 7px; }
-    .account-bar .actions button { min-height: 30px; padding: 4px 10px; }
     .surface, .results, .history, .chart-card, .stat { backdrop-filter: blur(14px); }
     .entry-card, .results, .history { position: relative; overflow: hidden; }
     .entry-card::before, .results::before, .history::before {
@@ -608,8 +611,14 @@
       font-weight: 800;
     }
     .history-head { justify-content: flex-start; }
-    .history-head #export { margin-left: auto; }
-    .data-actions { padding: 12px; border: 1px solid #e1e8ef; border-radius: 13px; background: #f8fafc; }
+    .history-tools { display: flex; align-items: center; gap: 7px; margin: 0 0 0 auto; }
+    .history-tools button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 7px 11px; border: 1px solid #d8e3eb; border-radius: 10px; color: #40566a; background: #f8fafc; box-shadow: 0 2px 7px rgba(28,55,80,.04); font-size: 12px; font-weight: 750; white-space: nowrap; }
+    .history-tools button::before { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; color: #3d668c; background: #e7eef5; font-size: 11px; font-weight: 900; line-height: 1; }
+    .history-tools #backup::before { content: "↓"; }
+    .history-tools #restore::before { content: "↑"; }
+    .history-tools #printReport::before { content: "印"; }
+    .history-tools #export::before { content: "表"; }
+    .history-tools button:hover { color: #174f99; border-color: #bdcfdd; background: #eef4f8; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(28,55,80,.08); }
     .filters { padding: 12px; border: 1px solid #e1e8ef; border-radius: 13px; background: #f5f8fa; }
     .table-wrap { scrollbar-color: #aebfcd #edf2f5; scrollbar-width: thin; }
     .table-wrap::-webkit-scrollbar { height: 10px; }
@@ -742,15 +751,12 @@
     }
     @media (max-width: 1100px) {
       .workspace { grid-template-columns: 1fr; }
-      .results { position: static; }
+      .results { height: auto; }
       .stats { grid-template-columns: repeat(3, 1fr); }
       .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard .chart-card:first-child { grid-column: 1 / -1; min-height: auto; }
       .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .app-hero { grid-template-columns: auto minmax(0, 1fr); }
-      .account-bar { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; align-items: center; justify-items: stretch; width: 100%; }
-      .account-info { justify-content: flex-start; text-align: left; }
-      .account-heading, .cloud-note { justify-content: flex-start; }
     }
     @media (max-width: 900px) {
       .history .table-wrap { overflow: visible; border: 0; background: transparent; }
@@ -774,16 +780,12 @@
     }
     @media (max-width: 720px) {
       main { padding: 12px 12px calc(34px + env(safe-area-inset-bottom)); }
-      .app-hero { grid-template-columns: auto 1fr; gap: 14px; margin-bottom: 12px; padding: 22px 18px; border-radius: 20px; }
+      .app-hero { grid-template-columns: auto 1fr; gap: 14px; margin-bottom: 12px; padding: 64px 18px 22px; border-radius: 20px; }
       .brand-mark { width: 50px; height: 50px; border-radius: 14px; font-size: 21px; }
       .app-hero h1 { font-size: 25px; }
       .app-hero .intro { font-size: 13px; }
-      .account-bar { grid-template-columns: 1fr; align-items: stretch; padding: 11px 12px; }
-      .account-info { align-items: flex-start; }
-      .account-info strong { white-space: normal; }
-      .account-bar .role-note { max-width: 100%; text-align: left; }
-      .account-bar .actions { display: flex; width: 100%; }
-      .account-bar .actions button:only-child { grid-column: 1 / -1; }
+      .account-bar { position: absolute; top: 15px; right: 14px; }
+      .account-menu-trigger strong { max-width: 118px; }
       .install-card { margin-bottom: 10px; }
       .workspace { gap: 12px; }
       .entry-card, .results, .history { padding: 18px 16px; border-radius: 17px; }
@@ -793,9 +795,12 @@
       .field-grid { grid-template-columns: 1fr; gap: 13px; }
       .photo-picker { align-items: flex-start; flex-wrap: wrap; }
       .photo-picker .field { flex-basis: 100%; }
-      .entry-card > .actions { grid-template-columns: 1fr 1fr; gap: 9px; }
-      .entry-card > .actions #save { grid-column: 1 / -1; grid-row: 1; }
-      .entry-card > .actions button { min-height: 42px; }
+      .analysis-photo .photo-picker { grid-template-columns: 1fr; }
+      .analysis-photo .photo-preview { grid-column: auto; width: 100%; }
+      .analysis-photo .photo-remove { width: 100%; }
+      .analysis-actions { grid-template-columns: 1fr; }
+      .final-actions { align-items: stretch; flex-direction: column; gap: 14px; }
+      .final-action-buttons { grid-template-columns: 1fr 1.35fr; width: 100%; }
       .results .row { grid-template-columns: 84px minmax(0, 1fr); }
       .overview-heading { margin: 26px 4px 11px; }
       .stats { grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -804,9 +809,9 @@
       .dashboard { grid-template-columns: 1fr; gap: 10px; }
       .dashboard .chart-card:first-child { grid-column: auto; }
       .chart-card { min-height: auto; padding: 17px; }
-      .history-head { align-items: stretch; flex-direction: column; }
-      .data-actions { display: grid; grid-template-columns: 1fr 1fr; }
-      .data-actions button:last-of-type { grid-column: 1 / -1; }
+      .history-head { align-items: flex-start; flex-direction: column; }
+      .history-tools { display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin: 8px 0 0; }
+      .history-tools button { width: 100%; }
       .filters, .bulk-actions { grid-template-columns: 1fr; }
       .table-wrap { overflow: visible; border: 0; background: transparent; }
       .history table, .history tbody, .history tr, .history td { display: block; width: 100%; }
@@ -850,8 +855,9 @@
       .app-hero .brand-mark { display: none; }
       .account-bar { grid-column: auto; }
       .results .row { grid-template-columns: 76px minmax(0, 1fr); }
-      .data-actions, .entry-card > .actions { grid-template-columns: 1fr; }
-      .entry-card > .actions #save, .data-actions button:last-of-type { grid-column: auto; }
+      .history-tools { grid-template-columns: 1fr 1fr; }
+      .final-action-buttons { grid-template-columns: 1fr; }
+      .final-action-buttons #save { grid-row: 1; }
       .history td { grid-template-columns: 78px minmax(0, 1fr); }
       .history .row-actions { grid-template-columns: 1fr 1fr; }
       .history .row-actions .delete:last-child { grid-column: 1 / -1; }
@@ -907,15 +913,14 @@
       <div class="brand-mark" aria-hidden="true">巡</div>
       <div class="hero-copy"><span class="eyebrow">CITY INSPECTION</span><h1>城市巡查 AI 助手</h1><p class="intro">记录现场问题，获得智能研判建议，并持续跟踪处置进度。</p></div>
       <section class="account-bar" id="accountBar" aria-label="当前登录人员" hidden>
-        <div class="account-info">
-          <span class="account-avatar" id="profileAvatar" aria-hidden="true">巡</span>
-          <div class="account-copy">
-            <div class="account-heading"><strong id="currentUserName"></strong><span class="role-badge" id="roleBadge"></span></div>
-            <p class="role-note" id="roleNote"></p>
-            <p class="cloud-note"><span class="online-dot" aria-hidden="true"></span><span id="cloudStatus"></span></p>
-          </div>
+        <button class="account-menu-trigger" id="accountMenuToggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <strong id="currentUserName"></strong><span class="role-badge" id="roleBadge"></span><span class="account-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="account-menu" id="accountMenu" role="menu" hidden>
+          <div class="account-menu-status"><span class="online-dot" aria-hidden="true"></span><span id="cloudStatus"></span></div>
+          <button id="manageUsers" type="button" role="menuitem" hidden>人员管理</button>
+          <button id="logout" type="button" role="menuitem">退出登录</button>
         </div>
-        <div class="actions"><button id="manageUsers" type="button" hidden>人员管理</button><button id="logout" type="button">退出</button></div>
       </section>
     </header>
     <aside class="install-card" id="installCard" hidden>
@@ -953,25 +958,27 @@
       </div>
         </div>
 
-        <div class="photo-picker">
-      <div class="field">
-        <label for="photo">现场照片（可选）</label>
-        <input id="photo" type="file" accept="image/*" capture="environment">
-      </div>
-      <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
-      <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
-        </div>
-
-        <div class="actions">
-      <button class="primary" id="analyze">开始识别</button>
-      <button class="secondary" id="analyzePhoto" type="button">AI 识别现场照片</button>
-      <button class="success" id="save">保存记录</button>
-      <button class="secondary" id="clear">清空输入</button>
-        </div>
       </section>
 
       <section class="results" aria-live="polite">
       <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>识别结果</h2><p>结果仅作辅助，请结合现场情况复核。</p></div></div>
+      <div class="analysis-photo">
+        <div class="photo-picker">
+          <div class="field">
+            <label for="photo">现场照片（可选）</label>
+            <input id="photo" type="file" accept="image/*" capture="environment">
+          </div>
+          <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
+          <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
+        </div>
+      </div>
+      <div class="analysis-tools">
+        <div class="analysis-tools-head"><strong>选择识别方式</strong><span>可根据现场资料任选一种</span></div>
+        <div class="analysis-actions">
+          <button id="analyzePhoto" type="button">AI 识别现场照片</button>
+          <button class="primary" id="analyze" type="button">开始识别</button>
+        </div>
+      </div>
       <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
       <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
       <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
@@ -982,6 +989,14 @@
         <p>建议处置：<span id="aiRecommendation"></span></p>
         <p>判断置信度：<span id="aiConfidence"></span>；注意事项：<span id="aiCaution"></span></p>
       </div>
+      </section>
+
+      <section class="final-actions surface" aria-label="巡查记录最终操作">
+        <div class="final-actions-copy"><span class="eyebrow">最终确认</span><strong>核对录入信息与研判结果</strong><p>确认无误后保存巡查记录；清空操作将重置本次尚未保存的内容。</p></div>
+        <div class="final-action-buttons">
+          <button class="secondary" id="clear" type="button">清空输入</button>
+          <button class="success" id="save" type="button">保存巡查记录</button>
+        </div>
       </section>
     </div>
 
@@ -1032,13 +1047,13 @@
       </section>
       <div class="history-head">
         <h2>巡查记录</h2>
-        <button class="secondary" id="export">导出 CSV 表格</button>
-      </div>
-      <div class="data-actions">
-        <button class="secondary" id="backup">备份全部数据</button>
-        <button class="secondary" id="restore">恢复备份</button>
-        <button class="secondary" id="printReport">打印巡查报告</button>
-        <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+        <div class="history-tools data-actions" aria-label="巡查记录数据操作">
+          <button id="backup" type="button">备份全部数据</button>
+          <button id="restore" type="button">恢复备份</button>
+          <button id="printReport" type="button">打印巡查报告</button>
+          <button id="export" type="button">导出 CSV</button>
+          <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+        </div>
       </div>
       <div class="filters">
         <input id="search" aria-label="搜索巡查记录" placeholder="搜索编号、描述、地点或负责人">
@@ -1242,10 +1257,10 @@
     const confirmPassword = document.querySelector('#confirmPassword');
     const passwordResetError = document.querySelector('#passwordResetError');
     const accountBar = document.querySelector('#accountBar');
+    const accountMenuToggle = document.querySelector('#accountMenuToggle');
+    const accountMenu = document.querySelector('#accountMenu');
     const currentUserName = document.querySelector('#currentUserName');
-    const profileAvatar = document.querySelector('#profileAvatar');
     const roleBadge = document.querySelector('#roleBadge');
-    const roleNote = document.querySelector('#roleNote');
     const cloudStatus = document.querySelector('#cloudStatus');
     const installCard = document.querySelector('#installCard');
     const installText = document.querySelector('#installText');
@@ -1262,14 +1277,18 @@
     let deferredInstallPrompt = null;
     let currentIsAdmin = false;
 
+    function closeAccountMenu() {
+      accountMenu.hidden = true;
+      accountMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+
     function showLoggedInState(user) {
       currentIsAdmin = user.role === '管理员';
       currentUserName.textContent = user.name;
-      profileAvatar.textContent = (user.name || user.role || '巡').trim().slice(0, 1).toUpperCase();
       roleBadge.textContent = user.role;
-      roleNote.textContent = user.note;
       cloudStatus.textContent = '正在连接云端…';
       cloudStatus.title = '';
+      closeAccountMenu();
       accountBar.hidden = false;
       manageUsersButton.hidden = !currentIsAdmin;
       document.querySelectorAll('.admin-only').forEach(element => { element.hidden = !currentIsAdmin; });
@@ -1278,6 +1297,7 @@
 
     function showLoggedOutState() {
       currentIsAdmin = false;
+      closeAccountMenu();
       accountBar.hidden = true;
       cloudStatus.textContent = '';
       cloudStatus.title = '';
@@ -2274,7 +2294,24 @@
       photoDialog.showModal();
     });
     document.querySelector('#closePhoto').addEventListener('click', () => photoDialog.close());
-    manageUsersButton.addEventListener('click', openUserManagement);
+    accountMenuToggle.addEventListener('click', event => {
+      event.stopPropagation();
+      const willOpen = accountMenu.hidden;
+      accountMenu.hidden = !willOpen;
+      accountMenuToggle.setAttribute('aria-expanded', String(willOpen));
+    });
+    accountMenu.addEventListener('click', event => event.stopPropagation());
+    document.addEventListener('click', closeAccountMenu);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !accountMenu.hidden) {
+        closeAccountMenu();
+        accountMenuToggle.focus();
+      }
+    });
+    manageUsersButton.addEventListener('click', () => {
+      closeAccountMenu();
+      openUserManagement();
+    });
     document.querySelector('#closeUsers').addEventListener('click', () => userDialog.close());
     userRows.addEventListener('click', async event => {
       const button = event.target.closest('[data-save-user]');
@@ -2604,6 +2641,7 @@
     });
 
     document.querySelector('#logout').addEventListener('click', () => {
+      closeAccountMenu();
       if (!supabaseClient) { showLoggedOutState(); return; }
       supabaseClient.auth.signOut().then(() => showLoggedOutState());
     });
