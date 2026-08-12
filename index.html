@@ -478,12 +478,21 @@
     .record-case, .record-stack { display: grid; align-content: center; justify-items: center; gap: 6px; }
     .record-case .photo-thumb { width: 64px; height: 52px; }
     .record-number { color: var(--navy); font-size: 12px; line-height: 1.4; }
+    .record-sync-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 999px; color: #65788a; background: #edf2f6; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .record-sync-chip::before { width: 6px; height: 6px; border-radius: 50%; background: #8da0b1; content: ""; }
+    .record-sync-chip[data-state="syncing"] { color: #1856a6; background: #e7f0ff; }
+    .record-sync-chip[data-state="syncing"]::before { background: #3478de; animation: sync-pulse 1s ease-in-out infinite; }
+    .record-sync-chip[data-state="synced"] { color: #08705f; background: #e3f5ef; }
+    .record-sync-chip[data-state="synced"]::before { background: #18a183; }
+    .record-sync-chip[data-state="pending"] { color: #8a4b08; background: #fff3d6; }
+    .record-sync-chip[data-state="pending"]::before { background: #d28a23; }
     .record-summary { display: block; color: #263d52; font-size: 13px; line-height: 1.55; }
     .record-location { margin-top: 7px; color: #6a7d8f; font-size: 12px; line-height: 1.45; }
     .record-stack strong { color: #30485d; font-size: 13px; }
     .record-stack small { color: #758798; font-size: 11px; line-height: 1.4; }
     .record-meta-label { display: block; margin-bottom: 2px; color: #8a9aaa; font-size: 10px; font-weight: 700; }
     .priority-chip { display: inline-flex; padding: 3px 7px; border-radius: 999px; color: #5f5142; background: #f3eee8; font-size: 11px; font-weight: 800; }
+    @keyframes sync-pulse { 50% { opacity: .35; transform: scale(.75); } }
     .photo-thumb { border-radius: 10px; box-shadow: 0 3px 10px rgba(16, 42, 67, .1); }
     .status-chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; color: #855307; background: #fff2d7; font-size: 12px; font-weight: 800; white-space: nowrap; }
     .status-chip[data-status="处理中"] { color: #1856a6; background: #e7f0ff; }
@@ -1354,12 +1363,48 @@
     let recordsSubscription = null;
     let pendingRetryActive = false;
     let assignees = [];
+    let cloudReloadTimer = null;
+    const recentLocalMutations = new Map();
 
     function getRecords() { return recordCache; }
 
     function saveRecords(records) {
       recordCache = records;
       localStorage.setItem(storageKey, JSON.stringify(records));
+    }
+
+    function markLocalMutation(...identifiers) {
+      const expiresAt = Date.now() + 90000;
+      identifiers.filter(Boolean).forEach(identifier => recentLocalMutations.set(String(identifier), expiresAt));
+    }
+
+    function isRecentLocalMutation(payload) {
+      const now = Date.now();
+      for (const [identifier, expiresAt] of recentLocalMutations) {
+        if (expiresAt <= now) recentLocalMutations.delete(identifier);
+      }
+      const values = [payload?.new?.id, payload?.new?.record_no, payload?.old?.id, payload?.old?.record_no]
+        .filter(Boolean)
+        .map(String);
+      return values.some(value => (recentLocalMutations.get(value) || 0) > now);
+    }
+
+    function getRecordSyncState(record) {
+      if (record.syncState === 'syncing') return 'syncing';
+      if (record.syncState === 'pending') return 'pending';
+      return record.cloudId ? 'synced' : 'local';
+    }
+
+    function getRecordSyncText(state) {
+      return state === 'syncing' ? '同步中' : state === 'synced' ? '已同步' : state === 'pending' ? '待同步' : '本机暂存';
+    }
+
+    function updateRecordSyncIndicator(recordId, state) {
+      const indicator = [...recordBody.querySelectorAll('[data-record-sync]')]
+        .find(element => element.dataset.recordSync === recordId);
+      if (!indicator) return;
+      indicator.dataset.state = state;
+      indicator.textContent = getRecordSyncText(state);
     }
 
     async function loadAssignees() {
@@ -1459,7 +1504,9 @@
     async function addCloudPhotos(records) {
       return Promise.all(records.map(async record => ({
         ...record,
-        photo: record.photoPath ? await getCloudPhotoUrl(record.photoPath) : record.photo
+        photo: record.photo?.startsWith('data:image/jpeg;base64,')
+          ? record.photo
+          : record.photoPath ? await getCloudPhotoUrl(record.photoPath) : record.photo
       })));
     }
 
@@ -1564,6 +1611,7 @@
     async function createCloudRecord(record) {
       const { data: authData } = await supabaseClient.auth.getUser();
       if (!authData.user) throw new Error('登录状态已失效，请重新登录');
+      markLocalMutation(record.id);
       let { data, error } = await supabaseClient
         .from('inspection_records')
         .insert(cloudRecordFromLocal(record, authData.user.id))
@@ -1571,6 +1619,7 @@
         .single();
       if (error?.code === '23505') {
         record.id = createRecordId();
+        markLocalMutation(record.id);
         ({ data, error } = await supabaseClient
           .from('inspection_records')
           .insert(cloudRecordFromLocal(record, authData.user.id))
@@ -1578,6 +1627,7 @@
           .single());
       }
       if (error) throw error;
+      markLocalMutation(record.id, data.id);
       const initialEntry = record.timeline?.[record.timeline.length - 1] || {
         fromStatus: '', toStatus: record.status || '待派单', note: '创建巡查记录'
       };
@@ -1586,6 +1636,7 @@
       if (record.photo) {
         const photoPath = `${authData.user.id}/${data.id}.jpg`;
         await uploadCloudPhoto(photoPath, record.photo);
+        markLocalMutation(record.id, data.id);
         const { data: recordWithPhoto, error: photoPathError } = await supabaseClient
           .from('inspection_records')
           .update({ photo_path: photoPath, updated_at: new Date().toISOString() })
@@ -1601,7 +1652,7 @@
         note: initialEntry.note,
         created_at: data.created_at
       }], record.photo || '');
-      return { ...localRecord, photo: savedRecord.photo_path ? await getCloudPhotoUrl(savedRecord.photo_path) : localRecord.photo };
+      return { ...localRecord, photo: record.photo || localRecord.photo, syncState: 'synced' };
     }
 
     async function retryPendingCloudRecords(pendingRecords) {
@@ -1617,6 +1668,7 @@
             const next = recordCache.slice();
             next[index] = { ...cloudRecord, photo: pendingRecord.photo, timeline: pendingRecord.timeline };
             saveRecords(next);
+            updateRecordSyncIndicator(pendingRecord.id, 'synced');
             syncedCount += 1;
           } catch {
             // 保留暂存记录，等待下一次打开页面时再次尝试。
@@ -1625,10 +1677,7 @@
       } finally {
         pendingRetryActive = false;
       }
-      if (syncedCount) {
-        renderRecords();
-        showNotice(`已自动同步 ${syncedCount} 条本机暂存记录`);
-      }
+      if (syncedCount) showNotice(`已自动同步 ${syncedCount} 条本机暂存记录`);
     }
 
     async function updateCloudRecord(record) {
@@ -1651,7 +1700,11 @@
       if (!supabaseClient || recordsSubscription) return;
       recordsSubscription = supabaseClient
         .channel('inspection-records-sync')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'inspection_records' }, () => loadCloudRecords())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inspection_records' }, payload => {
+          if (isRecentLocalMutation(payload)) return;
+          window.clearTimeout(cloudReloadTimer);
+          cloudReloadTimer = window.setTimeout(loadCloudRecords, 350);
+        })
         .subscribe();
     }
 
@@ -1881,7 +1934,7 @@
       recordBody.innerHTML = visibleRecords.map(record => `
         <tr>
           <td data-label="选择" class="no-print admin-only record-select-column" ${currentIsAdmin ? '' : 'hidden'}><input type="checkbox" data-select-index="${record.storageIndex}" aria-label="选择 ${escapeHtml(record.id || '巡查记录')}" ${selectedIndices.has(record.storageIndex) ? 'checked' : ''}></td>
-          <td data-label="案件" class="record-case-column"><div class="record-case">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '<small>无现场照片</small>'}<strong class="record-number">${escapeHtml(record.id || '历史记录')}</strong></div></td>
+          <td data-label="案件" class="record-case-column"><div class="record-case">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '<small>无现场照片</small>'}<strong class="record-number">${escapeHtml(record.id || '历史记录')}</strong>${(() => { const state = getRecordSyncState(record); return `<span class="record-sync-chip" data-record-sync="${escapeHtml(record.id || '')}" data-state="${state}">${getRecordSyncText(state)}</span>`; })()}</div></td>
           <td data-label="问题信息" class="record-issue-column"><strong class="record-summary">${escapeHtml(record.description)}</strong><div class="record-location">${renderLocation(record)}</div></td>
           <td data-label="分类研判" class="record-class-column"><div class="record-stack"><strong>${escapeHtml(record.type || '其他问题')}</strong><small>${escapeHtml(record.department || '待研判部门')}</small><span class="priority-chip">${escapeHtml(record.priority || '普通')}</span></div></td>
           <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(record.status || '待派单')}">${escapeHtml(record.status || '待派单')}</span></div></td>
@@ -2026,6 +2079,7 @@
         latitude: currentCoordinates?.latitude ?? null,
         longitude: currentCoordinates?.longitude ?? null,
         photo: photoData,
+        syncState: 'syncing',
         aiAnalysis: currentAiAnalysis,
         time: new Date().toLocaleString('zh-CN'),
         timeline: [{
@@ -2054,17 +2108,27 @@
       currentCoordinates = null;
       setLocationStatus('尚未定位');
       showNotice('正在保存到云端…');
+      const renderedRecordId = newRecord.id;
       try {
         const cloudRecord = await createCloudRecord(newRecord);
-        const index = getRecords().findIndex(record => record === newRecord);
+        const index = getRecords().findIndex(record => record.id === newRecord.id);
         if (index >= 0) {
           const next = getRecords().slice();
-          next[index] = { ...cloudRecord, photo: newRecord.photo, timeline: newRecord.timeline };
+          next[index] = { ...cloudRecord, photo: newRecord.photo, timeline: newRecord.timeline, syncState: 'synced' };
           saveRecords(next);
-          renderRecords();
+          if (newRecord.id === renderedRecordId) updateRecordSyncIndicator(renderedRecordId, 'synced');
+          else renderRecords();
         }
         showNotice('巡查记录已保存到云端');
       } catch (error) {
+        const index = getRecords().findIndex(record => record.id === newRecord.id);
+        if (index >= 0) {
+          const next = getRecords().slice();
+          next[index] = { ...next[index], syncState: 'pending' };
+          saveRecords(next);
+          if (newRecord.id === renderedRecordId) updateRecordSyncIndicator(renderedRecordId, 'pending');
+          else renderRecords();
+        }
         showNotice(`云端保存失败，记录暂存本机：${error.message}`);
       }
     });

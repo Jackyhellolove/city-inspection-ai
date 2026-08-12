@@ -1,4 +1,4 @@
-const CACHE_NAME = 'city-inspection-ai-v11';
+const CACHE_NAME = 'city-inspection-ai-v12';
 const APP_FILES = [
   './',
   './index.html',
