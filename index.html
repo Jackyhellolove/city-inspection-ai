@@ -541,7 +541,16 @@
     .photo-thumb { border-radius: 10px; box-shadow: 0 3px 10px rgba(16, 42, 67, .1); }
     .status-chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; color: #855307; background: #fff2d7; font-size: 12px; font-weight: 800; white-space: nowrap; }
     .status-chip[data-status="处理中"] { color: #1856a6; background: #e7f0ff; }
-    .status-chip[data-status="已完成"] { color: #08705f; background: #e3f5ef; }
+    .status-chip[data-status="待核查"] { color: #6b4fa1; background: #f0eaff; }
+    .status-chip[data-status="退回整改"] { color: #b54708; background: #fff0df; }
+    .status-chip[data-status="已结案"], .status-chip[data-status="已完成"] { color: #08705f; background: #e3f5ef; }
+    .workflow-hint { grid-column: 1 / -1; margin: -4px 0 2px; padding: 10px 12px; border: 1px solid #d9e6ef; border-radius: 11px; color: #536b7d; background: #f6f9fb; font-size: 13px; line-height: 1.55; }
+    .workflow-hint strong { color: var(--navy); }
+    .assignee-workflow-actions { grid-column: 1 / -1; display: grid; gap: 8px; padding: 14px; border: 1px solid #b9ddd4; border-radius: 13px; background: #f0faf7; }
+    .assignee-workflow-actions[hidden] { display: none; }
+    .assignee-workflow-actions strong { color: #08705f; font-size: 14px; }
+    .assignee-workflow-actions p { margin: 0; color: #587169; font-size: 12px; }
+    .assignee-workflow-actions button { width: 100%; min-height: 42px; }
     .row-actions { display: grid; grid-template-columns: 1fr 1fr; justify-content: center; gap: 6px; }
     .row-actions .delete:last-child { grid-column: 1 / -1; }
     .row-actions button, .data-actions button { min-height: 36px; }
@@ -950,7 +959,7 @@
     </aside>
 
     <div class="workspace">
-      <section class="entry-stage surface">
+      <section class="entry-stage surface admin-only" aria-label="管理员新建案件">
         <div class="section-heading"><div><span class="eyebrow">现场录入</span><h2>新建巡查问题</h2><p>填写现场情况和派单信息，智能研判将在下一步完成。</p></div></div>
         <div class="analysis-layout">
           <div class="analysis-pane issue-card">
@@ -975,8 +984,6 @@
         <label for="status">处置状态</label>
         <select id="status">
           <option>待派单</option>
-          <option>处理中</option>
-          <option>已完成</option>
         </select>
       </div>
       <div class="field">
@@ -988,7 +995,7 @@
         </div>
       </section>
 
-      <section class="results" aria-live="polite">
+      <section class="results admin-only" aria-live="polite">
         <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>现场识别与研判结果</h2><p>上传现场资料并选择识别方式，结果仅作辅助，请结合实际复核。</p></div></div>
         <div class="analysis-layout">
           <div class="analysis-pane analysis-input-pane">
@@ -1026,7 +1033,7 @@
         </div>
       </section>
 
-      <section class="final-actions surface" aria-label="巡查记录最终操作">
+      <section class="final-actions surface admin-only" aria-label="巡查记录最终操作">
         <div class="final-actions-copy"><span class="eyebrow">最终确认</span><strong>核对录入信息与研判结果</strong><p>确认无误后保存巡查记录；清空操作将重置本次尚未保存的内容。</p></div>
         <div class="final-action-buttons">
           <button class="secondary" id="clear" type="button">清空输入</button>
@@ -1042,9 +1049,8 @@
       <div class="stat"><span>全部问题</span><strong id="totalCount">0</strong></div>
       <div class="stat"><span>待派单</span><strong id="pendingCount">0</strong></div>
       <div class="stat"><span>处理中</span><strong id="processingCount">0</strong></div>
-      <div class="stat"><span>已完成</span><strong id="completedCount">0</strong></div>
-      <div class="stat"><span>办结率</span><strong id="completionRate">0%</strong></div>
-      <div class="stat"><span>已逾期</span><strong id="overdueCount">0</strong></div>
+      <div class="stat"><span>待核查</span><strong id="verifyingCount">0</strong></div>
+      <div class="stat"><span>已结案</span><strong id="completedCount">0</strong></div>
     </section>
 
     <section class="dashboard" aria-label="巡查数据看板">
@@ -1076,7 +1082,8 @@
           <div><span>问题总数</span><strong id="reportTotal">0</strong></div>
           <div><span>待派单</span><strong id="reportPending">0</strong></div>
           <div><span>处理中</span><strong id="reportProcessing">0</strong></div>
-          <div><span>已完成</span><strong id="reportCompleted">0</strong></div>
+          <div><span>待核查</span><strong id="reportVerifying">0</strong></div>
+          <div><span>已结案</span><strong id="reportCompleted">0</strong></div>
           <div><span>已逾期</span><strong id="reportOverdue">0</strong></div>
         </div>
       </section>
@@ -1096,7 +1103,9 @@
           <option value="">全部状态</option>
           <option>待派单</option>
           <option>处理中</option>
-          <option>已完成</option>
+          <option>待核查</option>
+          <option>退回整改</option>
+          <option>已结案</option>
         </select>
         <select id="deadlineFilter" aria-label="按期限状态筛选">
           <option value="">全部期限</option>
@@ -1110,12 +1119,6 @@
       <div class="bulk-actions no-print admin-only">
         <strong id="selectedCount">已选择 0 条</strong>
         <input id="bulkOwner" list="ownerOptions" aria-label="批量指定负责人" placeholder="批量指定负责人（留空则不修改）">
-        <select id="bulkStatus" aria-label="批量修改状态">
-          <option value="">状态不修改</option>
-          <option>待派单</option>
-          <option>处理中</option>
-          <option>已完成</option>
-        </select>
         <button class="primary" id="applyBulk" type="button">应用到已选记录</button>
       </div>
       <div class="table-wrap">
@@ -1188,7 +1191,7 @@
         </div>
         <div>
           <label for="editStatus">处置状态</label>
-          <select id="editStatus"><option>待派单</option><option>处理中</option><option>已完成</option></select>
+          <select id="editStatus"><option>待派单</option><option>处理中</option><option>待核查</option><option>退回整改</option><option>已结案</option></select>
         </div>
         <div>
           <label for="editDeadline">完成期限</label>
@@ -1206,6 +1209,12 @@
           <label for="editNote">本次处理说明（可选）</label>
           <textarea id="editNote" placeholder="例如：已联系养护单位，预计今日完成处理"></textarea>
         </div>
+        <div class="workflow-hint" id="editWorkflowHint"></div>
+        <div class="assignee-workflow-actions" id="assigneeWorkflowActions" hidden>
+          <strong id="assigneeWorkflowTitle"></strong>
+          <p id="assigneeWorkflowText"></p>
+          <button class="success" id="assigneeWorkflowAction" type="submit"></button>
+        </div>
         <div class="full evidence-picker">
           <label for="editEvidencePhotos">整改凭证照片（可多选，每次最多 6 张）</label>
           <input id="editEvidencePhotos" type="file" accept="image/*" capture="environment" multiple>
@@ -1214,7 +1223,7 @@
       </div>
       <div class="dialog-actions dialog-footer">
         <button class="secondary" id="cancelEdit" type="button">取消</button>
-        <button class="primary" type="submit">保存修改</button>
+        <button class="primary" id="editSubmit" type="submit">保存修改</button>
       </div>
     </form>
   </dialog>
@@ -1275,6 +1284,12 @@
     const editLatitude = document.querySelector('#editLatitude');
     const editLongitude = document.querySelector('#editLongitude');
     const editNote = document.querySelector('#editNote');
+    const editWorkflowHint = document.querySelector('#editWorkflowHint');
+    const editSubmit = document.querySelector('#editSubmit');
+    const assigneeWorkflowActions = document.querySelector('#assigneeWorkflowActions');
+    const assigneeWorkflowTitle = document.querySelector('#assigneeWorkflowTitle');
+    const assigneeWorkflowText = document.querySelector('#assigneeWorkflowText');
+    const assigneeWorkflowAction = document.querySelector('#assigneeWorkflowAction');
     const editEvidencePhotos = document.querySelector('#editEvidencePhotos');
     const editEvidencePreview = document.querySelector('#editEvidencePreview');
     const reportDialog = document.querySelector('#reportDialog');
@@ -1290,7 +1305,6 @@
     const selectAll = document.querySelector('#selectAll');
     const selectedCount = document.querySelector('#selectedCount');
     const bulkOwner = document.querySelector('#bulkOwner');
-    const bulkStatus = document.querySelector('#bulkStatus');
     const recordBody = document.querySelector('#records');
     const empty = document.querySelector('#empty');
     const storageKey = 'city-inspection-records';
@@ -1331,6 +1345,67 @@
     let deferredInstallPrompt = null;
     let currentIsAdmin = false;
 
+    const WORKFLOW_STATUS = ['待派单', '处理中', '待核查', '退回整改', '已结案'];
+
+    function normalizeStatus(status) {
+      if (status === '已完成') return '已结案';
+      if (status === '待接单') return '处理中';
+      return WORKFLOW_STATUS.includes(status) ? status : '待派单';
+    }
+
+    function isClosedStatus(status) {
+      return normalizeStatus(status) === '已结案';
+    }
+
+    function statusOptions(status, isAdmin) {
+      const current = normalizeStatus(status);
+      if (isAdmin) {
+        if (current === '待派单') return ['待派单', '处理中'];
+        if (current === '处理中') return ['处理中'];
+        if (current === '待核查') return ['待核查', '已结案', '退回整改'];
+        if (current === '退回整改') return ['退回整改'];
+        return ['已结案'];
+      }
+      if (current === '处理中' || current === '退回整改') return [current, '待核查'];
+      return [current];
+    }
+
+    function workflowHint(status, isAdmin) {
+      const current = normalizeStatus(status);
+      if (isAdmin && current === '待核查') return '<strong>待你核查：</strong>请查看处理说明和整改凭证，确认后“已结案”，不合格则“退回整改”。';
+      if (!isAdmin && (current === '处理中' || current === '退回整改')) return '<strong>待你办理：</strong>填写处理说明或上传整改凭证后，点击“办理并提交核查”。';
+      if (current === '待派单') return '<strong>等待派单：</strong>管理员指定负责人并提交后，案件将进入“处理中”。';
+      if (current === '已结案') return '<strong>案件已结案：</strong>该案件的处置流程已完成。';
+      return '<strong>协同处置：</strong>请按当前节点完成办理，并保留必要的处理说明和现场凭证。';
+    }
+
+    function updateEditWorkflowOptions() {
+      const current = normalizeStatus(editStatus.dataset.currentStatus || editStatus.value);
+      const statusField = editStatus.closest('.edit-form-grid > div');
+      const assigneeNextStatus = current === '处理中' || current === '退回整改' ? '待核查' : current;
+      const available = currentIsAdmin ? statusOptions(current, true) : [assigneeNextStatus];
+      const selected = currentIsAdmin && available.includes(editStatus.value) ? editStatus.value : available[0];
+      editStatus.innerHTML = available.map(status => `<option${status === selected ? ' selected' : ''}>${status}</option>`).join('');
+      editWorkflowHint.innerHTML = workflowHint(current, currentIsAdmin);
+      editStatus.disabled = !currentIsAdmin || available.length === 1;
+      statusField.hidden = !currentIsAdmin;
+      const isAssigneeAction = !currentIsAdmin && ['处理中', '退回整改'].includes(current);
+      assigneeWorkflowActions.hidden = !isAssigneeAction;
+      editSubmit.hidden = isAssigneeAction;
+      if (currentIsAdmin) {
+        editSubmit.textContent = current === '待核查' ? '保存核查结果' : '保存修改';
+      } else if (current === '处理中' || current === '退回整改') {
+        assigneeWorkflowTitle.textContent = current === '退回整改' ? '已退回整改，请重新办理' : '办理完成后提交核查';
+        assigneeWorkflowText.textContent = '请先填写处理说明或上传整改凭证，再提交给管理员核查。';
+        assigneeWorkflowAction.textContent = '办理并提交核查';
+        const readyToVerify = Boolean(editNote.value.trim() || editEvidenceData.length);
+        assigneeWorkflowAction.disabled = !readyToVerify;
+        assigneeWorkflowAction.title = readyToVerify ? '' : '请先填写处理说明或上传整改凭证照片';
+      } else {
+        editSubmit.textContent = '保存处理说明';
+      }
+    }
+
     function closeAccountMenu() {
       accountMenu.hidden = true;
       accountMenuToggle.setAttribute('aria-expanded', 'false');
@@ -1346,6 +1421,7 @@
       accountBar.hidden = false;
       manageUsersButton.hidden = !currentIsAdmin;
       document.querySelectorAll('.admin-only').forEach(element => { element.hidden = !currentIsAdmin; });
+      document.querySelectorAll('.entry-stage, .results, .final-actions').forEach(element => { element.hidden = !currentIsAdmin; });
       loginScreen.hidden = true;
     }
 
@@ -1355,6 +1431,7 @@
       accountBar.hidden = true;
       cloudStatus.textContent = '';
       cloudStatus.title = '';
+      document.querySelectorAll('.entry-stage, .results, .final-actions').forEach(element => { element.hidden = true; });
       loginScreen.hidden = false;
       loginPassword.value = '';
       loginError.textContent = '';
@@ -1529,7 +1606,7 @@
         priority: record.priority || null,
         owner_name: record.owner || null,
         assignee_id: record.assigneeId || getAssigneeId(record.owner),
-        status: record.status || '待派单',
+        status: normalizeStatus(record.status),
         deadline: record.deadline || null,
         latitude: record.latitude ?? null,
         longitude: record.longitude ?? null,
@@ -1553,7 +1630,7 @@
         priority: record.priority || '一般',
         owner: record.owner_name || '',
         assigneeId: record.assignee_id || null,
-        status: record.status || '待派单',
+        status: normalizeStatus(record.status),
         deadline: record.deadline || '',
         latitude: record.latitude,
         longitude: record.longitude,
@@ -1567,10 +1644,10 @@
           ? updates.map(update => ({
             time: update.created_at ? new Date(update.created_at).toLocaleString('zh-CN') : '时间未知',
             fromStatus: update.from_status || '',
-            toStatus: update.to_status || record.status || '待派单',
+            toStatus: normalizeStatus(update.to_status || record.status),
             note: update.note || '未填写处理说明'
           }))
-          : [{ time: createdTime, fromStatus: '', toStatus: record.status || '待派单', note: '已从云端同步' }]
+          : [{ time: createdTime, fromStatus: '', toStatus: normalizeStatus(record.status), note: '已从云端同步' }]
       };
     }
 
@@ -1683,7 +1760,7 @@
         record_id: recordId,
         actor_id: actorId,
         from_status: entry.fromStatus || null,
-        to_status: entry.toStatus || '待派单',
+        to_status: normalizeStatus(entry.toStatus),
         note: entry.note || '未填写处理说明'
       });
       if (error) throw error;
@@ -1710,7 +1787,7 @@
       if (error) throw error;
       markLocalMutation(record.id, data.id);
       const initialEntry = record.timeline?.[record.timeline.length - 1] || {
-        fromStatus: '', toStatus: record.status || '待派单', note: '创建巡查记录'
+        fromStatus: '', toStatus: normalizeStatus(record.status), note: '创建巡查记录'
       };
       await createCloudTimeline(data.id, authData.user.id, initialEntry);
       let savedRecord = data;
@@ -1809,7 +1886,7 @@
     }
 
     function getDeadlineState(record) {
-      if ((record.status || '待派单') === '已完成') return 'done';
+      if (isClosedStatus(record.status)) return 'done';
       if (!record.deadline) return 'none';
       const end = new Date(`${record.deadline}T23:59:59`);
       if (end < new Date()) return 'overdue';
@@ -1875,7 +1952,7 @@
       return [{
         time: record.time || '时间未知',
         fromStatus: '',
-        toStatus: record.status || '待派单',
+        toStatus: normalizeStatus(record.status),
         note: '创建巡查记录'
       }];
     }
@@ -1889,7 +1966,7 @@
           <div class="detail-item"><span>问题类型</span><strong>${escapeHtml(record.type || '未分类')}</strong></div>
           <div class="detail-item"><span>处理部门</span><strong>${escapeHtml(record.department || '未指定')}</strong></div>
           <div class="detail-item"><span>负责人</span><strong>${escapeHtml(record.owner || '未指定')}</strong></div>
-          <div class="detail-item"><span>当前状态</span><strong>${escapeHtml(record.status || '待派单')}</strong></div>
+          <div class="detail-item"><span>当前状态</span><strong>${escapeHtml(normalizeStatus(record.status))}</strong></div>
           <div class="detail-item"><span>完成期限</span><strong>${escapeHtml(record.deadline || '未设置')}</strong></div>
           <div class="detail-item"><span>坐标</span><strong>${hasCoordinates(record) ? `${Number(record.latitude).toFixed(6)}, ${Number(record.longitude).toFixed(6)}` : '未记录'}</strong></div>
           <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
@@ -1917,7 +1994,8 @@
       editDescription.value = record.description || '';
       editLocation.value = record.location || '';
       editOwner.value = record.owner || '';
-      editStatus.value = record.status || '待派单';
+      editStatus.dataset.currentStatus = normalizeStatus(record.status);
+      editStatus.value = normalizeStatus(record.status);
       editDeadline.value = record.deadline || '';
       editLatitude.value = hasCoordinates(record) ? Number(record.latitude) : '';
       editLongitude.value = hasCoordinates(record) ? Number(record.longitude) : '';
@@ -1928,8 +2006,9 @@
       [editDescription, editLocation, editOwner, editDeadline, editLatitude, editLongitude].forEach(field => {
         field.disabled = !currentIsAdmin;
       });
+      updateEditWorkflowOptions();
       editDialog.showModal();
-      (currentIsAdmin ? editDescription : editStatus).focus();
+      (currentIsAdmin ? editDescription : editNote).focus();
     }
 
     editEvidencePhotos.addEventListener('change', async () => {
@@ -1938,12 +2017,21 @@
       try {
         editEvidenceData = await Promise.all(files.map(async file => ({ name: file.name, data: await compressPhoto(file) })));
         editEvidencePreview.innerHTML = editEvidenceData.map(item => `<div class="evidence-card"><img src="${item.data}" alt="${escapeHtml(item.name)}"><small>${escapeHtml(item.name)}</small></div>`).join('');
+        updateEditWorkflowOptions();
         showNotice(`已准备 ${editEvidenceData.length} 张整改凭证照片`);
       } catch {
         editEvidenceData = [];
         editEvidencePreview.innerHTML = '';
         showNotice('整改凭证照片读取失败，请重新选择');
       }
+    });
+
+    editForm.addEventListener('input', () => {
+      const current = normalizeStatus(editStatus.dataset.currentStatus || editStatus.value);
+      if (currentIsAdmin || !['处理中', '退回整改'].includes(current)) return;
+      const ready = Boolean(editNote.value.trim() || editEvidenceData.length);
+      assigneeWorkflowAction.disabled = !ready;
+      assigneeWorkflowAction.title = ready ? '' : '请先填写处理说明或上传整改凭证照片';
     });
 
     function updateSelectionSummary() {
@@ -1964,7 +2052,7 @@
         .map((record, index) => ({ ...record, storageIndex: index }))
         .filter(record => {
           const searchable = [record.id, record.description, record.location, record.owner].join(' ').toLowerCase();
-          const status = record.status || '待派单';
+          const status = normalizeStatus(record.status);
           const deadlineState = getDeadlineState(record);
           return (!keyword || searchable.includes(keyword))
             && (!selectedStatus || status === selectedStatus)
@@ -1972,19 +2060,18 @@
             && (!selectedOwner || (record.owner || '') === selectedOwner);
         });
 
-      const pendingCount = records.filter(record => (record.status || '待派单') === '待派单').length;
-      const processingCount = records.filter(record => record.status === '处理中').length;
-      const completedCount = records.filter(record => record.status === '已完成').length;
+      const pendingCount = records.filter(record => normalizeStatus(record.status) === '待派单').length;
+      const processingCount = records.filter(record => ['处理中', '退回整改'].includes(normalizeStatus(record.status))).length;
+      const verifyingCount = records.filter(record => normalizeStatus(record.status) === '待核查').length;
+      const completedCount = records.filter(record => isClosedStatus(record.status)).length;
       const completionRate = records.length ? Math.round(completedCount / records.length * 100) : 0;
-      const overdueCount = records.filter(record => getDeadlineState(record) === 'overdue').length;
       document.querySelector('#totalCount').textContent = records.length;
       document.querySelector('#pendingCount').textContent = pendingCount;
       document.querySelector('#processingCount').textContent = processingCount;
+      document.querySelector('#verifyingCount').textContent = verifyingCount;
       document.querySelector('#completedCount').textContent = completedCount;
-      document.querySelector('#completionRate').textContent = `${completionRate}%`;
-      document.querySelector('#overdueCount').textContent = overdueCount;
       document.querySelector('#completionBar').style.width = `${completionRate}%`;
-      document.querySelector('#completionText').textContent = records.length ? `已完成 ${completionRate}%` : '尚无巡查记录';
+      document.querySelector('#completionText').textContent = records.length ? `已结案 ${completionRate}%` : '尚无巡查记录';
       document.querySelector('#completionRatio').textContent = `${completedCount} / ${records.length}`;
 
       const typeCounts = records.reduce((counts, record) => {
@@ -2001,7 +2088,7 @@
             <strong>${count}</strong>
           </div>`).join('')
         : '<span class="chart-empty">尚无巡查记录</span>';
-      const ownerCounts = records.filter(record => record.owner && record.status !== '已完成').reduce((counts, record) => {
+      const ownerCounts = records.filter(record => record.owner && !isClosedStatus(record.status)).reduce((counts, record) => {
         counts[record.owner] = (counts[record.owner] || 0) + 1;
         return counts;
       }, {});
@@ -2018,7 +2105,7 @@
           <td data-label="案件" class="record-case-column"><div class="record-case">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '<small>无现场照片</small>'}<strong class="record-number">${escapeHtml(record.id || '历史记录')}</strong>${(() => { const state = getRecordSyncState(record); return `<span class="record-sync-chip" data-record-sync="${escapeHtml(record.id || '')}" data-state="${state}">${getRecordSyncText(state)}</span>`; })()}</div></td>
           <td data-label="问题信息" class="record-issue-column"><strong class="record-summary">${escapeHtml(record.description)}</strong><div class="record-location">${renderLocation(record)}</div></td>
           <td data-label="分类研判" class="record-class-column"><div class="record-stack"><strong>${escapeHtml(record.type || '其他问题')}</strong><small>${escapeHtml(record.department || '待研判部门')}</small><span class="priority-chip">${escapeHtml(record.priority || '普通')}</span></div></td>
-          <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(record.status || '待派单')}">${escapeHtml(record.status || '待派单')}</span></div></td>
+          <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(normalizeStatus(record.status))}">${escapeHtml(normalizeStatus(record.status))}</span></div></td>
           <td data-label="时间节点" class="record-time-column"><div class="record-stack"><div><span class="record-meta-label">完成期限</span>${renderDeadline(record)}</div><small><span class="record-meta-label">最近更新</span>${escapeHtml(record.updatedAt || record.time || '暂无')}</small></div></td>
           <td data-label="操作" class="no-print record-action-column"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
         </tr>`).join('');
@@ -2136,6 +2223,8 @@
       const description = issue.value.trim();
       if (!description) { showNotice('请先输入巡查问题'); issue.focus(); return; }
       if (!supabaseClient) { showNotice('请先完成云端登录配置'); return; }
+      if (!currentIsAdmin) { showNotice('只有管理员可以新建和派发案件'); return; }
+      if (!ownerInput.value.trim()) { showNotice('请先选择负责人后再提交案件'); ownerInput.focus(); return; }
       if (!validateAssignee(ownerInput.value)) return;
       const [fallbackType, fallbackDepartment, fallbackPriority] = classify(description);
       const type = currentAiAnalysis?.category || fallbackType;
@@ -2146,6 +2235,7 @@
       output.priority.textContent = priority;
       analysisSource.textContent = currentAiAnalysis ? '照片 AI 识别（请人工复核）' : '文字规则识别';
       const records = getRecords();
+      const initialStatus = ownerInput.value.trim() && statusInput.value === '待派单' ? '处理中' : normalizeStatus(statusInput.value);
       const newRecord = {
         id: createRecordId(records),
         description,
@@ -2155,7 +2245,7 @@
         priority,
         owner: ownerInput.value.trim(),
         assigneeId: getAssigneeId(ownerInput.value.trim()),
-        status: statusInput.value,
+        status: initialStatus,
         deadline: deadlineInput.value,
         latitude: currentCoordinates?.latitude ?? null,
         longitude: currentCoordinates?.longitude ?? null,
@@ -2166,8 +2256,8 @@
         timeline: [{
           time: new Date().toLocaleString('zh-CN'),
           fromStatus: '',
-          toStatus: statusInput.value,
-          note: '创建巡查记录'
+          toStatus: initialStatus,
+          note: initialStatus === '处理中' && ownerInput.value.trim() ? `创建巡查记录并指派给负责人：${ownerInput.value.trim()}` : '创建巡查记录'
         }]
       };
       records.unshift(newRecord);
@@ -2222,7 +2312,7 @@
         ['问题编号', '现场照片', '问题描述', '发现地点', '纬度', '经度', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
         ...records.map(record => [
           record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.latitude ?? '', record.longitude ?? '', record.type,
-          record.department, record.priority, record.owner || '', record.status || '待派单', record.deadline || '', getDeadlineState(record), record.time,
+          record.department, record.priority, record.owner || '', normalizeStatus(record.status), record.deadline || '', getDeadlineState(record), record.time,
           record.updatedAt || record.time
         ])
       ];
@@ -2292,9 +2382,10 @@
       event.preventDefault();
       const records = getVisibleRecords();
       if (!records.length) { reportDialog.close(); showNotice('当前筛选结果中没有记录'); return; }
-      const pending = records.filter(record => (record.status || '待派单') === '待派单').length;
-      const processing = records.filter(record => record.status === '处理中').length;
-      const completed = records.filter(record => record.status === '已完成').length;
+      const pending = records.filter(record => normalizeStatus(record.status) === '待派单').length;
+      const processing = records.filter(record => ['处理中', '退回整改'].includes(normalizeStatus(record.status))).length;
+      const verifying = records.filter(record => normalizeStatus(record.status) === '待核查').length;
+      const completed = records.filter(record => isClosedStatus(record.status)).length;
       const overdue = records.filter(record => getDeadlineState(record) === 'overdue').length;
       const newestDate = String(records[0].time || '').split(' ')[0] || '未知';
       const oldestDate = String(records[records.length - 1].time || '').split(' ')[0] || '未知';
@@ -2311,6 +2402,7 @@
       document.querySelector('#reportTotal').textContent = records.length;
       document.querySelector('#reportPending').textContent = pending;
       document.querySelector('#reportProcessing').textContent = processing;
+      document.querySelector('#reportVerifying').textContent = verifying;
       document.querySelector('#reportCompleted').textContent = completed;
       document.querySelector('#reportOverdue').textContent = overdue;
       reportDialog.close();
@@ -2421,8 +2513,7 @@
     document.querySelector('#applyBulk').addEventListener('click', async () => {
       if (!selectedIndices.size) { showNotice('请先勾选需要批量处理的记录'); return; }
       const owner = bulkOwner.value.trim();
-      const status = bulkStatus.value;
-      if (!owner && !status) { showNotice('请填写负责人或选择新的处置状态'); return; }
+      if (!owner) { showNotice('请先选择要指派的负责人'); return; }
       if (!validateAssignee(owner)) return;
       const records = getRecords();
       const updatedAt = new Date().toLocaleString('zh-CN');
@@ -2432,9 +2523,11 @@
         const record = records[index];
         if (!record) return;
         const currentOwner = record.owner || '';
-        const currentStatus = record.status || '待派单';
+        const currentStatus = normalizeStatus(record.status);
         const nextOwner = owner || currentOwner;
-        const nextStatus = status || currentStatus;
+        const nextStatus = nextOwner && !currentOwner && currentStatus === '待派单'
+          ? '处理中'
+          : currentStatus;
         if (nextOwner === currentOwner && nextStatus === currentStatus) return;
         const changes = [];
         if (nextOwner !== currentOwner) changes.push(`负责人调整为：${nextOwner}`);
@@ -2458,7 +2551,6 @@
       saveRecords(records);
       selectedIndices.clear();
       bulkOwner.value = '';
-      bulkStatus.value = '';
       renderRecords();
       if (!changedCount) { showNotice('所选记录无需更新'); return; }
       try {
@@ -2483,7 +2575,7 @@
       if (!description) { editDescription.focus(); return; }
       const location = editLocation.value.trim();
       const owner = editOwner.value.trim();
-      const status = editStatus.value;
+      let status = normalizeStatus(editStatus.value);
       const deadline = editDeadline.value;
       const note = editNote.value.trim();
       const latitudeText = editLatitude.value.trim();
@@ -2495,7 +2587,29 @@
       }
       const latitude = latitudeText ? Number(latitudeText) : null;
       const longitude = longitudeText ? Number(longitudeText) : null;
-      const currentStatus = record.status || '待派单';
+      const currentStatus = normalizeStatus(record.status);
+      if (!currentIsAdmin) {
+        status = currentStatus === '处理中' || currentStatus === '退回整改' ? '待核查' : currentStatus;
+      }
+      const allowedStatuses = statusOptions(currentStatus, currentIsAdmin);
+      if (!allowedStatuses.includes(status)) {
+        showNotice('当前案件不能跳过处置节点，请按流程推进。');
+        return;
+      }
+      if (currentIsAdmin && currentStatus === '待核查' && status === '退回整改' && !note) {
+        showNotice('退回整改时请填写退回意见，便于负责人针对性办理。');
+        editNote.focus();
+        return;
+      }
+      if (currentIsAdmin && record.owner && !owner && currentStatus !== '待派单') {
+        showNotice('已派单案件不能直接清空负责人，请重新指定负责人或按流程退回整改。');
+        return;
+      }
+      if (currentIsAdmin && !record.owner && owner && status === '待派单') status = '处理中';
+      if (!currentIsAdmin && status === '待核查' && !note && !editEvidenceData.length) {
+        showNotice('提交核查前请填写处理说明或上传至少一张整改凭证照片。');
+        return;
+      }
       const changes = [];
       if (description !== record.description) changes.push('修改问题描述');
       if (location !== (record.location || '')) changes.push('修改发现地点');
