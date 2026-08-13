@@ -150,6 +150,10 @@
     .deadline-soon { color: #8a4b08; background: #fff3d6; }
     .deadline-overdue { color: #b42318; background: #fff0ee; }
     .deadline-done { color: #116548; background: #e8f7f0; }
+    .recurrence-alert { display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; padding: 11px 12px; border: 1px solid #ecd7a6; border-radius: 11px; color: #765719; background: #fffaf0; font-size: 13px; line-height: 1.55; }
+    .recurrence-alert[hidden] { display: none; }
+    .recurrence-alert strong { color: #704d08; }
+    .recurrence-alert button { flex: none; min-height: 30px; padding: 5px 9px; color: #765719; background: #fff0c9; box-shadow: none; font-size: 12px; }
     .photo-picker { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px; border: 1px dashed #b9c9dc; border-radius: 12px; background: #f8fbff; }
     .photo-picker input { max-width: 260px; }
     .photo-preview, .photo-thumb { object-fit: cover; border-radius: 8px; background: #edf2f8; }
@@ -1051,12 +1055,16 @@
       </section>
 
       <section class="final-actions surface admin-only" aria-label="巡查记录最终操作">
-        <div class="final-actions-copy"><span class="eyebrow">最终确认</span><strong>核对录入信息与研判结果</strong><p>确认无误后保存巡查记录；清空操作将重置本次尚未保存的内容。</p></div>
+      <div class="final-actions-copy"><span class="eyebrow">最终确认</span><strong>核对录入信息与研判结果</strong><p>确认无误后保存巡查记录；清空操作将重置本次尚未保存的内容。</p></div>
         <div class="final-action-buttons">
           <button class="secondary" id="clear" type="button">清空输入</button>
           <button class="success" id="save" type="button">保存巡查记录</button>
         </div>
       </section>
+      <aside class="recurrence-alert" id="recurrenceAlert" hidden aria-live="polite">
+        <div><strong>发现可能重复问题</strong><span id="recurrenceText"></span></div>
+        <button id="viewRecurrence" type="button">查看历史</button>
+      </aside>
     </div>
 
     <p class="notice" id="notice" aria-live="polite"></p>
@@ -1326,6 +1334,9 @@
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
+    const recurrenceAlert = document.querySelector('#recurrenceAlert');
+    const recurrenceText = document.querySelector('#recurrenceText');
+    const viewRecurrence = document.querySelector('#viewRecurrence');
     const filterOverdue = document.querySelector('#filterOverdue');
     const filterSoon = document.querySelector('#filterSoon');
     const filterVerifying = document.querySelector('#filterVerifying');
@@ -1512,6 +1523,29 @@
       return ['其他问题', '城市管理部门', '一般'];
     }
 
+    function normalizedLocation(value) {
+      return String(value || '').trim().toLowerCase().replace(/[\s，,。．、;；:：()（）\-—_]/g, '');
+    }
+
+    function findRecurringRecords(description = issue.value, location = locationInput.value) {
+      const [type] = classify(description || '');
+      const normalized = normalizedLocation(location);
+      if (!normalized || normalized.length < 3) return [];
+      return getRecords().filter(record =>
+        !isClosedStatus(record.status)
+        && normalizedLocation(record.location) === normalized
+        && (record.type || classify(record.description || '')[0]) === type
+      );
+    }
+
+    function updateRecurrenceAlert() {
+      const matches = findRecurringRecords();
+      recurrenceAlert.hidden = matches.length === 0;
+      if (!matches.length) return;
+      const recent = matches.slice(0, 2).map(record => record.id || '历史案件').join('、');
+      recurrenceText.textContent = `：同一地点已有 ${matches.length} 条未结案的同类问题（${recent}${matches.length > 2 ? '等' : ''}）。请确认是否合并处置或加强巡查。`;
+    }
+
     function priorityFromRisk(riskLevel) {
       if (riskLevel === '高') return '高';
       if (riskLevel === '中') return '较高';
@@ -1543,6 +1577,7 @@
       analysisSource.textContent = '照片 AI 识别（请人工复核）';
       renderAiAnalysis(analysis);
       if (analysis.issue_summary?.trim()) issue.value = analysis.issue_summary.trim();
+      updateRecurrenceAlert();
     }
 
     let recordCache;
@@ -2237,6 +2272,7 @@
           const payload = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(payload.error || '道路名称查询失败');
           if (payload.address) locationInput.value = payload.address;
+          updateRecurrenceAlert();
           if (payload.resolved) {
             setLocationStatus(`定位成功：${payload.road}`, 'success');
           } else {
@@ -2261,6 +2297,18 @@
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
     });
 
+    issue.addEventListener('input', updateRecurrenceAlert);
+    locationInput.addEventListener('input', updateRecurrenceAlert);
+    viewRecurrence.addEventListener('click', () => {
+      const matches = findRecurringRecords();
+      if (!matches.length) return;
+      searchInput.value = locationInput.value.trim();
+      statusFilter.value = '';
+      deadlineFilter.value = '';
+      renderRecords();
+      focusRecords();
+    });
+
     document.querySelector('#clear').addEventListener('click', () => {
       issue.value = '';
       locationInput.value = '';
@@ -2276,6 +2324,7 @@
       Object.values(output).forEach(element => element.textContent = '等待识别');
       analysisSource.textContent = '等待识别';
       renderAiAnalysis(null);
+      recurrenceAlert.hidden = true;
       issue.focus();
     });
 
