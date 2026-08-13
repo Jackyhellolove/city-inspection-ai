@@ -138,6 +138,14 @@
     .bar-track { height: 10px; overflow: hidden; border-radius: 999px; background: #e9eef5; }
     .bar-value { height: 100%; border-radius: inherit; background: #4f86e8; }
     .chart-empty { color: #7b879b; font-size: 14px; }
+    .owner-supervision { display: grid; gap: 9px; }
+    .owner-supervision-row { display: grid; grid-template-columns: minmax(72px, 1fr) auto auto auto; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: 1px solid #e0e8f0; border-radius: 10px; color: #30485d; background: white; box-shadow: none; text-align: left; }
+    .owner-supervision-row:hover { border-color: #a9c7eb; background: #f7fbff; transform: translateY(-1px); }
+    .owner-supervision-name { overflow: hidden; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .owner-supervision-count { display: grid; justify-items: center; min-width: 38px; padding-left: 8px; border-left: 1px solid #e7edf3; color: #597085; font-size: 10px; line-height: 1.1; }
+    .owner-supervision-count strong { margin-bottom: 2px; color: #263d52; font-size: 16px; }
+    .owner-supervision-count.overdue strong { color: #b42318; }
+    .owner-supervision-count.soon strong { color: #9b5e04; }
     .filters { display: grid; grid-template-columns: 1fr 150px 150px; gap: 12px; margin-top: 14px; }
     .filters input, .filters select { padding: 10px 12px; border: 1px solid #cbd8e8; border-radius: 9px; font: inherit; }
     .delete { padding: 7px 10px; color: #b42318; background: #fff0ee; }
@@ -1089,7 +1097,7 @@
         <div class="bars" id="typeChart"><span class="chart-empty">尚无巡查记录</span></div>
       </div>
       <div class="chart-card">
-        <h2>负责人待办</h2>
+        <h2>责任人督办排行</h2>
         <div class="bars" id="ownerChart"><span class="chart-empty">尚无已派单问题</span></div>
       </div>
       <div class="chart-card supervision-card">
@@ -2183,14 +2191,19 @@
             <strong>${count}</strong>
           </div>`).join('')
         : '<span class="chart-empty">尚无巡查记录</span>';
-      const ownerCounts = records.filter(record => record.owner && !isClosedStatus(record.status)).reduce((counts, record) => {
-        counts[record.owner] = (counts[record.owner] || 0) + 1;
-        return counts;
-      }, {});
-      const maxOwnerCount = Math.max(0, ...Object.values(ownerCounts));
-      document.querySelector('#ownerChart').innerHTML = maxOwnerCount
-        ? Object.entries(ownerCounts).sort((a, b) => b[1] - a[1]).map(([owner, count]) => `<div class="bar-row"><span class="bar-label" title="${escapeHtml(owner)}">${escapeHtml(owner)}</span><div class="bar-track"><div class="bar-value" style="width:${count / maxOwnerCount * 100}%"></div></div><strong>${count}</strong></div>`).join('')
-        : '<span class="chart-empty">尚无已派单问题</span>';
+      const ownerSummary = records.filter(record => record.owner && !isClosedStatus(record.status)).reduce((summary, record) => {
+        const owner = record.owner;
+        const item = summary.get(owner) || { total: 0, overdue: 0, soon: 0 };
+        item.total += 1;
+        if (getDeadlineState(record) === 'overdue') item.overdue += 1;
+        if (getDeadlineState(record) === 'soon') item.soon += 1;
+        summary.set(owner, item);
+        return summary;
+      }, new Map());
+      const rankedOwners = [...ownerSummary.entries()].sort((a, b) => b[1].overdue - a[1].overdue || b[1].soon - a[1].soon || b[1].total - a[1].total || a[0].localeCompare(b[0], 'zh-CN'));
+      document.querySelector('#ownerChart').innerHTML = rankedOwners.length
+        ? `<div class="owner-supervision">${rankedOwners.map(([owner, item]) => `<button class="owner-supervision-row" data-owner-filter="${escapeHtml(owner)}" type="button" title="查看 ${escapeHtml(owner)} 的未结案案件"><span class="owner-supervision-name">${escapeHtml(owner)}</span><span class="owner-supervision-count"><strong>${item.total}</strong>待办</span><span class="owner-supervision-count overdue"><strong>${item.overdue}</strong>逾期</span><span class="owner-supervision-count soon"><strong>${item.soon}</strong>临期</span></button>`).join('')}</div>`
+        : '<span class="chart-empty">尚无已指派的未结案问题</span>';
 
       empty.textContent = records.length ? '没有符合筛选条件的记录' : '暂时没有保存的记录';
       empty.hidden = visibleRecords.length > 0;
@@ -2780,6 +2793,15 @@
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
+    document.querySelector('#ownerChart').addEventListener('click', event => {
+      const button = event.target.closest('[data-owner-filter]');
+      if (!button) return;
+      ownerFilter.value = button.dataset.ownerFilter;
+      statusFilter.value = '';
+      deadlineFilter.value = '';
+      renderRecords();
+      focusRecords();
+    });
     filterOverdue.addEventListener('click', () => { deadlineFilter.value = 'overdue'; statusFilter.value = ''; renderRecords(); focusRecords(); });
     filterSoon.addEventListener('click', () => { deadlineFilter.value = 'soon'; statusFilter.value = ''; renderRecords(); focusRecords(); });
     filterVerifying.addEventListener('click', () => { statusFilter.value = '待核查'; deadlineFilter.value = ''; renderRecords(); focusRecords(); });
