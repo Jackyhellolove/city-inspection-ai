@@ -52,6 +52,12 @@
 - 数据库用 Supabase（Postgres + Auth + Storage + Realtime），前端直连 `supabase-js`；AI 密钥类请求只走后端代理，浏览器不接触密钥。
 - 保持「轻依赖」原则：新增第三方依赖前先评估是否真的必要。
 
+### 4. 线程命名约定（区分模型产出）
+
+- 所有任务/线程标题必须以模型前缀开头：`[Codex]`（Codex 产出）或 `[DeepSeek]`（DeepSeek 产出）。
+- 新建线程或重命名线程时遵守；旧线程按创建时间归属：2026-08-16 切换模型之前为 Codex，之后为 DeepSeek，应补上对应前缀。
+- 代码归属最终以 git 分支为准（`codex-checkpoint` / `deepseek/dev`），线程命名仅用于对话管理，不作为代码归属依据。
+
 ## 架构速览
 
 - 后端：`web_app.py`（约 875 行）——静态文件服务 + AI 代理 + 鉴权 + 反向地理编码。
