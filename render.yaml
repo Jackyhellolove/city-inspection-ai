@@ -17,7 +17,21 @@ services:
         value: qwen3-vl-plus
       - key: AI_API_KEY
         sync: false
+      - key: SITUATION_AI_PROVIDER
+        value: dashscope
+      - key: SITUATION_AI_MODEL
+        value: qwen3.7-plus
+      - key: SITUATION_AI_MODELS
+        value: qwen3.7-plus
+      - key: SITUATION_AI_BASE_URL
+        value: https://dashscope.aliyuncs.com/compatible-mode/v1
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
         sync: false
+      - key: AMAP_WEB_KEY
+        sync: false
+      - key: AMAP_SECURITY_JS_CODE
+        sync: false
+      - key: AMAP_COORDINATE_SYSTEM
+        value: WGS84

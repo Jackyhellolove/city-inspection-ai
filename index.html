@@ -115,7 +115,7 @@
     .supervision-card { border-color: #f1d6a6; background: linear-gradient(145deg, #fffdf8, #fff7e9); }
     .supervision-card h2 { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .supervision-card h2 small { color: #9a6418; font-size: 11px; font-weight: 700; }
-    .supervision-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .supervision-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .supervision-summary button { min-height: 74px; padding: 10px; border: 1px solid #f1dfbf; border-radius: 11px; color: #596777; background: rgba(255,255,255,.78); box-shadow: none; text-align: left; }
     .supervision-summary button:hover { border-color: #e8b664; background: white; transform: translateY(-1px); }
     .supervision-summary span, .supervision-summary strong { display: block; }
@@ -124,6 +124,7 @@
     .supervision-summary .urgent { color: #b42318; background: #fff6f4; border-color: #f3c8c2; }
     .supervision-summary .soon { color: #935a07; background: #fffaf0; }
     .supervision-summary .verifying { color: #62479c; background: #faf7ff; border-color: #ddd0f3; }
+    .supervision-summary .missing-deadline { color: #33667c; background: #f1f7fa; border-color: #c8dce8; }
     .supervision-list { display: grid; gap: 7px; margin-top: 12px; }
     .supervision-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(206, 180, 136, .36); }
     .supervision-item strong { display: block; overflow: hidden; color: #30485d; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
@@ -140,8 +141,45 @@
     .review-queue-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
     .review-queue-meta span { padding: 3px 6px; border-radius: 999px; color: #65558f; background: #f0eaff; font-size: 10px; font-weight: 700; }
     .review-queue-meta .has-evidence { color: #08705f; background: #e4f6f0; }
+    .review-queue-meta .review-aging { color: #9a5a09; background: #fff1d8; }
+    .review-queue-meta .review-aging.is-priority { color: #a62f25; background: #fee9e5; }
+    .review-queue-item.is-priority { border-color: #efc5be; background: #fffaf9; }
     .review-queue-item button { min-height: 34px; padding: 7px 9px; color: #5f4396; background: #ede6fb; box-shadow: none; font-size: 12px; }
     .review-queue-item button:hover { background: #e1d5f7; }
+    .notification-trigger { position: relative; }
+    .notification-badge { display: grid; min-width: 17px; height: 17px; place-items: center; padding: 0 4px; border: 2px solid #173d58; border-radius: 999px; color: white; background: #d9483d; font-size: 10px; font-weight: 900; line-height: 1; }
+    .notification-badge[hidden] { display: none; }
+    .notification-dialog { width: min(720px, calc(100vw - 28px)); }
+    .notification-list { display: grid; gap: 9px; }
+    .notification-item { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: start; gap: 10px; padding: 12px; border: 1px solid #dce6ef; border-radius: 12px; background: #fbfdff; }
+    .notification-item::before { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; color: #3d647e; background: #e9f1f7; font-size: 13px; font-weight: 900; content: '提'; }
+    .notification-item.is-urgent { border-color: #efc5be; background: #fff9f8; }
+    .notification-item.is-urgent::before { color: #b42318; background: #fee7e3; content: '!'; }
+    .notification-item.is-review { border-color: #ddd0f3; background: #fcfaff; }
+    .notification-item.is-review::before { color: #684b9d; background: #f0eaff; content: '核'; }
+    .notification-item strong { display: block; color: #30485d; font-size: 13px; line-height: 1.45; }
+    .notification-item small { display: block; margin-top: 3px; color: #728494; font-size: 12px; line-height: 1.5; }
+    .notification-item button { min-height: 32px; padding: 6px 9px; color: #195896; background: #eaf3ff; box-shadow: none; font-size: 12px; }
+    .notification-empty { margin: 0; padding: 22px 10px; color: #718396; text-align: center; }
+    .my-workbench-card { border-color: #b9ddd4; background: linear-gradient(145deg, #f6fffc, #edf9f5); }
+    .my-workbench-card[hidden] { display: none; }
+    .my-workbench-card h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .my-workbench-card h2 small { color: #08705f; font-size: 11px; font-weight: 700; }
+    .my-workbench-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .my-workbench-summary button { min-height: 74px; padding: 10px; border: 1px solid #c8e7dd; border-radius: 11px; color: #456b62; background: rgba(255,255,255,.82); box-shadow: none; text-align: left; }
+    .my-workbench-summary button:hover { border-color: #77c9b5; background: white; transform: translateY(-1px); }
+    .my-workbench-summary span, .my-workbench-summary strong { display: block; }
+    .my-workbench-summary span { font-size: 11px; font-weight: 700; }
+    .my-workbench-summary strong { margin-top: 5px; color: #176c59; font-size: 22px; line-height: 1; }
+    .my-workbench-summary .urgent { color: #b42318; background: #fff6f4; border-color: #f3c8c2; }
+    .my-workbench-summary .returning { color: #9a5a09; background: #fffaf0; border-color: #f1ddb9; }
+    .my-workbench-summary .verifying { color: #62479c; background: #faf7ff; border-color: #ddd0f3; }
+    .my-workbench-list { display: grid; gap: 7px; margin-top: 12px; }
+    .my-workbench-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(121, 194, 172, .34); }
+    .my-workbench-item strong { display: block; overflow: hidden; color: #304d65; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .my-workbench-item small { display: block; margin-top: 2px; color: #728795; font-size: 11px; }
+    .my-workbench-item button { min-height: 32px; padding: 6px 9px; color: #08705f; background: #ddf3ed; box-shadow: none; font-size: 12px; }
+    .my-workbench-item button:hover { background: #caeadf; }
     .progress-track { height: 14px; overflow: hidden; border-radius: 999px; background: #e9eef5; }
     .progress-value { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #16835d, #25ad7d); transition: width .3s ease; }
     .progress-label { display: flex; justify-content: space-between; margin-top: 9px; color: #637087; font-size: 13px; }
@@ -186,6 +224,18 @@
     .evidence-card { padding: 8px; border: 1px solid #dce6f3; border-radius: 10px; background: #fff; }
     .evidence-card img { width: 100%; height: 90px; object-fit: cover; cursor: zoom-in; }
     .evidence-card small { display: block; margin-top: 6px; color: #69758a; overflow-wrap: anywhere; }
+    .before-after-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 14px; }
+    .evidence-group { min-width: 0; padding: 12px; border: 1px solid #dce6f0; border-radius: 13px; background: #fbfdff; }
+    .evidence-group header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+    .evidence-group header strong { color: #30485d; font-size: 13px; }
+    .evidence-group header small { color: #7b8b9a; font-size: 11px; }
+    .source-photo-card { display: grid; gap: 7px; }
+    .source-photo-card img { width: 100%; height: 152px; border-radius: 10px; object-fit: cover; cursor: zoom-in; }
+    .source-photo-card small { color: #6d7d8c; font-size: 11px; }
+    .evidence-group .evidence-gallery { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); margin: 0; }
+    .evidence-group .evidence-card { padding: 6px; }
+    .evidence-group .evidence-card img { height: 88px; }
+    .evidence-empty { display: grid; place-items: center; min-height: 120px; border: 1px dashed #cad8e4; border-radius: 10px; color: #7a8b9a; font-size: 12px; text-align: center; }
     dialog { width: min(900px, 92vw); padding: 14px; border: 0; border-radius: 16px; box-shadow: 0 24px 80px #17203355; }
     dialog::backdrop { background: #172033aa; }
     dialog img { display: block; width: 100%; max-height: 78vh; object-fit: contain; border-radius: 10px; }
@@ -339,7 +389,7 @@
       grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
       gap: 16px;
-      overflow: hidden;
+      overflow: visible;
       margin-bottom: 14px;
       padding: clamp(22px, 3vw, 32px);
       border-radius: 26px;
@@ -389,7 +439,7 @@
       position: absolute;
       top: 18px;
       right: 20px;
-      z-index: 5;
+      z-index: 50;
       display: block;
       justify-self: end;
       margin: 0;
@@ -409,16 +459,18 @@
     .role-badge { padding: 0; color: #aeeadf; background: transparent; font-weight: 800; }
     .account-chevron { width: 7px; height: 7px; margin: -3px 2px 0 1px; border-right: 1.5px solid rgba(255,255,255,.78); border-bottom: 1.5px solid rgba(255,255,255,.78); transform: rotate(45deg); transition: transform .16s ease; }
     .account-menu-trigger[aria-expanded="true"] .account-chevron { margin-top: 3px; transform: rotate(225deg); }
-    .account-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 218px; overflow: hidden; padding: 7px; border: 1px solid #dce5ec; border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.98); box-shadow: 0 18px 46px rgba(10,31,48,.22); backdrop-filter: blur(18px); }
+    .account-menu { position: absolute; z-index: 60; top: calc(100% + 8px); right: 0; width: 218px; overflow: hidden; padding: 7px; border: 1px solid #dce5ec; border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.98); box-shadow: 0 18px 46px rgba(10,31,48,.22); backdrop-filter: blur(18px); }
     .account-menu[hidden] { display: none; }
     .account-menu-status { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px; padding: 9px 10px 10px; border-bottom: 1px solid #e8edf1; color: #6f8091; font-size: 11px; line-height: 1.45; }
     .account-menu-status .online-dot { margin-top: 4px; }
-    .account-menu button { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 8px 10px; border: 0; border-radius: 9px; color: #30485d; background: transparent; box-shadow: none; font-size: 13px; text-align: left; }
-    .account-menu button:hover { color: #174f99; background: #eef4fb; }
+    .account-menu button, .account-menu a { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 8px 10px; border: 0; border-radius: 9px; color: #30485d; background: transparent; box-shadow: none; font-size: 13px; text-align: left; text-decoration: none; }
+    .account-menu button:hover, .account-menu a:hover { color: #174f99; background: #eef4fb; }
     .account-menu #logout { color: #a43d35; }
     .account-menu #logout:hover { background: #fff1ef; }
     .install-card { margin: 0 0 14px; border-radius: 15px; background: #edf6ff; }
     .workspace {
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
@@ -432,6 +484,32 @@
     .entry-stage > .section-heading, .results > .section-heading { margin-bottom: 12px; }
     .analysis-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 14px; }
     .analysis-pane { min-width: 0; padding: 15px; border: 1px solid #dce6ed; border-radius: 16px; background: rgba(255,255,255,.76); }
+    .case-intake-layout { display: grid; grid-template-columns: 1.08fr .92fr; gap: 14px; }
+    .case-intake-layout + .case-intake-layout { margin-top: 14px; }
+    .standard-classification-card { border-color: #b8ddd4; background: linear-gradient(145deg, #f1fbf8, #f9fdfc); }
+    .standard-reference { display: flex; align-items: center; gap: 8px; margin: 0 0 13px; padding: 9px 10px; border: 1px solid #c9e6de; border-radius: 10px; color: #417368; background: rgba(255,255,255,.75); font-size: 12px; line-height: 1.45; }
+    .standard-reference strong { flex: none; color: #08705f; font-size: 11px; letter-spacing: .04em; }
+    .standard-code-preview { display: grid; gap: 3px; margin-top: 12px; padding: 12px; border: 1px solid #c6e5dc; border-radius: 12px; color: #416359; background: rgba(255,255,255,.82); }
+    .standard-code-preview span { color: #6f8b84; font-size: 11px; font-weight: 700; }
+    .standard-code-preview strong { color: #0a6859; font-size: 15px; }
+    .standard-code-preview small { color: #688078; font-size: 11px; line-height: 1.45; }
+    .standard-code-preview button { justify-self: start; min-height: 31px; margin-top: 4px; padding: 5px 9px; border: 1px solid #98d4c5; color: #08705f; background: #e3f6f0; font-size: 12px; font-weight: 800; }
+    .standard-code-preview button:hover { background: #d5f0e7; }
+    .classification-result { margin-top: 13px; padding-top: 12px; border-top: 1px dashed #bddcd4; }
+    .classification-result .row { grid-template-columns: minmax(80px, .65fr) minmax(0, 1fr); padding: 7px 0; border-bottom: 1px solid rgba(152,205,192,.34); }
+    .classification-result .row:last-child { border-bottom: 0; }
+    .classification-result .value { font-weight: 800; }
+    .matter-attribute-preview { margin-top: 13px; padding: 12px; border: 1px solid #c6e5dc; border-radius: 12px; background: rgba(255,255,255,.74); }
+    .matter-attribute-preview header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .matter-attribute-preview header strong { color: #0a6859; font-size: 13px; }
+    .matter-attribute-preview header small { color: #658078; font-size: 11px; }
+    .matter-attribute-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; margin: 10px 0 0; }
+    .matter-attribute-grid div { min-width: 0; padding-top: 7px; border-top: 1px solid rgba(152,205,192,.34); }
+    .matter-attribute-grid dt { color: #70867f; font-size: 10px; font-weight: 800; }
+    .matter-attribute-grid dd { margin: 3px 0 0; overflow-wrap: anywhere; color: #264c44; font-size: 12px; font-weight: 750; line-height: 1.4; }
+    .ai-description-action { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-top: 10px; padding: 9px 10px; border: 1px solid #b8ddd4; border-radius: 10px; color: #42665d; background: #f4fcf9; font-size: 12px; line-height: 1.45; }
+    .ai-description-action[hidden] { display: none; }
+    .ai-description-action button { flex: none; min-height: 30px; padding: 5px 9px; border: 1px solid #9dd7c8; color: #08705f; background: #e3f6f0; font-size: 12px; }
     .issue-card { display: flex; flex-direction: column; }
     .issue-card textarea { flex: 1; min-height: 152px; resize: vertical; }
     .details-card .field-grid { margin-top: 14px; }
@@ -487,7 +565,13 @@
     .analysis-photo { margin: 0 0 9px; }
     .analysis-photo .photo-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; }
     .analysis-photo .photo-picker .field { min-width: 0; }
-    .analysis-photo .photo-preview { grid-column: 1 / -1; justify-self: center; width: min(100%, 200px); height: 108px; border-radius: 12px; object-fit: cover; }
+    .analysis-photo .photo-preview-stage { position: relative; grid-column: 1 / -1; justify-self: center; width: min(100%, 200px); height: 108px; overflow: hidden; border-radius: 12px; }
+    .analysis-photo .photo-preview-stage[hidden] { display: none; }
+    .analysis-photo .photo-preview { display: block; width: 100%; height: 100%; border-radius: 12px; object-fit: cover; }
+    .photo-annotations { position: absolute; inset: 0; pointer-events: none; }
+    .photo-annotations[hidden] { display: none; }
+    .photo-annotation { position: absolute; border: 2px solid #f29b38; border-radius: 5px; box-shadow: 0 0 0 1px rgba(255,255,255,.8), 0 3px 10px rgba(125,66,8,.28); }
+    .photo-annotation span { position: absolute; top: -20px; left: -2px; max-width: 130px; overflow: hidden; padding: 3px 5px; border-radius: 5px 5px 5px 0; color: white; background: #bc6514; font-size: 9px; font-weight: 800; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
     .analysis-photo .photo-remove { min-height: 38px; padding: 7px 10px; }
     .analysis-tools { margin: auto 0 0; padding: 10px; border: 1px solid #d9e5ee; border-radius: 14px; background: linear-gradient(145deg, #f5f9fc, #edf4f8); }
     .analysis-tools-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
@@ -518,6 +602,9 @@
     .ai-analysis-section { margin-top: 12px; padding: 14px 15px; border: 1px solid #dde7ed; border-radius: 12px; background: white; }
     .ai-analysis-section p { margin: 0; color: #30485d; line-height: 1.75; white-space: pre-wrap; }
     .ai-analysis-section:first-of-type { border-color: #b9ddd4; background: #f0faf7; }
+    .ai-region-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .ai-region-list span { margin: 0; padding: 5px 8px; border: 1px solid #f0d2a5; border-radius: 7px; color: #91520b; background: #fff8ee; font-size: 11px; }
+    .ai-region-list .empty-region { border: 0; padding: 0; color: #718394; background: transparent; }
     .final-actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 18px; border-radius: 17px; }
     .final-actions-copy { min-width: 0; }
     .final-actions-copy strong { display: block; color: var(--navy); font-size: 16px; }
@@ -586,8 +673,45 @@
     .status-chip[data-status="待核查"] { color: #6b4fa1; background: #f0eaff; }
     .status-chip[data-status="退回整改"] { color: #b54708; background: #fff0df; }
     .status-chip[data-status="已结案"], .status-chip[data-status="已完成"] { color: #08705f; background: #e3f5ef; }
+    .workflow-guide { display: block; max-width: 100%; margin-top: 2px; color: #63778a; font-size: 11px; line-height: 1.45; }
+    .workflow-guide strong { color: #405d76; font-weight: 800; }
+    .rework-chip { display: inline-flex; align-items: center; width: fit-content; margin-top: 5px; padding: 3px 7px; border-radius: 999px; color: #9a5a09; background: #fff1d8; font-size: 10px; font-weight: 800; }
+    .rework-chip.is-repeat { color: #a62f25; background: #fee9e5; }
+    .detail-rework-summary { grid-column: 1 / -1; border: 1px solid #f0d7aa; background: #fffaf0; }
+    .detail-rework-summary strong { color: #8a5407; }
+    .detail-workflow-guide { grid-column: 1 / -1; border: 1px solid #cddfed; background: #f3f8fd; }
+    .detail-workflow-guide strong { color: #244f77; }
     .workflow-hint { grid-column: 1 / -1; margin: -4px 0 2px; padding: 10px 12px; border: 1px solid #d9e6ef; border-radius: 11px; color: #536b7d; background: #f6f9fb; font-size: 13px; line-height: 1.55; }
     .workflow-hint strong { color: var(--navy); }
+    .deadline-risk-panel { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid #d9e4ee; border-radius: 12px; color: #536b7d; background: #f7fafc; }
+    .deadline-risk-panel[hidden] { display: none; }
+    .deadline-risk-panel::before { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 9px; color: #44647c; background: #e6eef5; font-weight: 900; content: '时'; }
+    .deadline-risk-panel strong { color: #304d65; font-size: 13px; }
+    .deadline-risk-panel small { display: block; margin-top: 2px; color: #718396; font-size: 12px; line-height: 1.45; }
+    .deadline-risk-panel.is-soon { border-color: #f0d29b; background: #fffaf0; }
+    .deadline-risk-panel.is-soon::before { color: #9b5e04; background: #fff0cd; }
+    .deadline-risk-panel.is-soon strong { color: #8a5407; }
+    .deadline-risk-panel.is-overdue { border-color: #efc5be; background: #fff6f4; }
+    .deadline-risk-panel.is-overdue::before { color: #b42318; background: #fee5e1; }
+    .deadline-risk-panel.is-overdue strong { color: #a62f25; }
+    .deadline-risk-panel.is-done { border-color: #b8dfd4; background: #f1faf7; }
+    .deadline-risk-panel.is-done::before { color: #08705f; background: #ddf3ed; content: '✓'; }
+    .deadline-risk-panel.is-done strong { color: #08705f; }
+    .review-evidence-panel { grid-column: 1 / -1; display: grid; gap: 9px; padding: 12px 13px; border: 1px solid #cbdff0; border-radius: 12px; background: #f3f8fd; }
+    .review-evidence-panel[hidden] { display: none; }
+    .review-evidence-panel header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .review-evidence-panel strong { color: #244f77; font-size: 13px; }
+    .review-evidence-panel header small { color: #657c91; font-size: 11px; }
+    .review-evidence-checks { display: flex; flex-wrap: wrap; gap: 7px; }
+    .review-evidence-check { padding: 5px 8px; border-radius: 999px; color: #61778a; background: #e8eff5; font-size: 12px; font-weight: 700; }
+    .review-evidence-check.is-ready { color: #08705f; background: #ddf3ed; }
+    .review-evidence-note { padding-top: 8px; border-top: 1px solid #d7e5ef; color: #4d6579; font-size: 12px; line-height: 1.55; }
+    .review-evidence-note b { color: #2d536f; }
+    .return-feedback { grid-column: 1 / -1; padding: 12px 13px; border: 1px solid #f0c7b7; border-radius: 12px; color: #774536; background: #fff5f1; font-size: 13px; line-height: 1.6; }
+    .return-feedback[hidden] { display: none; }
+    .return-feedback strong { color: #a24428; }
+    .return-feedback small { display: block; margin-top: 5px; color: #946b60; }
+    .detail-return-feedback { grid-column: 1 / -1; border-color: #f0c7b7; background: #fff5f1; }
     .assignee-workflow-actions { grid-column: 1 / -1; display: grid; gap: 8px; padding: 14px; border: 1px solid #b9ddd4; border-radius: 13px; background: #f0faf7; }
     .assignee-workflow-actions[hidden] { display: none; }
     .assignee-workflow-actions strong { color: #08705f; font-size: 14px; }
@@ -634,7 +758,7 @@
     .login-actions button:first-child { grid-column: 1 / -1; }
     .demo-tip { border: 1px solid #e0e8ef; background: #f6f9fb; }
     /* Product polish: identity, work surfaces and modal system */
-    .app-hero { isolation: isolate; }
+    .app-hero { z-index: 20; isolation: isolate; }
     .app-hero::before {
       position: absolute;
       z-index: -1;
@@ -774,7 +898,7 @@
       line-height: 1;
     }
     .dialog-close:hover { color: #b42318; background: #fff2f0; }
-    .dialog-body { padding: 22px 24px; overflow-y: auto; }
+    .dialog-body { min-height: 0; flex: 1 1 auto; padding: 22px 24px; overflow-y: auto; overscroll-behavior: contain; }
     form.dialog-body { display: grid; }
     .dialog-footer, .app-dialog > .edit-form > .dialog-actions {
       flex: none;
@@ -793,6 +917,10 @@
     .dialog-section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
     .dialog-section-title span { color: var(--navy); font-size: 16px; font-weight: 800; }
     .dialog-section-title small { color: #8393a2; }
+    .config-dialog-notice { min-height: 22px; margin: 0 0 16px; padding: 10px 12px; border: 1px solid #dbe7ef; border-radius: 10px; color: #40566a; background: #f7fbfe; font-size: 13px; font-weight: 700; line-height: 1.45; }
+    .config-dialog-notice:empty { display: none; }
+    .config-dialog-notice.is-error { border-color: #f2c3bd; color: #a53126; background: #fff6f4; }
+    .config-dialog-notice.is-success { border-color: #b7dfd4; color: #08705f; background: #effaf6; }
     .detail-grid { gap: 12px; padding: 0; }
     .detail-item { min-height: 78px; padding: 13px 14px; border: 1px solid #e0e8ee; border-radius: 12px; background: white; }
     .detail-item span { color: #708294; font-weight: 700; }
@@ -813,6 +941,10 @@
     .dialog-table th, .dialog-table td { width: auto !important; min-width: 110px; max-width: 260px; vertical-align: middle; text-align: center; }
     .dialog-table input, .dialog-table select { width: 100%; }
     .dialog-table tbody tr:hover { background: #f4f8fb; }
+    #issueDictionaryDialog .dialog-body { display: flex; flex-direction: column; gap: 16px; }
+    #issueDictionaryDialog .dialog-table { flex: 0 1 42dvh; min-height: 110px; overflow: auto; }
+    #issueDictionaryDialog .edit-form { flex: none; gap: 8px; margin: 0; }
+    #issueDictionaryDialog .dialog-actions { gap: 8px; margin: 0; }
     .evidence-picker { border-color: #bad1df; border-radius: 12px; background: #f3f8fb; }
     .compact-dialog .dialog-actions { margin: 8px -24px -22px; padding: 15px 24px; }
     @keyframes dialog-enter {
@@ -828,6 +960,8 @@
     }
     @media (max-width: 900px) {
       .analysis-layout { grid-template-columns: 1fr; }
+      .case-intake-layout { grid-template-columns: 1fr; }
+      .matter-attribute-grid { grid-template-columns: 1fr; }
       .issue-card, .details-card { min-height: 0; }
       .issue-card textarea { min-height: 180px; }
       .history .table-wrap { overflow: visible; border: 0; background: transparent; }
@@ -848,6 +982,7 @@
       .history .row-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .history .row-actions button { width: 100%; min-height: 40px; }
       .history .row-actions .delete:last-child { grid-column: auto; }
+      .before-after-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 720px) {
       main { padding: 12px 12px calc(34px + env(safe-area-inset-bottom)); }
@@ -990,6 +1125,11 @@
         </button>
         <div class="account-menu" id="accountMenu" role="menu" hidden>
           <div class="account-menu-status"><span class="online-dot" aria-hidden="true"></span><span id="cloudStatus"></span></div>
+          <button class="notification-trigger" id="openNotifications" type="button" role="menuitem">消息提醒 <span class="notification-badge" id="notificationBadge" hidden>0</span></button>
+          <a class="admin-only" id="openCommandCenter" href="./command-center.html" role="menuitem" hidden>城市一张图 · 领导驾驶舱</a>
+          <button class="admin-only" id="manageIssueDictionary" type="button" role="menuitem" hidden>标准问题字典</button>
+          <button class="admin-only" id="manageKnowledgeBase" type="button" role="menuitem" hidden>城管知识库</button>
+          <button class="admin-only" id="manageCaseIntakeConfig" type="button" role="menuitem" hidden>主管部门与单元网格</button>
           <button id="manageUsers" type="button" role="menuitem" hidden>人员管理</button>
           <button id="logout" type="button" role="menuitem">退出登录</button>
         </div>
@@ -1002,43 +1142,74 @@
 
     <div class="workspace">
       <section class="entry-stage surface admin-only" aria-label="管理员新建案件">
-        <div class="section-heading"><div><span class="eyebrow">现场录入</span><h2>新建巡查问题</h2><p>填写现场情况和派单信息，智能研判将在下一步完成。</p></div></div>
-        <div class="analysis-layout">
+        <div class="section-heading"><div><span class="eyebrow">国标案件建档</span><h2>新建巡查事项</h2><p>先确认 GB/T 47678.5-2026 管理事项，再补充现场描述、定位和派单信息。</p></div></div>
+        <div class="case-intake-layout">
           <div class="analysis-pane issue-card">
-            <div class="analysis-pane-heading"><strong>巡查问题</strong><span>描述现场发现的问题、影响范围和需要处置的事项</span></div>
+            <div class="analysis-pane-heading"><strong>① 现场事实</strong><span>描述现场看到的情况；AI 结果会作为可复核的录入草稿</span></div>
+            <div class="field">
+              <label for="source">案件来源</label>
+              <select id="source"><option>人工巡查</option><option>群众上报</option><option>无人机巡查</option><option>视频发现</option><option>热线转办</option></select>
+            </div>
             <label for="issue">问题描述</label>
-            <textarea id="issue" placeholder="例如：发现道路井盖缺失">发现道路井盖缺失</textarea>
+            <textarea id="issue" placeholder="例如：人行道边垃圾箱满溢，散落垃圾影响通行"></textarea>
           </div>
 
-          <div class="analysis-pane details-card">
-            <div class="analysis-pane-heading"><strong>派单与处置设置</strong><span>补充发现位置、负责人、状态和完成期限</span></div>
+          <div class="analysis-pane standard-classification-card">
+            <div class="analysis-pane-heading"><strong>② 国标管理事项归类</strong><span>案件录入仅创建管理事项；管理部件由资产普查或专业部门维护。</span></div>
+            <p class="standard-reference"><strong>GB/T 47678.5-2026</strong><span>选择事项后会自动带出建议处置主管部门和优先级。</span></p>
+            <input id="standardKind" type="hidden" value="管理事项">
             <div class="field-grid">
-      <div class="field">
-        <label for="location">发现地点</label>
-        <input id="location" placeholder="例如：和平路与胜利街路口">
-        <div class="location-tools"><button id="getLocation" type="button">获取当前位置</button><span id="locationStatus">尚未定位</span></div>
-      </div>
-      <div class="field">
-        <label for="owner">负责人</label>
-        <input id="owner" list="ownerOptions" placeholder="选择或填写负责人">
-      </div>
-      <div class="field">
-        <label for="status">处置状态</label>
-        <select id="status">
-          <option>待派单</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="deadline">完成期限</label>
-        <input id="deadline" type="date">
-      </div>
+              <div class="field"><label for="standardCategory">国标分类</label><select id="standardCategory" disabled><option>正在加载国标目录…</option></select></div>
+              <div class="field"><label for="standardMatter">具体国标条目</label><select id="standardMatter" disabled><option>请先选择国标分类</option></select></div>
             </div>
+            <div class="standard-code-preview" id="standardMatterPreview"><span id="standardMatterPreviewLabel">当前确认事项</span><strong id="standardMatterPreviewTitle">请从国标目录选择</strong><small id="standardMatterPreviewMeta">照片 AI 只能辅助推荐，最终事项应由人工确认。</small><button id="confirmStandardMatter" type="button" hidden>确认采用此国标事项</button></div>
+            <div class="classification-result">
+              <div class="row"><span class="name">案件类型</span><span class="value" id="type">待选择国标事项</span></div>
+              <div class="row"><span class="name">处置主管部门</span><span class="value" id="department">待选择</span></div>
+              <div class="row"><span class="name">主管部门代码</span><span class="value" id="supervisingOrganization">待配置</span></div>
+              <div class="row"><span class="name">优先级</span><span class="value" id="priority">待确认</span></div>
+              <div class="row"><span class="name">归类依据</span><span class="value" id="analysisSource">人工待确认</span></div>
+            </div>
+            <section class="matter-attribute-preview" aria-label="管理事项国标属性预览">
+              <header><strong>管理事项国标属性</strong><small>保存时随事项实例一并建档</small></header>
+              <dl class="matter-attribute-grid">
+                <div><dt>事项代码（SXDM）</dt><dd id="matterAttributeCode">待选择事项</dd></div>
+                <div><dt>事项名称（SXMC）</dt><dd id="matterAttributeName">待选择事项</dd></div>
+                <div><dt>主管部门代码（ZGBMDM）</dt><dd id="matterAttributeOrgCode">待配置</dd></div>
+                <div><dt>主管部门名称（ZGBMMC）</dt><dd id="matterAttributeOrgName">待配置</dd></div>
+                <div><dt>事发位置（SFWZ）</dt><dd id="matterAttributeLocation">待填写</dd></div>
+                <div><dt>所在单元网格（SZDYWGBSM）</dt><dd id="matterAttributeGrid">待选择</dd></div>
+              </dl>
+            </section>
+          </div>
+        </div>
+        <div class="case-intake-layout">
+          <div class="analysis-pane details-card">
+            <div class="analysis-pane-heading"><strong>③ 现场位置与行政区划</strong><span>定位成功后自动回填道路名称；行政区划使用 GB/T 2260 六码。</span></div>
+            <div class="field">
+              <label for="location">发现地点</label>
+              <input id="location" placeholder="例如：和平路与胜利街路口">
+              <div class="location-tools"><button id="getLocation" type="button">获取当前位置</button><span id="locationStatus">尚未定位</span></div>
+            </div>
+            <div class="field-grid">
+              <div class="field"><label for="administrativeDivisionName">行政区划</label><input id="administrativeDivisionName" placeholder="例如：广东省深圳市南山区"></div>
+              <div class="field"><label for="administrativeDivisionCode">行政区划代码</label><input id="administrativeDivisionCode" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="GB/T 2260 六位代码"></div>
+            </div>
+            <div class="field"><label for="gridIdentifier">所在单元网格</label><select id="gridIdentifier" disabled><option>请先配置单元网格</option></select></div>
+          </div>
+          <div class="analysis-pane details-card">
+            <div class="analysis-pane-heading"><strong>④ 指派与时限</strong><span>新案件提交后将直接进入负责人待办。</span></div>
+            <div class="field-grid">
+              <div class="field"><label for="owner">负责人</label><input id="owner" list="ownerOptions" placeholder="选择负责人"></div>
+              <div class="field"><label for="deadline">完成期限</label><input id="deadline" type="date"></div>
+            </div>
+            <select id="status" hidden><option>待派单</option></select>
           </div>
         </div>
       </section>
 
       <section class="results admin-only" aria-live="polite">
-        <div class="section-heading"><div><span class="eyebrow">智能研判</span><h2>现场识别与研判结果</h2><p>上传现场资料并选择识别方式，结果仅作辅助，请结合实际复核。</p></div></div>
+        <div class="section-heading"><div><span class="eyebrow">AI 辅助归类</span><h2>现场识别与国标事项回填</h2><p>AI 会回填问题描述并尝试推荐国标事项；未能确定时必须人工选择。</p></div></div>
         <div class="analysis-layout">
           <div class="analysis-pane analysis-input-pane">
             <div class="analysis-pane-heading"><strong>现场资料与识别</strong><span>选择照片后可使用多模态 AI，也可根据文字规则识别</span></div>
@@ -1049,7 +1220,7 @@
                   <input id="photo" type="file" accept="image/*" capture="environment">
                 </div>
                 <button class="photo-remove" id="removePhoto" type="button" hidden>移除照片</button>
-                <img class="photo-preview" id="photoPreview" alt="现场照片预览" hidden>
+                <div class="photo-preview-stage" id="photoPreviewStage" hidden><img class="photo-preview" id="photoPreview" alt="现场照片预览"><div class="photo-annotations" id="photoAnnotations" hidden aria-label="AI 识别区域"></div></div>
               </div>
             </div>
             <div class="analysis-tools">
@@ -1061,15 +1232,13 @@
             </div>
           </div>
           <div class="analysis-pane analysis-output-pane">
-            <div class="analysis-pane-heading"><strong>智能研判结果</strong><span>分类、责任部门和优先级将自动写入巡查记录</span></div>
-            <div class="row"><span class="name">问题类型</span><span class="value" id="type">等待识别</span></div>
-            <div class="row"><span class="name">处理部门</span><span class="value" id="department">等待识别</span></div>
-            <div class="row"><span class="name">优先级</span><span class="value" id="priority">等待识别</span></div>
-            <div class="row"><span class="name">识别方式</span><span class="value" id="analysisSource">等待识别</span></div>
+            <div class="analysis-pane-heading"><strong>AI 推荐结果</strong><span>国标事项写入前须在“国标事项归类”中确认</span></div>
+            <p class="standard-reference"><strong>人工确认优先</strong><span>AI 只负责推荐和回填描述；最终类型、部门和优先级以已确认国标事项为准。</span></p>
             <div class="ai-result" id="aiResult" hidden>
               <div class="ai-result-head"><h3>照片 AI 辅助判断</h3><span class="ai-confidence-badge">置信度 <span id="aiConfidence">0%</span></span></div>
               <p class="ai-summary-clamp" id="aiSummary"></p>
               <div class="ai-result-footer"><span>结果仅供辅助，请人工复核</span><button id="openAiAnalysis" type="button">查看完整研判</button></div>
+              <div class="ai-description-action" id="aiDescriptionAction" hidden><span id="aiDescriptionActionText"></span><button id="applyAiDescription" type="button">采用 AI 描述</button></div>
             </div>
           </div>
         </div>
@@ -1119,8 +1288,19 @@
           <button class="urgent" id="filterOverdue" type="button"><span>已逾期</span><strong id="overdueCount">0</strong></button>
           <button class="soon" id="filterSoon" type="button"><span>48 小时内到期</span><strong id="soonCount">0</strong></button>
           <button class="verifying" id="filterVerifying" type="button"><span>待管理员核查</span><strong id="supervisionVerifyingCount">0</strong></button>
+          <button class="missing-deadline admin-only" id="filterNoDeadline" type="button" hidden><span>未设期限</span><strong id="noDeadlineCount">0</strong></button>
         </div>
         <div class="supervision-list" id="supervisionList"></div>
+      </div>
+      <div class="chart-card my-workbench-card" id="myWorkbenchCard" hidden>
+        <h2>我的待办 <small id="myWorkbenchLabel">0 件待处理</small></h2>
+        <div class="my-workbench-summary">
+          <button id="filterMyProcessing" type="button"><span>待办理</span><strong id="myProcessingCount">0</strong></button>
+          <button class="returning" id="filterMyReturned" type="button"><span>退回整改</span><strong id="myReturnedCount">0</strong></button>
+          <button class="verifying" id="filterMyVerifying" type="button"><span>待核查</span><strong id="myVerifyingCount">0</strong></button>
+          <button class="urgent" id="filterMyOverdue" type="button"><span>已逾期</span><strong id="myOverdueCount">0</strong></button>
+        </div>
+        <div class="my-workbench-list" id="myWorkbenchList"></div>
       </div>
       <div class="chart-card review-queue-card admin-only" id="reviewQueueCard" hidden>
         <h2>管理员核查队列 <small id="reviewQueueCount">0 件待核查</small></h2>
@@ -1173,6 +1353,15 @@
           <option value="normal">期限正常</option>
           <option value="none">未设期限</option>
         </select>
+        <select id="qualityFilter" aria-label="按数据完整度筛选">
+          <option value="">全部数据完整度</option>
+          <option value="location">未定位</option>
+          <option value="deadline">未设期限</option>
+          <option value="owner">未指派负责人</option>
+          <option value="photo">缺少现场照片</option>
+          <option value="ai">未完成 AI 研判</option>
+          <option value="description">问题描述过短</option>
+        </select>
         <select id="ownerFilter" aria-label="按负责人筛选"><option value="">全部负责人</option></select>
       </div>
       <div class="bulk-actions no-print admin-only">
@@ -1205,12 +1394,61 @@
       <section class="ai-analysis-section"><span>问题概述</span><p id="aiDetailSummary"></p></section>
       <section class="ai-analysis-section"><span>建议处置</span><p id="aiRecommendation"></p></section>
       <section class="ai-analysis-section"><span>注意事项</span><p id="aiCaution"></p></section>
+      <section class="ai-analysis-section"><span>识别区域</span><div class="ai-region-list" id="aiDetailRegions"></div></section>
     </div>
     <div class="dialog-actions dialog-footer"><button class="primary" id="confirmAiAnalysis" type="button">已核对，关闭</button></div>
   </dialog>
   <dialog class="app-dialog wide-dialog" id="userDialog">
     <header class="dialog-header"><div><span class="dialog-kicker">组织与权限</span><h2>人员管理</h2><p>维护部门、角色与在岗状态，确保派单范围准确。</p></div><button class="dialog-close" id="closeUsers" type="button" aria-label="关闭人员管理">×</button></header>
     <div class="dialog-body"><div class="table-wrap dialog-table"><table><thead><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
+  </dialog>
+  <dialog class="app-dialog wide-dialog" id="issueDictionaryDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">业务标准</span><h2>标准问题字典</h2><p>统一案件来源、问题类别、默认责任部门、优先级与建议处置时限。</p></div><button class="dialog-close" id="closeIssueDictionary" type="button" aria-label="关闭标准问题字典">×</button></header>
+    <div class="dialog-body"><p class="dialog-note" id="issueDictionaryStatus">正在读取标准问题字典…</p><div class="table-wrap dialog-table"><table><thead><tr><th>标准代码</th><th>类别</th><th>标准名称</th><th>默认责任主体</th><th>优先级</th><th>建议时限</th><th>适用来源</th></tr></thead><tbody id="issueDictionaryRows"></tbody></table></div><section class="edit-form"><label for="issueDictionaryImport">导入国标目录（TSV）</label><textarea id="issueDictionaryImport" rows="6" placeholder="粘贴从标准代码表整理的制表符分隔数据；第一行可为表头。仅导入已有正式标准代码的条目。"></textarea><div class="dialog-actions"><button id="downloadIssueDictionaryTemplate" type="button">下载导入模板</button><button class="primary" id="importIssueDictionary" type="button">校验并导入目录</button></div></section></div>
+  </dialog>
+  <dialog class="app-dialog wide-dialog" id="knowledgeBaseDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">行业知识资产</span><h2>城管国标事项知识库</h2><p>以 GB/T 47678.5-2026 事项为主目录，维护同义词、地方叫法、视觉特征、易混事项和处置指引；不修改国标名称和代码。</p></div><button class="dialog-close" id="closeKnowledgeBase" type="button" aria-label="关闭城管知识库">×</button></header>
+    <div class="dialog-body knowledge-base-body">
+      <p class="config-dialog-notice" id="knowledgeBaseNotice" aria-live="polite"></p>
+      <section class="dialog-section" style="margin-top:0;padding-top:0;border-top:0">
+        <div class="field"><label for="knowledgeIssueSelect">选择国标管理事项</label><select id="knowledgeIssueSelect"><option value="">正在加载事项目录…</option></select></div>
+        <form class="edit-form" id="knowledgeProfileForm">
+          <div class="edit-form-grid"><div class="full"><label for="knowledgeSummary">业务解释</label><textarea id="knowledgeSummary" rows="3" placeholder="说明此事项认定的核心事实与适用范围"></textarea></div><div class="full"><label for="knowledgeHandlingGuidance">处置指引</label><textarea id="knowledgeHandlingGuidance" rows="3" placeholder="例如：优先组织清运、清扫，并核查清运频次"></textarea></div><div class="full"><label for="knowledgeReviewGuidance">人工复核指引</label><textarea id="knowledgeReviewGuidance" rows="3" placeholder="说明与相近事项的判别要点"></textarea></div></div>
+          <div class="dialog-actions"><button class="primary" type="submit">保存知识说明</button></div>
+        </form>
+      </section>
+      <section class="dialog-section">
+        <div class="dialog-section-title"><span>同义词与语义词</span><small>支持通用词和按行政区划生效的地方叫法；排除项会降低推荐优先级。</small></div>
+        <form class="edit-form" id="knowledgeTermForm"><div class="field-grid"><div><label for="knowledgeTermType">类型</label><select id="knowledgeTermType"><option>同义词</option><option>地方叫法</option><option>关键词</option><option>常见描述</option><option>排除项</option></select></div><div><label for="knowledgeTerm">词语或描述</label><input id="knowledgeTerm" required maxlength="120" placeholder="例如：垃圾桶爆满"></div><div><label for="knowledgeTermWeight">权重（0~1）</label><input id="knowledgeTermWeight" type="number" required min="0" max="1" step="0.01" value="0.80"></div><div><label for="knowledgeTermDivision">适用行政区划（可选）</label><input id="knowledgeTermDivision" inputmode="numeric" maxlength="6" placeholder="6 位代码"></div></div><div class="dialog-actions"><button class="primary" type="submit">添加语义词</button></div></form>
+        <div class="table-wrap dialog-table"><table><thead><tr><th>类型</th><th>词语</th><th>权重</th><th>适用范围</th><th>操作</th></tr></thead><tbody id="knowledgeTermRows"></tbody></table></div>
+      </section>
+      <section class="dialog-section">
+        <div class="dialog-section-title"><span>AI 视觉特征</span><small>为照片识别、目标检测和后续多模态复核提供可解释的正反证据。</small></div>
+        <form class="edit-form" id="knowledgeFeatureForm"><div class="field-grid"><div><label for="knowledgeFeatureType">特征类型</label><select id="knowledgeFeatureType"><option>识别对象</option><option>场景</option><option>正向条件</option><option>负向条件</option></select></div><div><label for="knowledgeFeatureText">特征描述</label><input id="knowledgeFeatureText" required maxlength="300" placeholder="例如：垃圾高度超过桶口"></div><div><label for="knowledgeFeatureWeight">权重（0~1）</label><input id="knowledgeFeatureWeight" type="number" required min="0" max="1" step="0.01" value="0.80"></div></div><div class="dialog-actions"><button class="primary" type="submit">添加视觉特征</button></div></form>
+        <div class="table-wrap dialog-table"><table><thead><tr><th>类型</th><th>特征描述</th><th>权重</th><th>操作</th></tr></thead><tbody id="knowledgeFeatureRows"></tbody></table></div>
+      </section>
+      <section class="dialog-section">
+        <div class="dialog-section-title"><span>易混淆事项</span><small>明确候选事项的边界，供人工复核和后续大模型裁决使用。</small></div>
+        <form class="edit-form" id="knowledgeConfusionForm"><div class="edit-form-grid"><div><label for="knowledgeConfusionTarget">易混淆国标事项</label><select id="knowledgeConfusionTarget"></select></div><div class="full"><label for="knowledgeConfusionDistinction">判别依据</label><textarea id="knowledgeConfusionDistinction" required rows="3" placeholder="说明什么情况下应选择当前事项，什么情况下应选择易混淆事项"></textarea></div></div><div class="dialog-actions"><button class="primary" type="submit">添加易混事项</button></div></form>
+        <div class="table-wrap dialog-table"><table><thead><tr><th>易混淆事项</th><th>判别依据</th><th>操作</th></tr></thead><tbody id="knowledgeConfusionRows"></tbody></table></div>
+      </section>
+    </div>
+  </dialog>
+  <dialog class="app-dialog wide-dialog" id="caseIntakeConfigDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">案件建档基础数据</span><h2>主管部门与单元网格</h2><p>事项录入自动带出处置主管部门，并从本表选择所在单元网格；两项均为国标事项必填数据。</p></div><button class="dialog-close" id="closeCaseIntakeConfig" type="button" aria-label="关闭基础数据配置">×</button></header>
+    <div class="dialog-body">
+      <p class="config-dialog-notice" id="caseIntakeConfigNotice" aria-live="polite"></p>
+      <section class="dialog-section" style="margin-top:0;padding-top:0;border-top:0">
+        <div class="dialog-section-title"><span>事项处置主管部门</span><small>部门标签应与标准问题字典中的“默认责任主体”一致</small></div>
+        <form class="edit-form" id="handlingDepartmentForm"><div class="field-grid"><div><label for="handlingDepartmentLabel">部门标签</label><input id="handlingDepartmentLabel" required placeholder="例如：市政公用部门"></div><div><label for="handlingOrganizationCode">统一社会信用代码</label><input id="handlingOrganizationCode" required maxlength="18" placeholder="18 位代码"></div><div><label for="handlingOrganizationName">主管部门名称</label><input id="handlingOrganizationName" required maxlength="100" placeholder="例如：某市城市管理局"></div><div><label for="handlingDepartmentSort">排序</label><input id="handlingDepartmentSort" type="number" min="1" value="100"></div></div><div class="dialog-actions"><button class="primary" type="submit">保存主管部门</button></div></form>
+        <div class="table-wrap dialog-table"><table><thead><tr><th>部门标签</th><th>统一社会信用代码</th><th>主管部门名称</th><th>操作</th></tr></thead><tbody id="handlingDepartmentRows"></tbody></table></div>
+      </section>
+      <section class="dialog-section">
+        <div class="dialog-section-title"><span>单元网格</span><small>请选择已配置的 15 位单元网格标识码</small></div>
+        <form class="edit-form" id="unitGridForm"><div class="field-grid"><div><label for="unitGridIdentifier">单元网格标识码</label><input id="unitGridIdentifier" required maxlength="15" placeholder="15 位标识码"></div><div><label for="unitGridName">单元网格名称</label><input id="unitGridName" required maxlength="100" placeholder="例如：南山区粤海街道01网格"></div><div><label for="unitGridDivisionCode">行政区划代码</label><input id="unitGridDivisionCode" required maxlength="6" placeholder="6 位代码"></div><div><label for="unitGridDivisionName">行政区划名称</label><input id="unitGridDivisionName" maxlength="100" placeholder="例如：广东省深圳市南山区"></div></div><div class="dialog-actions"><button class="primary" type="submit">保存单元网格</button></div></form>
+        <div class="table-wrap dialog-table"><table><thead><tr><th>网格标识码</th><th>网格名称</th><th>行政区划</th><th>操作</th></tr></thead><tbody id="unitGridRows"></tbody></table></div>
+      </section>
+    </div>
   </dialog>
   <dialog class="app-dialog compact-dialog" id="passwordResetDialog">
     <header class="dialog-header"><div><span class="dialog-kicker">账户安全</span><h2>设置新密码</h2><p>请使用至少 6 位且不易猜测的新密码。</p></div></header>
@@ -1228,9 +1466,13 @@
     <header class="dialog-header"><div><span class="dialog-kicker">案件全景</span><h2 id="detailTitle">巡查问题详情</h2><p>查看案件信息、整改证据与完整处置过程。</p></div><button class="dialog-close" id="closeDetail" type="button" aria-label="关闭巡查问题详情">×</button></header>
     <div class="dialog-body">
       <div id="detailContent"></div>
-      <section class="dialog-section"><div class="dialog-section-title"><span>整改凭证</span><small>现场处置照片</small></div><div class="evidence-gallery" id="detailEvidence"></div></section>
+      <section class="dialog-section"><div class="dialog-section-title"><span>处置前后对比</span><small>核查现场问题与整改结果</small></div><div class="before-after-grid" id="detailEvidence"></div></section>
       <section class="dialog-section"><div class="dialog-section-title"><span>处置时间线</span><small>按时间倒序展示</small></div><div class="timeline" id="detailTimeline"></div></section>
     </div>
+  </dialog>
+  <dialog class="app-dialog notification-dialog" id="notificationDialog">
+    <header class="dialog-header"><div><span class="dialog-kicker">协同提醒</span><h2>消息提醒</h2><p>根据当前任务、时限和核查状态自动生成。</p></div><button class="dialog-close" id="closeNotifications" type="button" aria-label="关闭消息提醒">×</button></header>
+    <div class="dialog-body"><div class="notification-list" id="notificationList"></div></div>
   </dialog>
   <dialog class="app-dialog wide-dialog" id="editDialog">
     <header class="dialog-header"><div><span class="dialog-kicker">协同处置</span><h2>编辑巡查记录</h2><p>更新负责人、期限、处置状态并补充整改证据。</p></div></header>
@@ -1265,10 +1507,13 @@
           <input id="editLongitude" type="number" step="any" min="-180" max="180" placeholder="例如：119.1618">
         </div>
         <div class="full">
-          <label for="editNote">本次处理说明（可选）</label>
+          <label id="editNoteLabel" for="editNote">本次处理说明（可选）</label>
           <textarea id="editNote" placeholder="例如：已联系养护单位，预计今日完成处理"></textarea>
         </div>
         <div class="workflow-hint" id="editWorkflowHint"></div>
+        <section class="deadline-risk-panel" id="editDeadlineRisk" hidden></section>
+        <section class="review-evidence-panel" id="adminReviewEvidence" hidden></section>
+        <div class="return-feedback" id="editReturnFeedback" hidden></div>
         <div class="assignee-workflow-actions" id="assigneeWorkflowActions" hidden>
           <strong id="assigneeWorkflowTitle"></strong>
           <p id="assigneeWorkflowText"></p>
@@ -1301,11 +1546,20 @@
   <script src="./supabase-config.js"></script>
   <script>
     const issue = document.querySelector('#issue');
+    const standardKindInput = document.querySelector('#standardKind');
+    const standardCategoryInput = document.querySelector('#standardCategory');
+    const standardMatterInput = document.querySelector('#standardMatter');
+    const standardMatterPreview = document.querySelector('#standardMatterPreview');
+    const standardMatterPreviewLabel = document.querySelector('#standardMatterPreviewLabel');
+    const standardMatterPreviewTitle = document.querySelector('#standardMatterPreviewTitle');
+    const standardMatterPreviewMeta = document.querySelector('#standardMatterPreviewMeta');
+    const confirmStandardMatterButton = document.querySelector('#confirmStandardMatter');
     const output = {
       type: document.querySelector('#type'),
       department: document.querySelector('#department'),
       priority: document.querySelector('#priority')
     };
+    const supervisingOrganizationOutput = document.querySelector('#supervisingOrganization');
     const analysisSource = document.querySelector('#analysisSource');
     const analyzePhotoButton = document.querySelector('#analyzePhoto');
     const aiResult = document.querySelector('#aiResult');
@@ -1318,14 +1572,32 @@
     const aiRecommendation = document.querySelector('#aiRecommendation');
     const aiConfidence = document.querySelector('#aiConfidence');
     const aiCaution = document.querySelector('#aiCaution');
+    const aiDetailRegions = document.querySelector('#aiDetailRegions');
+    const aiDescriptionAction = document.querySelector('#aiDescriptionAction');
+    const aiDescriptionActionText = document.querySelector('#aiDescriptionActionText');
+    const applyAiDescriptionButton = document.querySelector('#applyAiDescription');
     const notice = document.querySelector('#notice');
     const locationInput = document.querySelector('#location');
+    const administrativeDivisionNameInput = document.querySelector('#administrativeDivisionName');
+    const administrativeDivisionCodeInput = document.querySelector('#administrativeDivisionCode');
+    const gridIdentifierInput = document.querySelector('#gridIdentifier');
     const locationStatus = document.querySelector('#locationStatus');
     const ownerInput = document.querySelector('#owner');
+    const sourceInput = document.querySelector('#source');
     const statusInput = document.querySelector('#status');
     const deadlineInput = document.querySelector('#deadline');
+    const matterAttributeOutput = {
+      code: document.querySelector('#matterAttributeCode'),
+      name: document.querySelector('#matterAttributeName'),
+      organizationCode: document.querySelector('#matterAttributeOrgCode'),
+      organizationName: document.querySelector('#matterAttributeOrgName'),
+      location: document.querySelector('#matterAttributeLocation'),
+      grid: document.querySelector('#matterAttributeGrid')
+    };
     const photoInput = document.querySelector('#photo');
     const photoPreview = document.querySelector('#photoPreview');
+    const photoPreviewStage = document.querySelector('#photoPreviewStage');
+    const photoAnnotations = document.querySelector('#photoAnnotations');
     const removePhotoButton = document.querySelector('#removePhoto');
     const photoDialog = document.querySelector('#photoDialog');
     const photoLarge = document.querySelector('#photoLarge');
@@ -1333,6 +1605,11 @@
     const detailContent = document.querySelector('#detailContent');
     const detailEvidence = document.querySelector('#detailEvidence');
     const detailTimeline = document.querySelector('#detailTimeline');
+    const notificationDialog = document.querySelector('#notificationDialog');
+    const openNotifications = document.querySelector('#openNotifications');
+    const closeNotifications = document.querySelector('#closeNotifications');
+    const notificationBadge = document.querySelector('#notificationBadge');
+    const notificationList = document.querySelector('#notificationList');
     const editDialog = document.querySelector('#editDialog');
     const editForm = document.querySelector('#editForm');
     const editDescription = document.querySelector('#editDescription');
@@ -1342,8 +1619,12 @@
     const editDeadline = document.querySelector('#editDeadline');
     const editLatitude = document.querySelector('#editLatitude');
     const editLongitude = document.querySelector('#editLongitude');
+    const editNoteLabel = document.querySelector('#editNoteLabel');
     const editNote = document.querySelector('#editNote');
     const editWorkflowHint = document.querySelector('#editWorkflowHint');
+    const editDeadlineRisk = document.querySelector('#editDeadlineRisk');
+    const adminReviewEvidence = document.querySelector('#adminReviewEvidence');
+    const editReturnFeedback = document.querySelector('#editReturnFeedback');
     const editSubmit = document.querySelector('#editSubmit');
     const assigneeWorkflowActions = document.querySelector('#assigneeWorkflowActions');
     const assigneeWorkflowTitle = document.querySelector('#assigneeWorkflowTitle');
@@ -1359,16 +1640,25 @@
     const searchInput = document.querySelector('#search');
     const statusFilter = document.querySelector('#statusFilter');
     const deadlineFilter = document.querySelector('#deadlineFilter');
+    const qualityFilter = document.querySelector('#qualityFilter');
     const recurrenceAlert = document.querySelector('#recurrenceAlert');
     const recurrenceText = document.querySelector('#recurrenceText');
     const viewRecurrence = document.querySelector('#viewRecurrence');
     const filterOverdue = document.querySelector('#filterOverdue');
     const filterSoon = document.querySelector('#filterSoon');
     const filterVerifying = document.querySelector('#filterVerifying');
+    const filterNoDeadline = document.querySelector('#filterNoDeadline');
     const supervisionList = document.querySelector('#supervisionList');
     const reviewQueueCard = document.querySelector('#reviewQueueCard');
     const reviewQueueCount = document.querySelector('#reviewQueueCount');
     const reviewQueue = document.querySelector('#reviewQueue');
+    const myWorkbenchCard = document.querySelector('#myWorkbenchCard');
+    const myWorkbenchLabel = document.querySelector('#myWorkbenchLabel');
+    const myProcessingCount = document.querySelector('#myProcessingCount');
+    const myReturnedCount = document.querySelector('#myReturnedCount');
+    const myVerifyingCount = document.querySelector('#myVerifyingCount');
+    const myOverdueCount = document.querySelector('#myOverdueCount');
+    const myWorkbenchList = document.querySelector('#myWorkbenchList');
     const ownerFilter = document.querySelector('#ownerFilter');
     const ownerOptions = document.querySelector('#ownerOptions');
     const selectAll = document.querySelector('#selectAll');
@@ -1405,6 +1695,51 @@
     const manageUsersButton = document.querySelector('#manageUsers');
     const userDialog = document.querySelector('#userDialog');
     const userRows = document.querySelector('#userRows');
+    const manageIssueDictionaryButton = document.querySelector('#manageIssueDictionary');
+    const issueDictionaryDialog = document.querySelector('#issueDictionaryDialog');
+    const issueDictionaryRows = document.querySelector('#issueDictionaryRows');
+    const issueDictionaryStatus = document.querySelector('#issueDictionaryStatus');
+    const issueDictionaryImport = document.querySelector('#issueDictionaryImport');
+    const downloadIssueDictionaryTemplateButton = document.querySelector('#downloadIssueDictionaryTemplate');
+    const importIssueDictionaryButton = document.querySelector('#importIssueDictionary');
+    const manageKnowledgeBaseButton = document.querySelector('#manageKnowledgeBase');
+    const knowledgeBaseDialog = document.querySelector('#knowledgeBaseDialog');
+    const knowledgeBaseNotice = document.querySelector('#knowledgeBaseNotice');
+    const knowledgeIssueSelect = document.querySelector('#knowledgeIssueSelect');
+    const knowledgeProfileForm = document.querySelector('#knowledgeProfileForm');
+    const knowledgeSummaryInput = document.querySelector('#knowledgeSummary');
+    const knowledgeHandlingGuidanceInput = document.querySelector('#knowledgeHandlingGuidance');
+    const knowledgeReviewGuidanceInput = document.querySelector('#knowledgeReviewGuidance');
+    const knowledgeTermForm = document.querySelector('#knowledgeTermForm');
+    const knowledgeTermTypeInput = document.querySelector('#knowledgeTermType');
+    const knowledgeTermInput = document.querySelector('#knowledgeTerm');
+    const knowledgeTermWeightInput = document.querySelector('#knowledgeTermWeight');
+    const knowledgeTermDivisionInput = document.querySelector('#knowledgeTermDivision');
+    const knowledgeTermRows = document.querySelector('#knowledgeTermRows');
+    const knowledgeFeatureForm = document.querySelector('#knowledgeFeatureForm');
+    const knowledgeFeatureTypeInput = document.querySelector('#knowledgeFeatureType');
+    const knowledgeFeatureTextInput = document.querySelector('#knowledgeFeatureText');
+    const knowledgeFeatureWeightInput = document.querySelector('#knowledgeFeatureWeight');
+    const knowledgeFeatureRows = document.querySelector('#knowledgeFeatureRows');
+    const knowledgeConfusionForm = document.querySelector('#knowledgeConfusionForm');
+    const knowledgeConfusionTargetInput = document.querySelector('#knowledgeConfusionTarget');
+    const knowledgeConfusionDistinctionInput = document.querySelector('#knowledgeConfusionDistinction');
+    const knowledgeConfusionRows = document.querySelector('#knowledgeConfusionRows');
+    const manageCaseIntakeConfigButton = document.querySelector('#manageCaseIntakeConfig');
+    const caseIntakeConfigDialog = document.querySelector('#caseIntakeConfigDialog');
+    const caseIntakeConfigNotice = document.querySelector('#caseIntakeConfigNotice');
+    const handlingDepartmentForm = document.querySelector('#handlingDepartmentForm');
+    const handlingDepartmentLabel = document.querySelector('#handlingDepartmentLabel');
+    const handlingOrganizationCode = document.querySelector('#handlingOrganizationCode');
+    const handlingOrganizationName = document.querySelector('#handlingOrganizationName');
+    const handlingDepartmentSort = document.querySelector('#handlingDepartmentSort');
+    const handlingDepartmentRows = document.querySelector('#handlingDepartmentRows');
+    const unitGridForm = document.querySelector('#unitGridForm');
+    const unitGridIdentifier = document.querySelector('#unitGridIdentifier');
+    const unitGridName = document.querySelector('#unitGridName');
+    const unitGridDivisionCode = document.querySelector('#unitGridDivisionCode');
+    const unitGridDivisionName = document.querySelector('#unitGridDivisionName');
+    const unitGridRows = document.querySelector('#unitGridRows');
     let photoData = '';
     let currentAiAnalysis = null;
     let editEvidenceData = [];
@@ -1413,6 +1748,20 @@
     let currentCoordinates = null;
     let deferredInstallPrompt = null;
     let currentIsAdmin = false;
+    let currentUserProfile = null;
+    let issueDictionary = [];
+    let issueDictionaryFeatureReady = false;
+    let knowledgeBaseFeatureReady = false;
+    let urbanIssueKnowledge = [];
+    let urbanIssueKnowledgeTerms = [];
+    let urbanIssueVisualFeatures = [];
+    let urbanIssueConfusions = [];
+    let currentKnowledgeMatch = null;
+    let currentKnowledgeMatchLogId = '';
+    let handlingDepartments = [];
+    let unitGrids = [];
+    let selectedStandardMatter = null;
+    let standardMatterConfirmed = false;
 
     const WORKFLOW_STATUS = ['待派单', '处理中', '待核查', '退回整改', '已结案'];
 
@@ -1439,6 +1788,81 @@
       return [current];
     }
 
+    async function appendAiTaskRun(task) {
+      if (!supabaseClient || !currentUserProfile?.id) return '';
+      const { data, error } = await supabaseClient.from('ai_task_runs').insert({
+        ...task,
+        created_by: currentUserProfile.id
+      }).select('id').maybeSingle();
+      if (error) {
+        // AI 功能不因尚未执行审计迁移而中断；迁移完成后会自动开始留痕。
+        console.info('AI 审计记录暂未写入：', error.message);
+        return '';
+      }
+      return data?.id || '';
+    }
+
+    function currentKnowledgeMatchPayload() {
+      if (!currentKnowledgeMatch?.item) return null;
+      const candidates = currentKnowledgeMatch.candidates?.length ? currentKnowledgeMatch.candidates : [currentKnowledgeMatch];
+      return {
+        recommended_standard_code: currentKnowledgeMatch.item.standard_code,
+        recommended_standard_name: currentKnowledgeMatch.item.standard_name,
+        knowledge_id: currentKnowledgeMatch.knowledgeId || null,
+        match_methods: currentKnowledgeMatch.methods || [],
+        match_confidence: Number(currentKnowledgeMatch.confidence || 0),
+        matched_terms: currentKnowledgeMatch.matchedTerms || [],
+        excluded_terms: currentKnowledgeMatch.excludedTerms || [],
+        candidates: candidates.map(candidate => ({
+          standard_code: candidate.item.standard_code,
+          standard_name: candidate.item.standard_name,
+          confidence: Number(candidate.confidence || 0),
+          methods: candidate.methods || [],
+          matched_terms: candidate.matchedTerms || [],
+          excluded_terms: candidate.excludedTerms || []
+        }))
+      };
+    }
+
+    async function appendUrbanKnowledgeMatchLog({ source, inputSummary, aiTaskRunId = null }) {
+      if (!knowledgeBaseFeatureReady || !supabaseClient || !currentUserProfile?.id) return '';
+      const match = currentKnowledgeMatchPayload();
+      const { data, error } = await supabaseClient.from('urban_issue_match_logs').insert({
+        ai_task_run_id: aiTaskRunId,
+        source,
+        input_summary: String(inputSummary || '').slice(0, 1000),
+        candidate_matches: match?.candidates || [],
+        recommended_knowledge_id: match?.knowledge_id || null,
+        recommended_standard_code: match?.recommended_standard_code || null,
+        recommendation_methods: match?.match_methods || [],
+        recommendation_confidence: match?.match_confidence ?? null,
+        created_by: currentUserProfile.id
+      }).select('id').maybeSingle();
+      if (error) {
+        console.info('知识库匹配留痕暂未写入：', error.message);
+        return '';
+      }
+      currentKnowledgeMatchLogId = data?.id || '';
+      return currentKnowledgeMatchLogId;
+    }
+
+    async function finalizeUrbanKnowledgeMatchLog(record, confirmedItem) {
+      if (!currentKnowledgeMatchLogId || !knowledgeBaseFeatureReady || !supabaseClient || !currentUserProfile?.id) return;
+      const confirmedKnowledge = getKnowledgeForItem(confirmedItem);
+      const match = currentKnowledgeMatchPayload();
+      const isCorrection = Boolean(match?.recommended_standard_code && match.recommended_standard_code !== confirmedItem?.standard_code);
+      const { error } = await supabaseClient.from('urban_issue_match_logs').update({
+        record_id: record.cloudId || null,
+        review_status: isCorrection ? '已修正' : '已确认',
+        confirmed_knowledge_id: confirmedKnowledge?.id || null,
+        correction_reason: isCorrection ? `人工确认改为 ${confirmedItem.standard_code} · ${confirmedItem.standard_name}` : '',
+        reviewed_by: currentUserProfile.id,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }).eq('id', currentKnowledgeMatchLogId);
+      if (error) console.info('知识库匹配复核状态暂未更新：', error.message);
+    }
+
     function workflowHint(status, isAdmin) {
       const current = normalizeStatus(status);
       if (isAdmin && current === '待核查') return '<strong>待你核查：</strong>请查看处理说明和整改凭证，确认后“已结案”，不合格则“退回整改”。';
@@ -1448,6 +1872,64 @@
       return '<strong>协同处置：</strong>请按当前节点完成办理，并保留必要的处理说明和现场凭证。';
     }
 
+    function getWorkflowGuide(record) {
+      const status = normalizeStatus(record.status);
+      const owner = record.owner || '负责人';
+      if (status === '待派单') return { actor: '管理员', action: '请选择负责人并派发案件', next: '进入处理中' };
+      if (status === '处理中') return { actor: owner, action: '填写处理说明或上传整改凭证', next: '提交管理员核查' };
+      if (status === '待核查') return { actor: '管理员', action: '核对处理说明和整改凭证', next: '办结或退回整改' };
+      if (status === '退回整改') return { actor: owner, action: '根据退回意见重新办理', next: '再次提交管理员核查' };
+      return { actor: '流程完成', action: '案件已办结归档', next: '无需后续操作' };
+    }
+
+    function renderWorkflowGuide(record, detail = false) {
+      const guide = getWorkflowGuide(record);
+      const className = detail ? 'detail-item detail-workflow-guide' : 'workflow-guide';
+      return `<div class="${className}"><span>${detail ? '当前办理指引' : ''}</span><strong>${escapeHtml(guide.actor)}</strong>：${escapeHtml(guide.action)} <span>→ ${escapeHtml(guide.next)}</span></div>`;
+    }
+
+    function getReworkCount(record) {
+      return getTimeline(record).filter(item => normalizeStatus(item.toStatus) === '退回整改').length;
+    }
+
+    function renderReworkChip(record) {
+      const count = getReworkCount(record);
+      if (!count) return '';
+      return `<span class="rework-chip${count > 1 ? ' is-repeat' : ''}">第 ${count} 轮整改${count > 1 ? ' · 重点跟进' : ''}</span>`;
+    }
+
+    function renderReworkSummary(record) {
+      const count = getReworkCount(record);
+      if (!count) return '';
+      const level = count > 1 ? '已多次退回，建议管理员重点核对整改材料与现场效果。' : '该案件曾被退回整改，请结合最近一次退回意见复核本轮办理结果。';
+      return `<div class="detail-item detail-rework-summary"><span>整改轮次</span><strong>第 ${count} 轮整改</strong><br><small>${level}</small></div>`;
+    }
+
+    function getLatestReturnFeedback(record) {
+      return getTimeline(record).slice().reverse().find(item => normalizeStatus(item.toStatus) === '退回整改') || null;
+    }
+
+    function renderReturnFeedback(record, detail = false) {
+      const feedback = getLatestReturnFeedback(record);
+      if (!feedback) return '';
+      const className = detail ? 'detail-item detail-return-feedback' : 'return-feedback';
+      return `<div class="${className}"><strong>管理员退回意见</strong><div>${escapeHtml(feedback.note || '请根据现场情况补充整改后重新提交核查。')}</div><small>${escapeHtml(feedback.time || '时间未知')}</small></div>`;
+    }
+
+    function renderAdminReviewEvidence(record) {
+      const attachments = record.attachments || [];
+      const reviewEntry = getTimeline(record).slice().reverse().find(item => normalizeStatus(item.toStatus) === '待核查');
+      const sourcePhotoReady = Boolean(safePhoto(record.photo));
+      const evidenceReady = attachments.length > 0;
+      const note = reviewEntry?.note || '负责人未填写处理说明，请结合整改凭证和现场情况核查。';
+      return `<header><strong>核查材料速览</strong><small>办结前请逐项核对</small></header>
+        <div class="review-evidence-checks">
+          <span class="review-evidence-check${sourcePhotoReady ? ' is-ready' : ''}">${sourcePhotoReady ? '✓' : '!' } 处置前现场照片</span>
+          <span class="review-evidence-check${evidenceReady ? ' is-ready' : ''}">${evidenceReady ? '✓' : '!' } 整改凭证 ${attachments.length} 张</span>
+        </div>
+        <div class="review-evidence-note"><b>负责人提交说明：</b>${escapeHtml(note)}</div>`;
+    }
+
     function updateEditWorkflowOptions() {
       const current = normalizeStatus(editStatus.dataset.currentStatus || editStatus.value);
       const statusField = editStatus.closest('.edit-form-grid > div');
@@ -1455,7 +1937,30 @@
       const available = currentIsAdmin ? statusOptions(current, true) : [assigneeNextStatus];
       const selected = currentIsAdmin && available.includes(editStatus.value) ? editStatus.value : available[0];
       editStatus.innerHTML = available.map(status => `<option${status === selected ? ' selected' : ''}>${status}</option>`).join('');
-      editWorkflowHint.innerHTML = workflowHint(current, currentIsAdmin);
+      const reviewDecision = currentIsAdmin && current === '待核查' ? normalizeStatus(editStatus.value) : '';
+      const requiresReviewConclusion = ['已结案', '退回整改'].includes(reviewDecision);
+      editNote.required = requiresReviewConclusion;
+      if (reviewDecision === '已结案') {
+        editNoteLabel.textContent = '核查结论（必填）';
+        editNote.placeholder = '例如：已核对整改凭证和现场情况，确认问题已整改，予以办结';
+        editWorkflowHint.innerHTML = '<strong>办结核查：</strong>请填写核查结论，确认整改效果后再办结案件。';
+      } else if (reviewDecision === '退回整改') {
+        editNoteLabel.textContent = '退回整改意见（必填）';
+        editNote.placeholder = '例如：整改凭证未覆盖问题点，请补充现场照片后重新提交核查';
+        editWorkflowHint.innerHTML = '<strong>退回整改：</strong>请填写明确的退回意见，便于负责人针对性办理。';
+      } else {
+        editNoteLabel.textContent = currentIsAdmin ? '本次处理说明（可选）' : '本次处理说明（可选，可上传凭证代替）';
+        editNote.placeholder = currentIsAdmin ? '例如：已联系养护单位，预计今日完成处理' : '例如：已完成现场处置，现提交管理员核查';
+        editWorkflowHint.innerHTML = workflowHint(current, currentIsAdmin);
+      }
+      const record = getRecords()[activeEditIndex];
+      updateEditDeadlineRisk();
+      const shouldShowReviewEvidence = Boolean(currentIsAdmin && current === '待核查' && record);
+      adminReviewEvidence.hidden = !shouldShowReviewEvidence;
+      adminReviewEvidence.innerHTML = shouldShowReviewEvidence ? renderAdminReviewEvidence(record) : '';
+      const feedback = record && normalizeStatus(record.status) === '退回整改' ? getLatestReturnFeedback(record) : null;
+      editReturnFeedback.hidden = !feedback;
+      editReturnFeedback.innerHTML = feedback ? `<strong>管理员退回意见</strong><div>${escapeHtml(feedback.note || '请根据现场情况补充整改后重新提交核查。')}</div><small>${escapeHtml(feedback.time || '时间未知')}</small>` : '';
       editStatus.disabled = !currentIsAdmin || available.length === 1;
       statusField.hidden = !currentIsAdmin;
       const isAssigneeAction = !currentIsAdmin && ['处理中', '退回整改'].includes(current);
@@ -1481,6 +1986,7 @@
     }
 
     function showLoggedInState(user) {
+      currentUserProfile = user;
       currentIsAdmin = user.role === '管理员';
       currentUserName.textContent = user.name;
       roleBadge.textContent = user.role;
@@ -1495,6 +2001,7 @@
     }
 
     function showLoggedOutState() {
+      currentUserProfile = null;
       currentIsAdmin = false;
       closeAccountMenu();
       accountBar.hidden = true;
@@ -1509,7 +2016,7 @@
 
     async function getProfile(user) {
       const fallbackName = user.user_metadata?.display_name || user.email || '已登录用户';
-      const fallback = { name: fallbackName, role: '巡查员', note: '可录入巡查问题、查看自己提交记录的处理进度。', profileSource: '账号注册资料' };
+      const fallback = { id: user.id, name: fallbackName, role: '巡查员', note: '可录入巡查问题、查看自己提交记录的处理进度。', profileSource: '账号注册资料' };
       if (!supabaseClient) return fallback;
       const { data, error } = await supabaseClient
         .from('profiles')
@@ -1519,6 +2026,7 @@
       if (error || !data) return fallback;
       const isAdmin = data.role === 'admin';
       return {
+        id: user.id,
         name: data.display_name || fallbackName,
         role: isAdmin ? '管理员' : '巡查员',
         note: isAdmin ? '可查看台账、分派任务、导出报告和管理数据。' : fallback.note,
@@ -1531,6 +2039,9 @@
       showLoggedInState(await getProfile(session.user));
       await loadCloudRecords();
       await loadAssignees();
+      await loadIssueDictionary();
+      await loadUrbanKnowledgeBase();
+      await loadCaseIntakeConfig();
       subscribeToCloudRecords();
     }
 
@@ -1542,9 +2053,27 @@
 
     function includesAny(text, words) { return words.some(word => text.includes(word)); }
 
-    function classify(text) {
+    function classifyFromIssueDictionary(text, source = '人工巡查') {
+      const candidates = activeStandardMatters(source)
+        .map(item => ({
+          item,
+          score: Math.max(0, ...(item.keywords || []).map(keyword => {
+            const value = String(keyword).trim();
+            return value && text.includes(value) ? value.length : 0;
+          }))
+        }))
+        .filter(candidate => candidate.score > 0)
+        .sort((left, right) => right.score - left.score || Number(left.item.sort_order || 0) - Number(right.item.sort_order || 0));
+      const match = candidates[0]?.item;
+      if (!match) return null;
+      return [match.standard_name || match.category, match.default_department || '待配置责任主体', match.default_priority || '一般'];
+    }
+
+    function classify(text, source = '人工巡查') {
       text = text.trim();
       if (!text) return ['无法识别', '待人工确认', '待确认'];
+      const standardMatch = classifyFromIssueDictionary(text, source);
+      if (standardMatch) return standardMatch;
       if (includesAny(text, ['垃圾', '落叶', '污水', '保洁'])) return ['环境卫生', '环卫部门', '一般'];
       if (includesAny(text, ['井盖', '路灯', '护栏', '道路破损'])) return ['市政设施', '市政管理部门', '较高'];
       if (includesAny(text, ['树木倒伏', '树枝断裂', '绿化带'])) return ['园林绿化', '园林部门', '较高'];
@@ -1556,7 +2085,7 @@
     }
 
     function findRecurringRecords(description = issue.value, location = locationInput.value) {
-      const [type] = classify(description || '');
+      const [type] = classify(description || '', sourceInput.value || '人工巡查');
       const normalized = normalizedLocation(location);
       if (!normalized || normalized.length < 3) return [];
       return getRecords().filter(record =>
@@ -1581,10 +2110,31 @@
       return '待确认';
     }
 
+    function aiIssueRegions(analysis) {
+      if (!Array.isArray(analysis?.issue_regions)) return [];
+      return analysis.issue_regions.map(region => {
+        const x = Number(region?.x);
+        const y = Number(region?.y);
+        const width = Number(region?.width);
+        const height = Number(region?.height);
+        if (![x, y, width, height].every(Number.isFinite) || x < 0 || y < 0 || width <= 0 || height <= 0 || x >= 1000 || y >= 1000) return null;
+        return { label: String(region?.label || '问题区域').slice(0, 40), x, y, width: Math.min(width, 1000 - x), height: Math.min(height, 1000 - y) };
+      }).filter(region => region && region.width >= 12 && region.height >= 12).slice(0, 5);
+    }
+
+    function renderPhotoAnnotations(analysis) {
+      const regions = aiIssueRegions(analysis);
+      photoAnnotations.hidden = regions.length === 0;
+      photoAnnotations.innerHTML = regions.map(region => `<i class="photo-annotation" style="left:${region.x / 10}%;top:${region.y / 10}%;width:${region.width / 10}%;height:${region.height / 10}%"><span>${escapeHtml(region.label)}</span></i>`).join('');
+      aiDetailRegions.innerHTML = regions.length ? regions.map(region => `<span>${escapeHtml(region.label)} · 已定位</span>`).join('') : '<span class="empty-region">未返回可靠的目标坐标；请以文字研判和现场核查为准。</span>';
+    }
+
     function renderAiAnalysis(analysis) {
       currentAiAnalysis = analysis || null;
       aiResult.hidden = !analysis;
+      renderPhotoAnnotations(analysis);
       if (!analysis) {
+        aiDescriptionAction.hidden = true;
         if (aiAnalysisDialog.open) aiAnalysisDialog.close();
         return;
       }
@@ -1598,14 +2148,46 @@
       aiCaution.textContent = analysis.caution || 'AI 判断仅供辅助，请结合现场情况复核。';
     }
 
+    function renderMatterAttributePreview(item = selectedStandardMatter) {
+      const department = item ? getHandlingDepartment(item.default_department) : null;
+      const divisionCode = administrativeDivisionCodeInput.value.trim();
+      const location = locationInput.value.trim();
+      matterAttributeOutput.code.textContent = item && /^\d{6}$/.test(divisionCode)
+        ? `${divisionCode}${item.standard_code}`
+        : '待补充行政区划代码及事项';
+      matterAttributeOutput.name.textContent = item?.standard_name || '待选择事项';
+      matterAttributeOutput.organizationCode.textContent = department?.organization_code || '待配置主管部门';
+      matterAttributeOutput.organizationName.textContent = department?.organization_name || '待配置主管部门';
+      matterAttributeOutput.location.textContent = location || '待填写发现地点';
+      matterAttributeOutput.grid.textContent = gridIdentifierInput.value || '待选择单元网格';
+    }
+
     function applyAiAnalysis(analysis) {
-      output.type.textContent = analysis.category || '无法判断';
-      output.department.textContent = analysis.department || '待人工确认';
-      output.priority.textContent = priorityFromRisk(analysis.risk_level);
-      analysisSource.textContent = '照片 AI 识别（请人工复核）';
       renderAiAnalysis(analysis);
-      if (analysis.issue_summary?.trim()) issue.value = analysis.issue_summary.trim();
+      const aiSummary = analysis.issue_summary?.trim();
+      if (aiSummary && !issue.value.trim()) {
+        issue.value = aiSummary;
+        aiDescriptionAction.hidden = true;
+      } else if (aiSummary) {
+        aiDescriptionActionText.textContent = '已保留人工描述；可按需采用 AI 生成的描述草稿。';
+        aiDescriptionAction.hidden = false;
+      }
+      const matchedMatter = findStandardMatterFromAi(analysis, sourceInput.value || '人工巡查');
+      if (matchedMatter) {
+        analysis.knowledge_match = currentKnowledgeMatchPayload();
+        const matchLabel = currentKnowledgeMatch?.methods?.some(method => method.startsWith('知识库'))
+          ? '照片 AI + 城管知识库推荐，待人工确认'
+          : '照片 AI 推荐，待人工确认';
+        selectStandardMatter(matchedMatter, matchLabel);
+        showNotice(`AI 已推荐国标事项：${matchedMatter.standard_code} · ${matchedMatter.standard_name}，请人工核对后保存。`);
+      } else {
+        selectedStandardMatter = null;
+        standardMatterConfirmed = false;
+        renderStandardMatterSelectors();
+        renderStandardMatterPreview(null, '照片 AI 未能确定国标事项');
+      }
       updateRecurrenceAlert();
+      renderMatterAttributePreview();
     }
 
     let recordCache;
@@ -1669,6 +2251,482 @@
       ownerFilter.value = selected;
     }
 
+    function renderIssueDictionary() {
+      if (!issueDictionary.length) {
+        issueDictionaryRows.innerHTML = '<tr><td colspan="7" class="empty">尚未导入国标目录。请先执行 supabase-issue-dictionary.sql，再按 GB/T 47678.5-2026 的正式代码表导入目录。</td></tr>';
+        issueDictionaryStatus.textContent = issueDictionaryFeatureReady ? '国标目录表已启用，等待导入正式管理部件和管理事项目录。' : '国标目录表尚未启用；当前不影响既有案件办理。';
+        return;
+      }
+      issueDictionaryRows.innerHTML = issueDictionary.map(item => `<tr><td>${escapeHtml(item.standard_code || '—')}</td><td>${escapeHtml(item.matter_kind || '管理事项')}</td><td>${escapeHtml(item.standard_name || item.category || '未命名')}</td><td>${escapeHtml(item.default_department || '待配置')}</td><td>${escapeHtml(item.default_priority || '一般')}</td><td>${escapeHtml(String(item.suggested_deadline_days ?? '—'))} 天</td><td>${escapeHtml((item.applicable_sources || []).join('、') || '未配置')}</td></tr>`).join('');
+      issueDictionaryStatus.textContent = `已加载 ${issueDictionary.length} 条目录 · ${issueDictionary[0]?.standard_ref || 'GB/T 47678.5-2026'} · 地方扩展项须单独标记。`;
+    }
+
+    function downloadIssueDictionaryTemplate() {
+      const headers = ['standard_ref', 'standard_code', 'matter_kind', 'category', 'subcategory', 'standard_name', 'default_department', 'default_priority', 'suggested_deadline_days', 'applicable_sources(|分隔)', 'keywords(|分隔)', 'is_local_extension', 'sort_order'];
+      const blob = new Blob([`\ufeff${headers.join('\t')}\n`], { type: 'text/tab-separated-values;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'GB-T-47678.5-2026-标准问题目录导入模板.tsv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function parseIssueDictionaryImport(value) {
+      const rows = String(value || '').replace(/^\uFEFF/, '').split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => line.split('\t').map(cell => cell.trim()));
+      if (rows[0]?.[0] === 'standard_ref' || rows[0]?.[0] === '标准号') rows.shift();
+      if (!rows.length) throw new Error('请粘贴至少一条目录数据');
+      const priorities = new Set(['一般', '较高', '高', '待确认']);
+      return rows.map((columns, index) => {
+        const [standard_ref = 'GB/T 47678.5-2026', standard_code, matter_kind = '管理事项', category, subcategory = '', standard_name, default_department, default_priority = '一般', deadline = '3', sources = '人工巡查', keywords = '', extension = 'false', sortOrder = '100'] = columns;
+        if (standard_ref !== 'GB/T 47678.5-2026') throw new Error(`第 ${index + 1} 条标准号必须为 GB/T 47678.5-2026`);
+        if (!standard_code || !standard_name || !default_department || !category) throw new Error(`第 ${index + 1} 条缺少标准代码、类别、标准名称或责任主体`);
+        if (!['管理部件', '管理事项'].includes(matter_kind)) throw new Error(`第 ${index + 1} 条“类别”只能是管理部件或管理事项`);
+        if (!priorities.has(default_priority)) throw new Error(`第 ${index + 1} 条优先级不符合系统取值`);
+        const suggested_deadline_days = Number.parseInt(deadline, 10);
+        if (!Number.isInteger(suggested_deadline_days) || suggested_deadline_days < 0 || suggested_deadline_days > 365) throw new Error(`第 ${index + 1} 条建议时限应为 0 到 365 的整数`);
+        return { standard_ref, standard_code, matter_kind, category, subcategory, standard_name, default_department, default_priority, suggested_deadline_days, applicable_sources: sources.split('|').map(item => item.trim()).filter(Boolean), keywords: keywords.split('|').map(item => item.trim()).filter(Boolean), is_local_extension: ['true', '1', '是'].includes(extension.toLowerCase()), sort_order: Number.parseInt(sortOrder, 10) || 100, is_active: true, updated_at: new Date().toISOString() };
+      });
+    }
+
+    async function importIssueDictionary() {
+      if (!issueDictionaryFeatureReady) { showNotice('请先在 Supabase 执行 supabase-issue-dictionary.sql'); return; }
+      let rows;
+      try { rows = parseIssueDictionaryImport(issueDictionaryImport.value); } catch (error) { showNotice(`目录校验失败：${error.message}`); return; }
+      importIssueDictionaryButton.disabled = true;
+      importIssueDictionaryButton.textContent = '正在导入…';
+      const { error } = await supabaseClient.from('issue_dictionary').upsert(rows, { onConflict: 'standard_ref,matter_kind,standard_code' });
+      importIssueDictionaryButton.disabled = false;
+      importIssueDictionaryButton.textContent = '校验并导入目录';
+      if (error) { showNotice(`目录导入失败：${error.message}`); return; }
+      issueDictionaryImport.value = '';
+      await loadIssueDictionary();
+      renderIssueDictionary();
+      showNotice(`已导入或更新 ${rows.length} 条标准目录`);
+    }
+
+    async function loadIssueDictionary() {
+      if (!supabaseClient) return;
+      const { data, error } = await supabaseClient.from('issue_dictionary').select('standard_ref, standard_code, matter_kind, category, subcategory, standard_name, default_department, default_priority, suggested_deadline_days, applicable_sources, keywords, is_local_extension, sort_order').eq('is_active', true).order('sort_order').order('standard_code');
+      if (error) {
+        issueDictionaryFeatureReady = false;
+        issueDictionary = [];
+        renderStandardMatterSelectors();
+        return;
+      }
+      issueDictionaryFeatureReady = true;
+      issueDictionary = data || [];
+      renderStandardMatterSelectors();
+    }
+
+    function knowledgeIssueKey(item) {
+      return item ? `${item.standard_ref}|${item.matter_kind}|${item.standard_code}` : '';
+    }
+
+    function getKnowledgeForItem(item) {
+      const key = knowledgeIssueKey(item);
+      return urbanIssueKnowledge.find(knowledge => knowledgeIssueKey(knowledge) === key) || null;
+    }
+
+    function selectedKnowledgeItem() {
+      return urbanIssueKnowledge.find(item => item.id === knowledgeIssueSelect.value) || null;
+    }
+
+    function showKnowledgeBaseNotice(message, state = 'error') {
+      knowledgeBaseNotice.textContent = message;
+      knowledgeBaseNotice.className = `config-dialog-notice${message ? ` is-${state}` : ''}`;
+    }
+
+    async function loadUrbanKnowledgeBase() {
+      if (!supabaseClient) return false;
+      const [knowledgeResult, termsResult, featuresResult, confusionsResult] = await Promise.all([
+        supabaseClient.from('urban_issue_knowledge').select('id, standard_ref, matter_kind, standard_code, knowledge_summary, handling_guidance, review_guidance, is_high_frequency, is_active').eq('is_active', true).order('standard_code'),
+        supabaseClient.from('urban_issue_knowledge_terms').select('id, knowledge_id, term_type, term, administrative_division_code, weight, source_note, is_active').eq('is_active', true).order('term_type').order('term'),
+        supabaseClient.from('urban_issue_visual_features').select('id, knowledge_id, feature_type, feature_text, weight, is_active').eq('is_active', true).order('feature_type').order('feature_text'),
+        supabaseClient.from('urban_issue_confusions').select('id, knowledge_id, confusing_standard_ref, confusing_matter_kind, confusing_standard_code, distinction, is_active').eq('is_active', true).order('confusing_standard_code')
+      ]);
+      const firstError = [knowledgeResult.error, termsResult.error, featuresResult.error, confusionsResult.error].find(Boolean);
+      if (firstError) {
+        knowledgeBaseFeatureReady = false;
+        urbanIssueKnowledge = [];
+        urbanIssueKnowledgeTerms = [];
+        urbanIssueVisualFeatures = [];
+        urbanIssueConfusions = [];
+        return false;
+      }
+      knowledgeBaseFeatureReady = true;
+      urbanIssueKnowledge = knowledgeResult.data || [];
+      urbanIssueKnowledgeTerms = termsResult.data || [];
+      urbanIssueVisualFeatures = featuresResult.data || [];
+      urbanIssueConfusions = confusionsResult.data || [];
+      renderKnowledgeBase();
+      return true;
+    }
+
+    function renderKnowledgeBase() {
+      const managementMatters = issueDictionary
+        .filter(item => item.matter_kind === '管理事项' && item.is_local_extension !== true)
+        .sort((left, right) => Number(left.sort_order || 0) - Number(right.sort_order || 0) || String(left.standard_code).localeCompare(String(right.standard_code)));
+      const selectedId = knowledgeIssueSelect.value || getKnowledgeForItem(selectedStandardMatter)?.id || urbanIssueKnowledge[0]?.id || '';
+      setSelectOptions(knowledgeIssueSelect, urbanIssueKnowledge.map(knowledge => {
+        const directoryItem = managementMatters.find(item => knowledgeIssueKey(item) === knowledgeIssueKey(knowledge));
+        return { value: knowledge.id, label: `${knowledge.is_high_frequency ? '【高频】' : ''}${knowledge.standard_code} · ${directoryItem?.standard_name || '国标事项'}` };
+      }), urbanIssueKnowledge.length ? '请选择国标管理事项' : '知识库尚未初始化');
+      knowledgeIssueSelect.value = urbanIssueKnowledge.some(item => item.id === selectedId) ? selectedId : '';
+      const knowledge = selectedKnowledgeItem();
+      knowledgeSummaryInput.value = knowledge?.knowledge_summary || '';
+      knowledgeHandlingGuidanceInput.value = knowledge?.handling_guidance || '';
+      knowledgeReviewGuidanceInput.value = knowledge?.review_guidance || '';
+      const terms = knowledge ? urbanIssueKnowledgeTerms.filter(item => item.knowledge_id === knowledge.id) : [];
+      const features = knowledge ? urbanIssueVisualFeatures.filter(item => item.knowledge_id === knowledge.id) : [];
+      const confusions = knowledge ? urbanIssueConfusions.filter(item => item.knowledge_id === knowledge.id) : [];
+      knowledgeTermRows.innerHTML = terms.length ? terms.map(item => `<tr><td>${escapeHtml(item.term_type)}</td><td>${escapeHtml(item.term)}</td><td>${escapeHtml(String(item.weight))}</td><td>${escapeHtml(item.administrative_division_code || '通用')}</td><td><button class="delete" type="button" data-delete-knowledge-term="${item.id}">删除</button></td></tr>`).join('') : '<tr><td colspan="5" class="empty">暂未维护语义词</td></tr>';
+      knowledgeFeatureRows.innerHTML = features.length ? features.map(item => `<tr><td>${escapeHtml(item.feature_type)}</td><td>${escapeHtml(item.feature_text)}</td><td>${escapeHtml(String(item.weight))}</td><td><button class="delete" type="button" data-delete-knowledge-feature="${item.id}">删除</button></td></tr>`).join('') : '<tr><td colspan="4" class="empty">暂未维护视觉特征</td></tr>';
+      knowledgeConfusionRows.innerHTML = confusions.length ? confusions.map(item => {
+        const target = managementMatters.find(candidate => candidate.standard_ref === item.confusing_standard_ref && candidate.matter_kind === item.confusing_matter_kind && candidate.standard_code === item.confusing_standard_code);
+        return `<tr><td>${escapeHtml(`${item.confusing_standard_code} · ${target?.standard_name || '未找到目录项'}`)}</td><td>${escapeHtml(item.distinction)}</td><td><button class="delete" type="button" data-delete-knowledge-confusion="${item.id}">删除</button></td></tr>`;
+      }).join('') : '<tr><td colspan="3" class="empty">暂未维护易混淆事项</td></tr>';
+      const currentKey = knowledgeIssueKey(knowledge);
+      setSelectOptions(knowledgeConfusionTargetInput, managementMatters.filter(item => knowledgeIssueKey(item) !== currentKey).map(item => ({ value: knowledgeIssueKey(item), label: `${item.standard_code} · ${item.standard_name}` })), '请选择易混淆事项');
+    }
+
+    async function openKnowledgeBase() {
+      if (!currentIsAdmin || !supabaseClient) return;
+      showKnowledgeBaseNotice('');
+      const loaded = await loadUrbanKnowledgeBase();
+      if (!loaded) {
+        showKnowledgeBaseNotice('知识库尚未启用：请先在 Supabase 执行 supabase-urban-knowledge-base.sql。');
+      }
+      knowledgeBaseDialog.showModal();
+    }
+
+    async function saveKnowledgeProfile(event) {
+      event.preventDefault();
+      const knowledge = selectedKnowledgeItem();
+      if (!knowledge) { showKnowledgeBaseNotice('请先选择一个国标管理事项。'); return; }
+      const { error } = await supabaseClient.from('urban_issue_knowledge').update({
+        knowledge_summary: knowledgeSummaryInput.value.trim(),
+        handling_guidance: knowledgeHandlingGuidanceInput.value.trim(),
+        review_guidance: knowledgeReviewGuidanceInput.value.trim(),
+        updated_at: new Date().toISOString()
+      }).eq('id', knowledge.id);
+      if (error) { showKnowledgeBaseNotice(`保存知识说明失败：${error.message}`); return; }
+      await loadUrbanKnowledgeBase();
+      showKnowledgeBaseNotice('知识说明已保存。', 'success');
+    }
+
+    async function saveKnowledgeTerm(event) {
+      event.preventDefault();
+      const knowledge = selectedKnowledgeItem();
+      const term = knowledgeTermInput.value.trim();
+      const weight = Number(knowledgeTermWeightInput.value);
+      const administrative_division_code = knowledgeTermDivisionInput.value.trim() || null;
+      if (!knowledge || !term || !Number.isFinite(weight) || weight < 0 || weight > 1 || (administrative_division_code && !/^\d{6}$/.test(administrative_division_code))) {
+        showKnowledgeBaseNotice('请填写词语、0 到 1 的权重；地方叫法的行政区划代码须为 6 位数字。');
+        return;
+      }
+      const { error } = await supabaseClient.from('urban_issue_knowledge_terms').insert({
+        knowledge_id: knowledge.id, term_type: knowledgeTermTypeInput.value, term, weight, administrative_division_code, updated_at: new Date().toISOString()
+      });
+      if (error) { showKnowledgeBaseNotice(`添加语义词失败：${error.message}`); return; }
+      knowledgeTermForm.reset();
+      knowledgeTermWeightInput.value = '0.80';
+      await loadUrbanKnowledgeBase();
+      showKnowledgeBaseNotice('语义词已添加。', 'success');
+    }
+
+    async function saveKnowledgeFeature(event) {
+      event.preventDefault();
+      const knowledge = selectedKnowledgeItem();
+      const feature_text = knowledgeFeatureTextInput.value.trim();
+      const weight = Number(knowledgeFeatureWeightInput.value);
+      if (!knowledge || !feature_text || !Number.isFinite(weight) || weight < 0 || weight > 1) {
+        showKnowledgeBaseNotice('请填写视觉特征和 0 到 1 的权重。');
+        return;
+      }
+      const { error } = await supabaseClient.from('urban_issue_visual_features').insert({
+        knowledge_id: knowledge.id, feature_type: knowledgeFeatureTypeInput.value, feature_text, weight, updated_at: new Date().toISOString()
+      });
+      if (error) { showKnowledgeBaseNotice(`添加视觉特征失败：${error.message}`); return; }
+      knowledgeFeatureForm.reset();
+      knowledgeFeatureWeightInput.value = '0.80';
+      await loadUrbanKnowledgeBase();
+      showKnowledgeBaseNotice('视觉特征已添加。', 'success');
+    }
+
+    async function saveKnowledgeConfusion(event) {
+      event.preventDefault();
+      const knowledge = selectedKnowledgeItem();
+      const [confusing_standard_ref, confusing_matter_kind, confusing_standard_code] = String(knowledgeConfusionTargetInput.value || '').split('|');
+      const distinction = knowledgeConfusionDistinctionInput.value.trim();
+      if (!knowledge || !confusing_standard_ref || !confusing_standard_code || !distinction) {
+        showKnowledgeBaseNotice('请选择易混淆事项并填写判别依据。');
+        return;
+      }
+      const { error } = await supabaseClient.from('urban_issue_confusions').insert({
+        knowledge_id: knowledge.id, confusing_standard_ref, confusing_matter_kind, confusing_standard_code, distinction, updated_at: new Date().toISOString()
+      });
+      if (error) { showKnowledgeBaseNotice(`添加易混事项失败：${error.message}`); return; }
+      knowledgeConfusionForm.reset();
+      await loadUrbanKnowledgeBase();
+      showKnowledgeBaseNotice('易混淆事项已添加。', 'success');
+    }
+
+    function getHandlingDepartment(label) {
+      const normalized = String(label || '').trim();
+      return handlingDepartments.find(item => item.is_active !== false && item.department_label === normalized) || null;
+    }
+
+    function renderCaseIntakeConfig() {
+      const divisionCode = administrativeDivisionCodeInput.value.trim();
+      const selectedGrid = gridIdentifierInput.value;
+      const availableGrids = unitGrids
+        .filter(item => item.is_active !== false)
+        .filter(item => !divisionCode || item.administrative_division_code === divisionCode);
+      setSelectOptions(gridIdentifierInput, availableGrids.map(item => ({
+        value: item.grid_identifier,
+        label: `${item.grid_identifier} · ${item.grid_name}`
+      })), divisionCode ? '请选择所在单元网格' : '请先填写行政区划代码');
+      gridIdentifierInput.disabled = !availableGrids.length;
+      gridIdentifierInput.value = availableGrids.some(item => item.grid_identifier === selectedGrid) ? selectedGrid : '';
+      handlingDepartmentRows.innerHTML = handlingDepartments.length
+        ? handlingDepartments.map(item => `<tr><td>${escapeHtml(item.department_label)}</td><td>${escapeHtml(item.organization_code)}</td><td>${escapeHtml(item.organization_name)}</td><td><button class="delete" type="button" data-delete-department="${escapeHtml(item.department_label)}">删除</button></td></tr>`).join('')
+        : '<tr><td colspan="4" class="empty">尚未配置主管部门</td></tr>';
+      unitGridRows.innerHTML = unitGrids.length
+        ? unitGrids.map(item => `<tr><td>${escapeHtml(item.grid_identifier)}</td><td>${escapeHtml(item.grid_name)}</td><td>${escapeHtml(item.administrative_division_name || item.administrative_division_code)}</td><td><button class="delete" type="button" data-delete-grid="${escapeHtml(item.grid_identifier)}">删除</button></td></tr>`).join('')
+        : '<tr><td colspan="4" class="empty">尚未配置单元网格</td></tr>';
+      if (selectedStandardMatter) renderStandardMatterPreview(selectedStandardMatter, analysisSource.textContent || '人工待确认');
+    }
+
+    async function loadCaseIntakeConfig() {
+      if (!supabaseClient) return;
+      const [departmentsResult, gridsResult] = await Promise.all([
+        supabaseClient.from('handling_departments').select('department_label, organization_code, organization_name, is_active, sort_order').order('sort_order').order('department_label'),
+        supabaseClient.from('unit_grids').select('grid_identifier, grid_name, administrative_division_code, administrative_division_name, is_active, sort_order').order('sort_order').order('grid_identifier')
+      ]);
+      handlingDepartments = departmentsResult.error ? [] : (departmentsResult.data || []);
+      unitGrids = gridsResult.error ? [] : (gridsResult.data || []);
+      renderCaseIntakeConfig();
+      return { departmentsResult, gridsResult };
+    }
+
+    function standardMatterKey(item) {
+      return item ? `${item.standard_ref}|${item.matter_kind}|${item.standard_code}` : '';
+    }
+
+    function standardKindLabel(kind) {
+      return kind || '国标条目';
+    }
+
+    function allStandardMatters(source = sourceInput.value || '人工巡查') {
+      return issueDictionary
+        .filter(item => item.matter_kind === '管理事项' && item.is_local_extension !== true)
+        .filter(item => !item.applicable_sources?.length || item.applicable_sources.includes(source))
+        .sort((left, right) => Number(left.sort_order || 0) - Number(right.sort_order || 0) || String(left.standard_code).localeCompare(String(right.standard_code)));
+    }
+
+    function activeStandardMatters(source = sourceInput.value || '人工巡查', kind = standardKindInput.value || '管理事项') {
+      return allStandardMatters(source).filter(item => item.matter_kind === kind);
+    }
+
+    function setSelectOptions(select, options, placeholder) {
+      select.replaceChildren(new Option(placeholder, ''));
+      options.forEach(option => select.add(new Option(option.label, option.value)));
+    }
+
+    function renderStandardMatterPreview(item, sourceLabel = '人工待确认') {
+      if (!item) {
+        standardMatterPreviewLabel.textContent = '当前确认事项';
+        standardMatterPreviewTitle.textContent = '请从国标目录选择';
+        standardMatterPreviewMeta.textContent = '照片 AI 只能辅助推荐，最终事项应由人工确认。';
+        confirmStandardMatterButton.hidden = true;
+        output.type.textContent = '待选择国标条目';
+        output.department.textContent = '待选择';
+        supervisingOrganizationOutput.textContent = '待配置';
+        output.priority.textContent = '待确认';
+        analysisSource.textContent = sourceLabel;
+        renderMatterAttributePreview(null);
+        return;
+      }
+      const reference = `${item.standard_ref} · ${item.standard_code}`;
+      const matchCandidates = currentKnowledgeMatch?.item?.standard_code === item.standard_code
+        ? (currentKnowledgeMatch.candidates || []).slice(0, 3)
+          .map(candidate => `${candidate.item.standard_code} ${candidate.item.standard_name} ${Math.round(Number(candidate.confidence || 0) * 100)}%`)
+          .join('；')
+        : '';
+      standardMatterPreviewLabel.textContent = standardMatterConfirmed ? `已确认${standardKindLabel(item.matter_kind)}` : `待人工确认的${standardKindLabel(item.matter_kind)}`;
+      standardMatterPreviewTitle.textContent = `${reference} · ${item.standard_name}`;
+      standardMatterPreviewMeta.textContent = `${standardKindLabel(item.matter_kind)} · ${item.category} · 默认责任主体：${item.default_department || '待配置'} · 建议时限：${Number(item.suggested_deadline_days || 0)} 天${matchCandidates ? ` · 候选：${matchCandidates}` : ''}`;
+      confirmStandardMatterButton.hidden = standardMatterConfirmed;
+      output.type.textContent = item.standard_name;
+      const handlingDepartment = getHandlingDepartment(item.default_department);
+      output.department.textContent = handlingDepartment?.organization_name || item.default_department || '待配置责任主体';
+      supervisingOrganizationOutput.textContent = handlingDepartment?.organization_code || '请在“主管部门与单元网格”中配置';
+      output.priority.textContent = item.default_priority || '待确认';
+      analysisSource.textContent = sourceLabel;
+      renderMatterAttributePreview(item);
+    }
+
+    function renderStandardMatterSelectors() {
+      if (!issueDictionaryFeatureReady) {
+        selectedStandardMatter = null;
+        standardMatterConfirmed = false;
+        standardKindInput.disabled = true;
+        setSelectOptions(standardCategoryInput, [], '国标目录尚未加载');
+        setSelectOptions(standardMatterInput, [], '请先导入国标目录');
+        standardCategoryInput.disabled = true;
+        standardMatterInput.disabled = true;
+        renderStandardMatterPreview(null, '国标目录待加载');
+        return;
+      }
+      const candidates = activeStandardMatters();
+      standardKindInput.disabled = false;
+      const categories = [...new Set(candidates.map(item => item.category).filter(Boolean))];
+      const previousCategory = selectedStandardMatter?.category || standardCategoryInput.value;
+      setSelectOptions(standardCategoryInput, categories.map(category => ({ label: category, value: category })), '请选择国标大类');
+      standardCategoryInput.disabled = !categories.length;
+      standardCategoryInput.value = categories.includes(previousCategory) ? previousCategory : '';
+      const scoped = standardCategoryInput.value ? candidates.filter(item => item.category === standardCategoryInput.value) : [];
+      setSelectOptions(standardMatterInput, scoped.map(item => ({ label: `${item.standard_code} · ${item.standard_name}`, value: standardMatterKey(item) })), `请选择${standardKindLabel(standardKindInput.value)}`);
+      standardMatterInput.disabled = !scoped.length;
+      const selectedKey = standardMatterKey(selectedStandardMatter);
+      if (selectedKey && scoped.some(item => standardMatterKey(item) === selectedKey)) {
+        standardMatterInput.value = selectedKey;
+        renderStandardMatterPreview(selectedStandardMatter, analysisSource.textContent || '人工确认');
+      } else {
+        selectedStandardMatter = null;
+        standardMatterConfirmed = false;
+        renderStandardMatterPreview(null, '人工待确认');
+      }
+    }
+
+    function selectStandardMatter(item, sourceLabel = '人工确认', confirmed = false) {
+      selectedStandardMatter = item || null;
+      standardMatterConfirmed = Boolean(item && confirmed);
+      if (!item) {
+        renderStandardMatterSelectors();
+        return;
+      }
+      standardKindInput.value = item.matter_kind;
+      standardCategoryInput.value = item.category;
+      const scoped = activeStandardMatters().filter(candidate => candidate.category === item.category);
+      setSelectOptions(standardMatterInput, scoped.map(candidate => ({ label: `${candidate.standard_code} · ${candidate.standard_name}`, value: standardMatterKey(candidate) })), `请选择${standardKindLabel(item.matter_kind)}`);
+      standardMatterInput.disabled = false;
+      standardMatterInput.value = standardMatterKey(item);
+      renderStandardMatterPreview(item, sourceLabel);
+    }
+
+    function normalizeStandardText(value) {
+      return String(value || '').replace(/[\s，,。．、；;：:（）()《》“”'"\-—_]/g, '').toLowerCase();
+    }
+
+    // 国标名称采用规范用语，现场描述常出现“垃圾桶”“垃圾箱”等行业同义称呼。
+    // 仅为已核对的明确同义词补充词典检索，不直接替代人工确认。
+    const standardMatterAliases = {
+      '06042': ['垃圾站满溢', '垃圾箱满溢', '垃圾桶满溢', '垃圾箱爆满', '垃圾桶爆满', '垃圾桶溢满']
+    };
+
+    function standardMatterWeightedTerms(item) {
+      const knowledge = getKnowledgeForItem(item);
+      const divisionCode = administrativeDivisionCodeInput.value.trim();
+      const standardTerms = [
+        { value: item.standard_name, weight: 1, method: '国标名称', termType: '国标名称' },
+        ...(item.keywords || []).map(value => ({ value, weight: 0.9, method: '国标关键词', termType: '关键词' })),
+        ...(standardMatterAliases[item.standard_code] || []).map(value => ({ value, weight: 0.88, method: '内置同义词', termType: '同义词' }))
+      ];
+      const knowledgeTerms = knowledge ? urbanIssueKnowledgeTerms
+        .filter(term => term.knowledge_id === knowledge.id)
+        .filter(term => !term.administrative_division_code || term.administrative_division_code === divisionCode)
+        .map(term => ({ value: term.term, weight: Number(term.weight) || 0.8, method: `知识库${term.term_type}`, termType: term.term_type })) : [];
+      return [...standardTerms, ...knowledgeTerms]
+        .map(term => ({ ...term, normalized: normalizeStandardText(term.value) }))
+        .filter(term => term.normalized.length >= 2);
+    }
+
+    function standardMatterSearchTerms(item) {
+      return standardMatterWeightedTerms(item).map(term => term.normalized);
+    }
+
+    function rankStandardMattersFromText(text, source = sourceInput.value || '人工巡查') {
+      const normalizedText = normalizeStandardText(text);
+      if (!normalizedText) return [];
+      return allStandardMatters(source).map(item => {
+        const terms = standardMatterWeightedTerms(item);
+        const positiveHits = terms.filter(term => term.termType !== '排除项' && normalizedText.includes(term.normalized));
+        const exclusionHits = terms.filter(term => term.termType === '排除项' && normalizedText.includes(term.normalized));
+        const bestPositive = positiveHits.reduce((best, term) => Math.max(best, term.normalized.length * term.weight), 0);
+        const bonus = Math.min(2.5, Math.max(0, positiveHits.length - 1) * 0.45);
+        const penalty = exclusionHits.reduce((total, term) => total + term.normalized.length * term.weight * 0.8, 0);
+        const score = Math.max(0, bestPositive + bonus - penalty);
+        const knowledge = getKnowledgeForItem(item);
+        return {
+          item,
+          knowledgeId: knowledge?.id || null,
+          score,
+          confidence: score ? Math.min(0.98, 0.46 + score / 12) : 0,
+          methods: [...new Set(positiveHits.map(term => term.method))],
+          matchedTerms: positiveHits.map(term => term.value),
+          excludedTerms: exclusionHits.map(term => term.value)
+        };
+      }).filter(candidate => candidate.score > 0)
+        .sort((left, right) => right.score - left.score || Number(left.item.sort_order || 0) - Number(right.item.sort_order || 0));
+    }
+
+    function findStandardMatterFromText(text, source = sourceInput.value || '人工巡查') {
+      const candidates = rankStandardMattersFromText(text, source);
+      currentKnowledgeMatch = candidates[0] ? { ...candidates[0], candidates: candidates.slice(0, 3) } : null;
+      return currentKnowledgeMatch?.item || null;
+    }
+
+    function findStandardMatterFromAi(analysis, source = sourceInput.value || '人工巡查') {
+      const candidates = allStandardMatters(source);
+      const recommendedCode = String(analysis?.recommended_standard_code || '').trim();
+      const recommendedName = normalizeStandardText(analysis?.recommended_standard_name);
+      if (/^\d{5}$/.test(recommendedCode)) {
+        const byCode = candidates.find(item => item.standard_code === recommendedCode);
+        if (byCode && (!recommendedName || standardMatterSearchTerms(byCode).includes(recommendedName))) {
+          currentKnowledgeMatch = {
+            item: byCode,
+            knowledgeId: getKnowledgeForItem(byCode)?.id || null,
+            score: 10,
+            confidence: Math.max(0.8, Number(analysis?.confidence || 0) / 100),
+            methods: ['视觉 AI 明确推荐'],
+            matchedTerms: [analysis.recommended_standard_name || analysis.recommended_standard_code],
+            excludedTerms: [],
+            candidates: []
+          };
+          return byCode;
+        }
+      }
+      if (recommendedName) {
+        const byName = candidates.find(item => standardMatterSearchTerms(item).includes(recommendedName));
+        if (byName) {
+          currentKnowledgeMatch = {
+            item: byName,
+            knowledgeId: getKnowledgeForItem(byName)?.id || null,
+            score: 9,
+            confidence: Math.max(0.75, Number(analysis?.confidence || 0) / 100),
+            methods: ['视觉 AI 名称推荐'],
+            matchedTerms: [analysis.recommended_standard_name],
+            excludedTerms: [],
+            candidates: []
+          };
+          return byName;
+        }
+      }
+      const matchText = [
+        analysis?.issue_summary,
+        analysis?.category,
+        analysis?.recommended_action,
+        ...(analysis?.issue_regions || []).map(region => region?.label)
+      ].filter(Boolean).join('；');
+      const result = findStandardMatterFromText(matchText, source);
+      if (currentKnowledgeMatch) currentKnowledgeMatch.methods = ['视觉 AI 描述', ...currentKnowledgeMatch.methods];
+      return result;
+    }
+
     function getAssigneeId(ownerName) {
       const normalizedName = (ownerName || '').trim();
       return assignees.find(person => (person.display_name || '').trim() === normalizedName)?.id || null;
@@ -1689,12 +2747,74 @@
       userDialog.showModal();
     }
 
+    async function openCaseIntakeConfig() {
+      if (!currentIsAdmin || !supabaseClient) return;
+      showCaseIntakeConfigNotice('');
+      await loadCaseIntakeConfig();
+      caseIntakeConfigDialog.showModal();
+    }
+
+    function showCaseIntakeConfigNotice(message, state = 'error') {
+      caseIntakeConfigNotice.textContent = message;
+      caseIntakeConfigNotice.className = `config-dialog-notice${message ? ` is-${state}` : ''}`;
+    }
+
+    async function saveHandlingDepartment(event) {
+      event.preventDefault();
+      const department_label = handlingDepartmentLabel.value.trim();
+      const organization_code = handlingOrganizationCode.value.trim().toUpperCase();
+      const organization_name = handlingOrganizationName.value.trim();
+      const sort_order = Number.parseInt(handlingDepartmentSort.value, 10) || 100;
+      if (!department_label || !/^[0-9A-Z]{18}$/.test(organization_code) || !organization_name) {
+        showCaseIntakeConfigNotice('请填写部门标签、18 位统一社会信用代码和主管部门名称。');
+        return;
+      }
+      const { error } = await supabaseClient.from('handling_departments').upsert({
+        department_label, organization_code, organization_name, sort_order, is_active: true, updated_at: new Date().toISOString()
+      }, { onConflict: 'department_label' });
+      if (error) { showCaseIntakeConfigNotice(`主管部门保存失败：${error.message}`); return; }
+      handlingDepartmentForm.reset();
+      handlingDepartmentSort.value = '100';
+      await loadCaseIntakeConfig();
+      showCaseIntakeConfigNotice('事项处置主管部门已保存。', 'success');
+    }
+
+    async function saveUnitGrid(event) {
+      event.preventDefault();
+      const grid_identifier = unitGridIdentifier.value.trim().toUpperCase();
+      const grid_name = unitGridName.value.trim();
+      const administrative_division_code = unitGridDivisionCode.value.trim();
+      const administrative_division_name = unitGridDivisionName.value.trim() || null;
+      if (!/^[0-9A-Z]{15}$/.test(grid_identifier) || !grid_name || !/^\d{6}$/.test(administrative_division_code)) {
+        showCaseIntakeConfigNotice('请填写 15 位单元网格标识码、网格名称和 6 位行政区划代码。');
+        return;
+      }
+      const { error } = await supabaseClient.from('unit_grids').upsert({
+        grid_identifier, grid_name, administrative_division_code, administrative_division_name, is_active: true, updated_at: new Date().toISOString()
+      }, { onConflict: 'grid_identifier' });
+      if (error) { showCaseIntakeConfigNotice(`单元网格保存失败：${error.message}`); return; }
+      unitGridForm.reset();
+      await loadCaseIntakeConfig();
+      showCaseIntakeConfigNotice('单元网格已保存。', 'success');
+    }
+
     function cloudRecordFromLocal(record, userId = null) {
       const cloudRecord = {
         record_no: record.id,
         description: record.description,
         location: record.location || null,
+        administrative_division_code: record.administrativeDivisionCode || null,
+        administrative_division_name: record.administrativeDivisionName || null,
+        supervising_org_code: record.supervisingOrgCode || null,
+        supervising_org_name: record.supervisingOrgName || null,
+        grid_identifier: record.gridIdentifier || null,
         issue_type: record.type || null,
+        standard_kind: record.standardKind || null,
+        standard_ref: record.standardRef || null,
+        standard_code: record.standardCode || null,
+        standard_name: record.standardName || record.type || null,
+        component_id: record.componentId || null,
+        matter_id: record.matterId || null,
         department: record.department || null,
         priority: record.priority || null,
         owner_name: record.owner || null,
@@ -1703,6 +2823,7 @@
         deadline: record.deadline || null,
         latitude: record.latitude ?? null,
         longitude: record.longitude ?? null,
+        ...(issueDictionaryFeatureReady ? { source: record.source || '人工巡查' } : {}),
         ...(record.aiAnalysis ? { ai_analysis: record.aiAnalysis } : {}),
         updated_at: new Date().toISOString()
       };
@@ -1718,9 +2839,21 @@
         id: record.record_no,
         description: record.description,
         location: record.location || '',
+        administrativeDivisionCode: record.administrative_division_code || '',
+        administrativeDivisionName: record.administrative_division_name || '',
+        supervisingOrgCode: record.supervising_org_code || '',
+        supervisingOrgName: record.supervising_org_name || '',
+        gridIdentifier: record.grid_identifier || '',
         type: record.issue_type || '其他问题',
+        standardKind: record.standard_kind || '',
+        standardRef: record.standard_ref || '',
+        standardCode: record.standard_code || '',
+        standardName: record.standard_name || record.issue_type || '',
+        componentId: record.component_id || null,
+        matterId: record.matter_id || null,
         department: record.department || '城市管理部门',
         priority: record.priority || '一般',
+        source: record.source || '人工巡查',
         owner: record.owner_name || '',
         assigneeId: record.assignee_id || null,
         status: normalizeStatus(record.status),
@@ -1864,25 +2997,52 @@
       if (!authData.user) throw new Error('登录状态已失效，请重新登录');
       markLocalMutation(record.id);
       let { data, error } = await supabaseClient
-        .from('inspection_records')
-        .insert(cloudRecordFromLocal(record, authData.user.id))
-        .select()
-        .single();
+        .rpc('create_inspection_case_with_matter', {
+          p_record_no: record.id,
+          p_description: record.description,
+          p_location: record.location || '',
+          p_administrative_division_code: record.administrativeDivisionCode || '',
+          p_administrative_division_name: record.administrativeDivisionName || null,
+          p_standard_ref: record.standardRef || '',
+          p_standard_code: record.standardCode || '',
+          p_grid_identifier: record.gridIdentifier || '',
+          p_assignee_id: record.assigneeId || getAssigneeId(record.owner),
+          p_owner_name: record.owner || '',
+          p_status: normalizeStatus(record.status),
+          p_deadline: record.deadline || null,
+          p_latitude: record.latitude ?? null,
+          p_longitude: record.longitude ?? null,
+          p_source: record.source || '人工巡查',
+          p_ai_analysis: record.aiAnalysis || null
+        });
       if (error?.code === '23505') {
         record.id = createRecordId();
         markLocalMutation(record.id);
         ({ data, error } = await supabaseClient
-          .from('inspection_records')
-          .insert(cloudRecordFromLocal(record, authData.user.id))
-          .select()
-          .single());
+          .rpc('create_inspection_case_with_matter', {
+            p_record_no: record.id,
+            p_description: record.description,
+            p_location: record.location || '',
+            p_administrative_division_code: record.administrativeDivisionCode || '',
+            p_administrative_division_name: record.administrativeDivisionName || null,
+            p_standard_ref: record.standardRef || '',
+            p_standard_code: record.standardCode || '',
+            p_grid_identifier: record.gridIdentifier || '',
+            p_assignee_id: record.assigneeId || getAssigneeId(record.owner),
+            p_owner_name: record.owner || '',
+            p_status: normalizeStatus(record.status),
+            p_deadline: record.deadline || null,
+            p_latitude: record.latitude ?? null,
+            p_longitude: record.longitude ?? null,
+            p_source: record.source || '人工巡查',
+            p_ai_analysis: record.aiAnalysis || null
+          }));
       }
       if (error) throw error;
       markLocalMutation(record.id, data.id);
       const initialEntry = record.timeline?.[record.timeline.length - 1] || {
         fromStatus: '', toStatus: normalizeStatus(record.status), note: '创建巡查记录'
       };
-      await createCloudTimeline(data.id, authData.user.id, initialEntry);
       let savedRecord = data;
       if (record.photo) {
         const photoPath = `${authData.user.id}/${data.id}.jpg`;
@@ -1993,6 +3153,30 @@
       return new Date(`${record.deadline}T23:59:59`).getTime();
     }
 
+    function getDeadlineInfo(record, status = record.status) {
+      const normalizedStatus = normalizeStatus(status);
+      if (isClosedStatus(normalizedStatus)) return { state: 'done', title: '案件办结后不再计时', text: '当前流程已完成，时限督办已自动停止。' };
+      if (!record.deadline) return { state: 'none', title: '尚未设置完成期限', text: '管理员可补充完成期限，系统将自动提醒临期和逾期风险。' };
+      const end = new Date(`${record.deadline}T23:59:59`);
+      const remaining = end.getTime() - Date.now();
+      if (remaining < 0) {
+        const overdueDays = Math.max(1, Math.ceil(Math.abs(remaining) / 86400000));
+        return { state: 'overdue', title: `已逾期 ${overdueDays} 天`, text: `完成期限为 ${record.deadline}，请优先办理并尽快提交核查。` };
+      }
+      const remainingDays = Math.ceil(remaining / 86400000);
+      if (remainingDays <= 2) return { state: 'soon', title: `距完成期限 ${remainingDays} 天`, text: `完成期限为 ${record.deadline}，请抓紧办理并保留整改凭证。` };
+      return { state: 'normal', title: `距完成期限 ${remainingDays} 天`, text: `完成期限为 ${record.deadline}，请按计划推进案件办理。` };
+    }
+
+    function updateEditDeadlineRisk() {
+      const record = getRecords()[activeEditIndex];
+      if (!record) { editDeadlineRisk.hidden = true; return; }
+      const info = getDeadlineInfo({ ...record, deadline: editDeadline.value }, editStatus.value);
+      editDeadlineRisk.hidden = false;
+      editDeadlineRisk.className = `deadline-risk-panel is-${info.state}`;
+      editDeadlineRisk.innerHTML = `<div><strong>${escapeHtml(info.title)}</strong><small>${escapeHtml(info.text)}</small></div>`;
+    }
+
     function focusRecords() {
       document.querySelector('.history')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -2001,20 +3185,95 @@
       const overdue = records.filter(record => getDeadlineState(record) === 'overdue');
       const soon = records.filter(record => getDeadlineState(record) === 'soon');
       const verifying = records.filter(record => normalizeStatus(record.status) === '待核查');
+      const noDeadline = records.filter(record => !isClosedStatus(record.status) && !record.deadline);
       document.querySelector('#overdueCount').textContent = overdue.length;
       document.querySelector('#soonCount').textContent = soon.length;
       document.querySelector('#supervisionVerifyingCount').textContent = verifying.length;
-      const priorities = [...overdue, ...soon, ...verifying]
+      document.querySelector('#noDeadlineCount').textContent = noDeadline.length;
+      filterNoDeadline.hidden = !currentIsAdmin;
+      const priorities = [...overdue, ...soon, ...verifying, ...noDeadline]
         .filter((record, index, array) => array.findIndex(item => (item.cloudId || item.id) === (record.cloudId || record.id)) === index)
         .sort((a, b) => getDeadlineTimestamp(a) - getDeadlineTimestamp(b))
         .slice(0, 3);
       supervisionList.innerHTML = priorities.length
         ? priorities.map(record => {
           const state = getDeadlineState(record);
-          const label = state === 'overdue' ? '已逾期' : state === 'soon' ? '临期' : '待核查';
+          const label = state === 'overdue' ? '已逾期' : state === 'soon' ? '临期' : state === 'none' ? '未设期限' : '待核查';
           return `<div class="supervision-item"><div><strong title="${escapeHtml(record.description || record.id)}">${escapeHtml(record.description || record.id)}</strong><small>${escapeHtml(record.owner || '未指定负责人')} · ${escapeHtml(record.deadline || '未设期限')}</small></div><span class="deadline deadline-${state === 'overdue' ? 'overdue' : state === 'soon' ? 'soon' : 'normal'}">${label}</span></div>`;
         }).join('')
-        : '<p class="supervision-empty">当前没有临期、逾期或待核查案件。</p>';
+        : '<p class="supervision-empty">当前没有临期、逾期、待核查或未设期限案件。</p>';
+    }
+
+    function renderMyWorkbench(records) {
+      if (currentIsAdmin || !currentUserProfile) {
+        myWorkbenchCard.hidden = true;
+        return;
+      }
+      const ownRecords = records.filter(record => (record.assigneeId === currentUserProfile.id || record.owner === currentUserProfile.name) && !isClosedStatus(record.status));
+      const processing = ownRecords.filter(record => normalizeStatus(record.status) === '处理中');
+      const returned = ownRecords.filter(record => normalizeStatus(record.status) === '退回整改');
+      const verifying = ownRecords.filter(record => normalizeStatus(record.status) === '待核查');
+      const overdue = ownRecords.filter(record => getDeadlineState(record) === 'overdue');
+      const priorities = [...overdue, ...returned, ...processing, ...verifying]
+        .filter((record, index, list) => list.findIndex(item => (item.cloudId || item.id) === (record.cloudId || record.id)) === index)
+        .sort((a, b) => getDeadlineTimestamp(a) - getDeadlineTimestamp(b))
+        .slice(0, 3);
+      myWorkbenchCard.hidden = false;
+      myWorkbenchLabel.textContent = verifying.length ? `${verifying.length} 件等待核查` : `${ownRecords.length} 件待处理`;
+      myProcessingCount.textContent = processing.length;
+      myReturnedCount.textContent = returned.length;
+      myVerifyingCount.textContent = verifying.length;
+      myOverdueCount.textContent = overdue.length;
+      myWorkbenchList.innerHTML = priorities.length
+        ? priorities.map(record => {
+          const state = getDeadlineState(record);
+          const status = normalizeStatus(record.status);
+          const tag = status === '待核查' ? '等待管理员核查' : state === 'overdue' ? '已逾期' : status === '退回整改' ? '待整改' : state === 'soon' ? '临期' : '待办理';
+          const index = records.indexOf(record);
+          const action = status === '待核查' ? '查看进度' : '去处理';
+          return `<article class="my-workbench-item"><div><strong title="${escapeHtml(record.description || record.id)}">${escapeHtml(record.description || record.id)}</strong><small>${escapeHtml(record.deadline || '未设期限')} · ${tag}</small>${renderReworkChip(record)}</div><button type="button" data-my-task-index="${index}" data-my-task-action="${status === '待核查' ? 'detail' : 'edit'}">${action}</button></article>`;
+        }).join('')
+        : '<p class="supervision-empty">当前没有需要办理的案件。</p>';
+    }
+
+    function getReviewAging(record) {
+      const reviewEntry = getTimeline(record).slice().reverse().find(item => normalizeStatus(item.toStatus) === '待核查');
+      if (!reviewEntry?.time) return { text: '提交时间未知', priority: false };
+      const submittedAt = new Date(reviewEntry.time).getTime();
+      if (!Number.isFinite(submittedAt)) return { text: '提交时间未知', priority: false };
+      const hours = Math.max(0, Math.floor((Date.now() - submittedAt) / 3600000));
+      if (hours >= 24) return { text: `已等待核查 ${Math.floor(hours / 24)} 天`, priority: true };
+      if (hours >= 1) return { text: `已等待核查 ${hours} 小时`, priority: false };
+      return { text: '刚提交核查', priority: false };
+    }
+
+    function getNotificationItems(records) {
+      const visibleRecords = currentIsAdmin
+        ? records
+        : records.filter(record => record.assigneeId === currentUserProfile?.id || record.owner === currentUserProfile?.name);
+      return visibleRecords.flatMap((record, index) => {
+        const status = normalizeStatus(record.status);
+        const deadline = getDeadlineState(record);
+        const items = [];
+        if (!isClosedStatus(status) && deadline === 'overdue') items.push({ index, type: 'urgent', title: '案件已逾期', text: `${record.description || record.id}：请优先推进处置并提交进度。`, action: status === '待核查' ? '查看核查进度' : '进入办理', mode: status === '待核查' ? 'detail' : 'edit' });
+        else if (!isClosedStatus(status) && deadline === 'soon') items.push({ index, type: 'urgent', title: '案件即将到期', text: `${record.description || record.id}：完成期限为 ${record.deadline}。`, action: status === '待核查' ? '查看核查进度' : '进入办理', mode: status === '待核查' ? 'detail' : 'edit' });
+        if (currentIsAdmin && status === '待核查') {
+          const aging = getReviewAging(record);
+          items.push({ index, type: 'review', title: aging.priority ? '核查任务等待超时' : '有案件等待核查', text: `${record.description || record.id}：${aging.text}。`, action: '进入核查', mode: 'edit' });
+        }
+        if (!currentIsAdmin && status === '退回整改') items.push({ index, type: 'urgent', title: `第 ${getReworkCount(record)} 轮整改待办理`, text: `${record.description || record.id}：请按管理员退回意见补充整改后重新提交。`, action: '进入办理', mode: 'edit' });
+        if (currentIsAdmin && !isClosedStatus(status) && !record.deadline) items.push({ index, type: 'normal', title: '案件尚未设置期限', text: `${record.description || record.id}：请补充完成期限，纳入时限督办。`, action: '补充期限', mode: 'edit' });
+        return items;
+      }).slice(0, 20);
+    }
+
+    function renderNotifications(records) {
+      const items = getNotificationItems(records);
+      notificationBadge.hidden = items.length === 0;
+      notificationBadge.textContent = items.length > 99 ? '99+' : items.length;
+      notificationList.innerHTML = items.length
+        ? items.map(item => `<article class="notification-item is-${item.type}"><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.text)}</small></div><button type="button" data-notification-index="${item.index}" data-notification-mode="${item.mode}">${item.action}</button></article>`).join('')
+        : '<p class="notification-empty">当前没有需要处理的提醒。</p>';
     }
 
     function renderReviewQueue(records) {
@@ -2037,7 +3296,8 @@
           const reviewEntry = getTimeline(record).filter(item => normalizeStatus(item.toStatus) === '待核查').at(-1);
           const note = reviewEntry?.note || '负责人已提交核查，请查看详情。';
           const evidenceCount = (record.attachments || []).length;
-          return `<article class="review-queue-item"><div class="review-queue-copy"><strong title="${escapeHtml(record.description || record.id)}">${escapeHtml(record.description || record.id)}</strong><small>${escapeHtml(record.owner || '未指定负责人')} · ${escapeHtml(note)}</small><div class="review-queue-meta"><span>${escapeHtml(reviewEntry?.time || record.updatedAt || '刚刚提交')}</span><span class="${evidenceCount ? 'has-evidence' : ''}">${evidenceCount ? `${evidenceCount} 张整改凭证` : '未上传凭证'}</span></div></div><button type="button" data-review-index="${index}">进入核查</button></article>`;
+          const aging = getReviewAging(record);
+          return `<article class="review-queue-item${aging.priority ? ' is-priority' : ''}"><div class="review-queue-copy"><strong title="${escapeHtml(record.description || record.id)}">${escapeHtml(record.description || record.id)}</strong><small>${escapeHtml(record.owner || '未指定负责人')} · ${escapeHtml(note)}</small><div class="review-queue-meta"><span>${escapeHtml(reviewEntry?.time || record.updatedAt || '刚刚提交')}</span><span class="review-aging${aging.priority ? ' is-priority' : ''}">${escapeHtml(aging.text)}</span><span class="${evidenceCount ? 'has-evidence' : ''}">${evidenceCount ? `${evidenceCount} 张整改凭证` : '未上传凭证'}</span></div>${renderReworkChip(record)}</div><button type="button" data-review-index="${index}">进入核查</button></article>`;
         }).join('')
         : '<p class="supervision-empty">当前没有待管理员核查的案件。</p>';
     }
@@ -2110,23 +3370,37 @@
         <div class="detail-grid">
           <div class="detail-item"><span>问题描述</span><strong>${escapeHtml(record.description)}</strong></div>
           <div class="detail-item"><span>发现地点</span><strong>${renderLocation(record)}</strong></div>
+          <div class="detail-item"><span>行政区划</span><strong>${escapeHtml(record.administrativeDivisionName || '未填写')}${record.administrativeDivisionCode ? `<small>${escapeHtml(record.administrativeDivisionCode)}</small>` : ''}</strong></div>
           <div class="detail-item"><span>问题类型</span><strong>${escapeHtml(record.type || '未分类')}</strong></div>
+          ${record.matterId ? `<div class="detail-item"><span>管理事项实例</span><strong>${escapeHtml(record.matterId)}<small>${escapeHtml(`${record.administrativeDivisionCode || ''}${record.standardCode || ''}` || '事项代码未记录')}</small></strong></div>` : ''}
+          ${record.gridIdentifier ? `<div class="detail-item"><span>所在单元网格</span><strong>${escapeHtml(record.gridIdentifier)}</strong></div>` : ''}
+          ${record.supervisingOrgCode ? `<div class="detail-item"><span>主管部门统一社会信用代码</span><strong>${escapeHtml(record.supervisingOrgCode)}</strong></div>` : ''}
+          <div class="detail-item"><span>案件来源</span><strong>${escapeHtml(record.source || '人工巡查')}</strong></div>
           <div class="detail-item"><span>处理部门</span><strong>${escapeHtml(record.department || '未指定')}</strong></div>
           <div class="detail-item"><span>负责人</span><strong>${escapeHtml(record.owner || '未指定')}</strong></div>
           <div class="detail-item"><span>当前状态</span><strong>${escapeHtml(normalizeStatus(record.status))}</strong></div>
+          ${renderWorkflowGuide(record, true)}
+          ${renderReworkSummary(record)}
+          ${normalizeStatus(record.status) === '退回整改' ? renderReturnFeedback(record, true) : ''}
           <div class="detail-item"><span>完成期限</span><strong>${escapeHtml(record.deadline || '未设置')}</strong></div>
           <div class="detail-item"><span>坐标</span><strong>${hasCoordinates(record) ? `${Number(record.latitude).toFixed(6)}, ${Number(record.longitude).toFixed(6)}` : '未记录'}</strong></div>
           <div class="detail-item"><span>更新时间</span><strong>${escapeHtml(record.updatedAt || record.time || '未知')}</strong></div>
           ${record.aiAnalysis ? `<div class="detail-item"><span>AI 辅助判断（需复核）</span><strong>${escapeHtml(record.aiAnalysis.issue_summary || '未给出具体问题')}</strong><br><small>置信度 ${escapeHtml(String(record.aiAnalysis.confidence ?? 0))}% · ${escapeHtml(record.aiAnalysis.caution || '请结合现场情况复核')}</small></div>` : ''}
         </div>`;
-      detailEvidence.innerHTML = (record.attachments || []).length
-        ? record.attachments.slice().reverse().map(item => `
-          <div class="evidence-card">
-            <img src="${safePhoto(item.url)}" alt="整改凭证照片" data-evidence-url="${safePhoto(item.url)}">
-            <small>${escapeHtml(item.note || '整改处置凭证')}</small>
-            <small>${escapeHtml(item.created_at ? new Date(item.created_at).toLocaleString('zh-CN') : '时间未知')}</small>
-          </div>`).join('')
-        : '<span class="chart-empty">尚未上传整改凭证照片</span>';
+      const sourcePhoto = safePhoto(record.photo);
+      const attachments = record.attachments || [];
+      detailEvidence.innerHTML = `
+        <section class="evidence-group"><header><strong>处置前 · 现场照片</strong><small>${sourcePhoto ? '原始巡查记录' : '未上传'}</small></header>
+          ${sourcePhoto ? `<div class="source-photo-card"><img src="${sourcePhoto}" alt="处置前现场照片" data-evidence-url="${sourcePhoto}"><small>${escapeHtml(record.time || '创建时间未知')}</small></div>` : '<div class="evidence-empty">未上传处置前现场照片</div>'}
+        </section>
+        <section class="evidence-group"><header><strong>处置后 · 整改凭证</strong><small>${attachments.length ? `${attachments.length} 张` : '未上传'}</small></header>
+          ${attachments.length ? `<div class="evidence-gallery">${attachments.slice().reverse().map(item => `
+            <div class="evidence-card">
+              <img src="${safePhoto(item.url)}" alt="整改凭证照片" data-evidence-url="${safePhoto(item.url)}">
+              <small>${escapeHtml(item.note || '整改处置凭证')}</small>
+              <small>${escapeHtml(item.created_at ? new Date(item.created_at).toLocaleString('zh-CN') : '时间未知')}</small>
+            </div>`).join('')}</div>` : '<div class="evidence-empty">负责人尚未上传整改凭证</div>'}
+        </section>`;
       detailTimeline.innerHTML = getTimeline(record).slice().reverse().map(item => `
         <div class="timeline-item">
           <div class="timeline-time">${escapeHtml(item.time || '时间未知')}</div>
@@ -2173,6 +3447,9 @@
       }
     });
 
+    editStatus.addEventListener('change', updateEditWorkflowOptions);
+    editDeadline.addEventListener('change', updateEditDeadlineRisk);
+
     editForm.addEventListener('input', () => {
       const current = normalizeStatus(editStatus.dataset.currentStatus || editStatus.value);
       if (currentIsAdmin || !['处理中', '退回整改'].includes(current)) return;
@@ -2194,6 +3471,7 @@
       const keyword = searchInput.value.trim().toLowerCase();
       const selectedStatus = statusFilter.value;
       const selectedDeadline = deadlineFilter.value;
+      const selectedQuality = qualityFilter.value;
       const selectedOwner = ownerFilter.value;
       const visibleRecords = records
         .map((record, index) => ({ ...record, storageIndex: index }))
@@ -2201,9 +3479,18 @@
           const searchable = [record.id, record.description, record.location, record.owner].join(' ').toLowerCase();
           const status = normalizeStatus(record.status);
           const deadlineState = getDeadlineState(record);
+          const hasMainPhoto = Boolean(String(record.photoPath || '').trim() || String(record.photo || '').trim());
+          const qualityMatches = !selectedQuality
+            || (selectedQuality === 'location' && !hasCoordinates(record))
+            || (selectedQuality === 'deadline' && !isClosedStatus(status) && !record.deadline)
+            || (selectedQuality === 'owner' && !isClosedStatus(status) && !String(record.owner || '').trim())
+            || (selectedQuality === 'photo' && !hasMainPhoto)
+            || (selectedQuality === 'ai' && hasMainPhoto && !record.aiAnalysis)
+            || (selectedQuality === 'description' && String(record.description || '').trim().length < 10);
           return (!keyword || searchable.includes(keyword))
             && (!selectedStatus || status === selectedStatus)
             && (!selectedDeadline || deadlineState === selectedDeadline)
+            && qualityMatches
             && (!selectedOwner || (record.owner || '') === selectedOwner);
         });
 
@@ -2221,7 +3508,9 @@
       document.querySelector('#completionText').textContent = records.length ? `已结案 ${completionRate}%` : '尚无巡查记录';
       document.querySelector('#completionRatio').textContent = `${completedCount} / ${records.length}`;
       renderSupervision(records);
+      renderMyWorkbench(records);
       renderReviewQueue(records);
+      renderNotifications(records);
 
       const typeCounts = records.reduce((counts, record) => {
         const type = record.type || '其他问题';
@@ -2259,7 +3548,7 @@
           <td data-label="案件" class="record-case-column"><div class="record-case">${safePhoto(record.photo) ? `<img class="photo-thumb" src="${safePhoto(record.photo)}" alt="${escapeHtml(record.id || '巡查记录')}现场照片" data-photo-index="${record.storageIndex}">` : '<small>无现场照片</small>'}<strong class="record-number">${escapeHtml(record.id || '历史记录')}</strong>${(() => { const state = getRecordSyncState(record); return `<span class="record-sync-chip" data-record-sync="${escapeHtml(record.id || '')}" data-state="${state}">${getRecordSyncText(state)}</span>`; })()}</div></td>
           <td data-label="问题信息" class="record-issue-column"><strong class="record-summary">${escapeHtml(record.description)}</strong><div class="record-location">${renderLocation(record)}</div></td>
           <td data-label="分类研判" class="record-class-column"><div class="record-stack"><strong>${escapeHtml(record.type || '其他问题')}</strong><small>${escapeHtml(record.department || '待研判部门')}</small><span class="priority-chip">${escapeHtml(record.priority || '普通')}</span></div></td>
-          <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(normalizeStatus(record.status))}">${escapeHtml(normalizeStatus(record.status))}</span></div></td>
+          <td data-label="处置情况" class="record-disposal-column"><div class="record-stack"><strong>${escapeHtml(record.owner || '未指定负责人')}</strong><span class="status-chip" data-status="${escapeHtml(normalizeStatus(record.status))}">${escapeHtml(normalizeStatus(record.status))}</span>${renderWorkflowGuide(record)}</div></td>
           <td data-label="时间节点" class="record-time-column"><div class="record-stack"><div><span class="record-meta-label">完成期限</span>${renderDeadline(record)}</div><small><span class="record-meta-label">最近更新</span>${escapeHtml(record.updatedAt || record.time || '暂无')}</small></div></td>
           <td data-label="操作" class="no-print record-action-column"><div class="row-actions"><button class="detail" data-index="${record.storageIndex}">详情</button><button class="edit" data-index="${record.storageIndex}">${currentIsAdmin ? '编辑' : '处理'}</button>${currentIsAdmin ? `<button class="delete" data-index="${record.storageIndex}">删除</button>` : ''}</div></td>
         </tr>`).join('');
@@ -2273,17 +3562,29 @@
     }
 
     document.querySelector('#analyze').addEventListener('click', () => {
-      const [type, department, priority] = classify(issue.value);
-      output.type.textContent = type;
-      output.department.textContent = department;
-      output.priority.textContent = priority;
-      analysisSource.textContent = '文字规则识别';
+      currentKnowledgeMatchLogId = '';
+      const matchedMatter = selectedStandardMatter || findStandardMatterFromText(issue.value, sourceInput.value || '人工巡查');
+      if (matchedMatter) {
+        const alreadyConfirmed = Boolean(selectedStandardMatter && standardMatterConfirmed);
+        const matchLabel = alreadyConfirmed ? '人工确认国标事项' : currentKnowledgeMatch?.methods?.some(method => method.startsWith('知识库')) ? '知识库文字匹配，待人工确认' : '文字匹配国标事项，待人工确认';
+        selectStandardMatter(matchedMatter, matchLabel, alreadyConfirmed);
+        if (!alreadyConfirmed) void appendUrbanKnowledgeMatchLog({ source: '文字录入', inputSummary: issue.value });
+        showNotice(`${alreadyConfirmed ? '已确认' : '已匹配'}国标事项：${matchedMatter.standard_code} · ${matchedMatter.standard_name}`);
+      } else {
+        selectedStandardMatter = null;
+        standardMatterConfirmed = false;
+        renderStandardMatterSelectors();
+        renderStandardMatterPreview(null, '文字未能确定国标事项');
+        showNotice('未能从描述确定国标事项，请在“国标事项归类”中人工选择。');
+      }
       renderAiAnalysis(null);
     });
 
     analyzePhotoButton.addEventListener('click', async () => {
       if (!photoData) { showNotice('请先选择或拍摄一张现场照片'); photoInput.focus(); return; }
       const originalText = analyzePhotoButton.textContent;
+      const startedAt = performance.now();
+      currentKnowledgeMatchLogId = '';
       analyzePhotoButton.disabled = true;
       analyzePhotoButton.textContent = 'AI 正在识别…';
       showNotice('正在发送现场照片进行 AI 辅助识别…');
@@ -2299,8 +3600,34 @@
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload.analysis) throw new Error(payload.error || 'AI 识别失败，请重试');
         applyAiAnalysis(payload.analysis);
+        const aiTaskRunId = await appendAiTaskRun({
+          task_type: 'photo_recognition',
+          provider: payload.provider || 'dashscope',
+          model: payload.model || 'configured-photo-model',
+          input_summary: { has_photo: true, source: sourceInput.value || '人工巡查' },
+          output_summary: {
+            category: payload.analysis.category || '待确认',
+            department: payload.analysis.department || '待确认',
+            risk_level: payload.analysis.risk_level || '待确认',
+            confidence: Number(payload.analysis.confidence || 0),
+            recommended_standard_code: selectedStandardMatter?.standard_code || null,
+            recommended_standard_name: selectedStandardMatter?.standard_name || null
+          },
+          latency_ms: Math.round(performance.now() - startedAt),
+          status: 'success'
+        });
+        await appendUrbanKnowledgeMatchLog({ source: '照片AI', inputSummary: payload.analysis.issue_summary || '', aiTaskRunId });
         showNotice('AI 识别完成，巡查问题已按 AI 描述更新；请人工核对后再保存');
       } catch (error) {
+        void appendAiTaskRun({
+          task_type: 'photo_recognition',
+          provider: 'dashscope',
+          model: 'configured-photo-model',
+          input_summary: { has_photo: true, source: sourceInput.value || '人工巡查' },
+          latency_ms: Math.round(performance.now() - startedAt),
+          status: 'failed',
+          error_message: String(error?.message || 'AI 识别失败').slice(0, 500)
+        });
         showNotice(`AI 识别失败：${error.message}`);
       } finally {
         analyzePhotoButton.disabled = false;
@@ -2357,13 +3684,64 @@
     });
 
     issue.addEventListener('input', updateRecurrenceAlert);
-    locationInput.addEventListener('input', updateRecurrenceAlert);
+    sourceInput.addEventListener('change', () => {
+      const source = sourceInput.value || '人工巡查';
+      if (selectedStandardMatter && !activeStandardMatters(source).some(item => standardMatterKey(item) === standardMatterKey(selectedStandardMatter))) {
+        selectedStandardMatter = null;
+        standardMatterConfirmed = false;
+      }
+      renderStandardMatterSelectors();
+    });
+    standardKindInput.addEventListener('change', () => {
+      selectedStandardMatter = null;
+      standardMatterConfirmed = false;
+      currentKnowledgeMatch = null;
+      currentKnowledgeMatchLogId = '';
+      renderStandardMatterSelectors();
+    });
+    standardCategoryInput.addEventListener('change', () => {
+      selectedStandardMatter = null;
+      standardMatterConfirmed = false;
+      const candidates = activeStandardMatters().filter(item => item.category === standardCategoryInput.value);
+      setSelectOptions(standardMatterInput, candidates.map(item => ({ label: `${item.standard_code} · ${item.standard_name}`, value: standardMatterKey(item) })), `请选择${standardKindLabel(standardKindInput.value)}`);
+      standardMatterInput.disabled = !candidates.length;
+      renderStandardMatterPreview(null, '人工待确认');
+    });
+    standardMatterInput.addEventListener('change', () => {
+      const item = activeStandardMatters().find(candidate => standardMatterKey(candidate) === standardMatterInput.value);
+      selectStandardMatter(item || null, item ? '人工确认国标事项' : '人工待确认', Boolean(item));
+    });
+    confirmStandardMatterButton.addEventListener('click', () => {
+      if (!selectedStandardMatter) return;
+      standardMatterConfirmed = true;
+      renderStandardMatterPreview(selectedStandardMatter, '人工确认国标事项');
+      showNotice(`已确认采用：${selectedStandardMatter.standard_code} · ${selectedStandardMatter.standard_name}`);
+    });
+    locationInput.addEventListener('input', () => {
+      updateRecurrenceAlert();
+      renderMatterAttributePreview();
+    });
+    administrativeDivisionCodeInput.addEventListener('input', () => {
+      renderCaseIntakeConfig();
+      renderMatterAttributePreview();
+    });
+    gridIdentifierInput.addEventListener('change', renderMatterAttributePreview);
+    applyAiDescriptionButton.addEventListener('click', () => {
+      const aiSummary = currentAiAnalysis?.issue_summary?.trim();
+      if (!aiSummary) return;
+      issue.value = aiSummary;
+      aiDescriptionAction.hidden = true;
+      updateRecurrenceAlert();
+      issue.focus();
+      showNotice('已采用 AI 生成的问题描述，请继续人工核对。');
+    });
     viewRecurrence.addEventListener('click', () => {
       const matches = findRecurringRecords();
       if (!matches.length) return;
       searchInput.value = locationInput.value.trim();
       statusFilter.value = '';
       deadlineFilter.value = '';
+      qualityFilter.value = '';
       renderRecords();
       focusRecords();
     });
@@ -2371,18 +3749,25 @@
     document.querySelector('#clear').addEventListener('click', () => {
       issue.value = '';
       locationInput.value = '';
+      administrativeDivisionNameInput.value = '';
+      administrativeDivisionCodeInput.value = '';
+      gridIdentifierInput.value = '';
       ownerInput.value = '';
+      sourceInput.value = '人工巡查';
+      standardKindInput.value = '管理事项';
       statusInput.value = '待派单';
       deadlineInput.value = '';
       currentCoordinates = null;
       setLocationStatus('尚未定位');
       photoInput.value = '';
       photoData = '';
-      photoPreview.hidden = true;
+      photoPreviewStage.hidden = true;
       removePhotoButton.hidden = true;
-      Object.values(output).forEach(element => element.textContent = '等待识别');
-      analysisSource.textContent = '等待识别';
+      selectedStandardMatter = null;
+      standardMatterConfirmed = false;
+      renderStandardMatterSelectors();
       renderAiAnalysis(null);
+      renderMatterAttributePreview(null);
       recurrenceAlert.hidden = true;
       issue.focus();
     });
@@ -2394,23 +3779,62 @@
       if (!currentIsAdmin) { showNotice('只有管理员可以新建和派发案件'); return; }
       if (!ownerInput.value.trim()) { showNotice('请先选择负责人后再提交案件'); ownerInput.focus(); return; }
       if (!validateAssignee(ownerInput.value)) return;
-      const [fallbackType, fallbackDepartment, fallbackPriority] = classify(description);
-      const type = currentAiAnalysis?.category || fallbackType;
-      const department = currentAiAnalysis?.department || fallbackDepartment;
-      const priority = currentAiAnalysis ? priorityFromRisk(currentAiAnalysis.risk_level) : fallbackPriority;
-      output.type.textContent = type;
-      output.department.textContent = department;
-      output.priority.textContent = priority;
-      analysisSource.textContent = currentAiAnalysis ? '照片 AI 识别（请人工复核）' : '文字规则识别';
+      const administrativeDivisionCode = administrativeDivisionCodeInput.value.trim();
+      if (!/^\d{6}$/.test(administrativeDivisionCode)) {
+        showNotice('行政区划代码应为 6 位数字（GB/T 2260）。');
+        administrativeDivisionCodeInput.focus();
+        return;
+      }
+      if (!selectedStandardMatter || !standardMatterConfirmed) {
+        showNotice('请先在“国标管理事项归类”中确认一项 GB/T 47678.5-2026 事项。');
+        standardCategoryInput.focus();
+        return;
+      }
+      const configResult = await loadCaseIntakeConfig();
+      if (configResult?.departmentsResult?.error) {
+        showNotice(`主管部门配置读取失败：${configResult.departmentsResult.error.message}`);
+        return;
+      }
+      const handlingDepartment = getHandlingDepartment(selectedStandardMatter.default_department);
+      if (!handlingDepartment) {
+        const labels = handlingDepartments
+          .filter(item => item.is_active !== false)
+          .map(item => `“${item.department_label}”`)
+          .join('、');
+        showNotice(`未找到部门标签“${selectedStandardMatter.default_department || '当前事项'}”。当前已加载：${labels || '无'}；请在“主管部门与单元网格”把“部门标签”填写为该名称。`);
+        return;
+      }
+      const gridIdentifier = gridIdentifierInput.value;
+      const selectedGrid = unitGrids.find(item => item.grid_identifier === gridIdentifier && item.is_active !== false);
+      if (!selectedGrid) {
+        showNotice('请先选择所在单元网格。');
+        gridIdentifierInput.focus();
+        return;
+      }
+      const type = selectedStandardMatter.standard_name;
+      const department = handlingDepartment.organization_name;
+      const priority = selectedStandardMatter.default_priority || '待确认';
+      const confirmedStandardMatter = { ...selectedStandardMatter };
+      renderStandardMatterPreview(selectedStandardMatter, currentAiAnalysis ? '照片 AI 推荐，人工确认' : '人工确认国标事项');
       const records = getRecords();
       const initialStatus = ownerInput.value.trim() && statusInput.value === '待派单' ? '处理中' : normalizeStatus(statusInput.value);
       const newRecord = {
         id: createRecordId(records),
         description,
         location: locationInput.value.trim(),
+        administrativeDivisionCode,
+        administrativeDivisionName: administrativeDivisionNameInput.value.trim(),
+        supervisingOrgCode: handlingDepartment.organization_code,
+        supervisingOrgName: handlingDepartment.organization_name,
+        gridIdentifier,
         type,
+        standardKind: selectedStandardMatter.matter_kind,
+        standardRef: selectedStandardMatter.standard_ref,
+        standardCode: selectedStandardMatter.standard_code,
+        standardName: selectedStandardMatter.standard_name,
         department,
         priority,
+        source: sourceInput.value || '人工巡查',
         owner: ownerInput.value.trim(),
         assigneeId: getAssigneeId(ownerInput.value.trim()),
         status: initialStatus,
@@ -2439,11 +3863,12 @@
       renderRecords();
       photoData = '';
       photoInput.value = '';
-      photoPreview.hidden = true;
+      photoPreviewStage.hidden = true;
       removePhotoButton.hidden = true;
       renderAiAnalysis(null);
-      analysisSource.textContent = '等待识别';
-      Object.values(output).forEach(element => element.textContent = '等待识别');
+      selectedStandardMatter = null;
+      standardMatterConfirmed = false;
+      renderStandardMatterSelectors();
       currentCoordinates = null;
       setLocationStatus('尚未定位');
       showNotice('正在保存到云端…');
@@ -2458,6 +3883,7 @@
           if (newRecord.id === renderedRecordId) updateRecordSyncIndicator(renderedRecordId, 'synced');
           else renderRecords();
         }
+        await finalizeUrbanKnowledgeMatchLog(cloudRecord, confirmedStandardMatter);
         showNotice('巡查记录已保存到云端');
       } catch (error) {
         const index = getRecords().findIndex(record => record.id === newRecord.id);
@@ -2477,9 +3903,9 @@
       if (!records.length) { showNotice('没有可导出的巡查记录'); return; }
       const quote = value => `"${String(value).replaceAll('"', '""')}"`;
       const rows = [
-        ['问题编号', '现场照片', '问题描述', '发现地点', '纬度', '经度', '问题类型', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
+        ['问题编号', '现场照片', '问题描述', '发现地点', '行政区划', '行政区划代码', '纬度', '经度', '国标大类', '国标标准号', '国标代码', '国标条目', '处理部门', '优先级', '负责人', '处置状态', '完成期限', '期限状态', '创建时间', '更新时间'],
         ...records.map(record => [
-          record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.latitude ?? '', record.longitude ?? '', record.type,
+          record.id || '历史记录', safePhoto(record.photo) ? '有' : '无', record.description, record.location || '', record.administrativeDivisionName || '', record.administrativeDivisionCode || '', record.latitude ?? '', record.longitude ?? '', record.standardKind ? standardKindLabel(record.standardKind) : '', record.standardRef || '', record.standardCode || '', record.standardName || record.type,
           record.department, record.priority, record.owner || '', normalizeStatus(record.status), record.deadline || '', getDeadlineState(record), record.time,
           record.updatedAt || record.time
         ])
@@ -2585,7 +4011,7 @@
       try {
         photoData = await compressPhoto(file);
         photoPreview.src = photoData;
-        photoPreview.hidden = false;
+        photoPreviewStage.hidden = false;
         removePhotoButton.hidden = false;
         renderAiAnalysis(null);
         analysisSource.textContent = '等待识别';
@@ -2599,7 +4025,7 @@
     removePhotoButton.addEventListener('click', () => {
       photoData = '';
       photoInput.value = '';
-      photoPreview.hidden = true;
+      photoPreviewStage.hidden = true;
       removePhotoButton.hidden = true;
       renderAiAnalysis(null);
       analysisSource.textContent = '等待识别';
@@ -2638,7 +4064,68 @@
       closeAccountMenu();
       openUserManagement();
     });
+    manageIssueDictionaryButton.addEventListener('click', async () => {
+      closeAccountMenu();
+      await loadIssueDictionary();
+      renderIssueDictionary();
+      issueDictionaryDialog.showModal();
+    });
+    manageKnowledgeBaseButton.addEventListener('click', async () => {
+      closeAccountMenu();
+      await openKnowledgeBase();
+    });
+    manageCaseIntakeConfigButton.addEventListener('click', async () => {
+      closeAccountMenu();
+      await openCaseIntakeConfig();
+    });
     document.querySelector('#closeUsers').addEventListener('click', () => userDialog.close());
+    document.querySelector('#closeIssueDictionary').addEventListener('click', () => issueDictionaryDialog.close());
+    document.querySelector('#closeKnowledgeBase').addEventListener('click', () => knowledgeBaseDialog.close());
+    document.querySelector('#closeCaseIntakeConfig').addEventListener('click', () => caseIntakeConfigDialog.close());
+    downloadIssueDictionaryTemplateButton.addEventListener('click', downloadIssueDictionaryTemplate);
+    importIssueDictionaryButton.addEventListener('click', importIssueDictionary);
+    knowledgeIssueSelect.addEventListener('change', () => {
+      showKnowledgeBaseNotice('');
+      renderKnowledgeBase();
+    });
+    knowledgeProfileForm.addEventListener('submit', saveKnowledgeProfile);
+    knowledgeTermForm.addEventListener('submit', saveKnowledgeTerm);
+    knowledgeFeatureForm.addEventListener('submit', saveKnowledgeFeature);
+    knowledgeConfusionForm.addEventListener('submit', saveKnowledgeConfusion);
+    knowledgeBaseDialog.addEventListener('click', async event => {
+      const termButton = event.target.closest('[data-delete-knowledge-term]');
+      const featureButton = event.target.closest('[data-delete-knowledge-feature]');
+      const confusionButton = event.target.closest('[data-delete-knowledge-confusion]');
+      if (!termButton && !featureButton && !confusionButton) return;
+      if (!currentIsAdmin || !supabaseClient) return;
+      const target = termButton
+        ? { table: 'urban_issue_knowledge_terms', id: termButton.dataset.deleteKnowledgeTerm, label: '语义词' }
+        : featureButton
+          ? { table: 'urban_issue_visual_features', id: featureButton.dataset.deleteKnowledgeFeature, label: '视觉特征' }
+          : { table: 'urban_issue_confusions', id: confusionButton.dataset.deleteKnowledgeConfusion, label: '易混事项' };
+      const { error } = await supabaseClient.from(target.table).delete().eq('id', target.id);
+      if (error) { showKnowledgeBaseNotice(`${target.label}删除失败：${error.message}`); return; }
+      await loadUrbanKnowledgeBase();
+      showKnowledgeBaseNotice(`${target.label}已删除。`, 'success');
+    });
+    handlingDepartmentForm.addEventListener('submit', saveHandlingDepartment);
+    unitGridForm.addEventListener('submit', saveUnitGrid);
+    handlingDepartmentRows.addEventListener('click', async event => {
+      const button = event.target.closest('[data-delete-department]');
+      if (!button) return;
+      const { error } = await supabaseClient.from('handling_departments').delete().eq('department_label', button.dataset.deleteDepartment);
+      if (error) { showCaseIntakeConfigNotice(`主管部门删除失败：${error.message}`); return; }
+      await loadCaseIntakeConfig();
+      showCaseIntakeConfigNotice('主管部门配置已删除。', 'success');
+    });
+    unitGridRows.addEventListener('click', async event => {
+      const button = event.target.closest('[data-delete-grid]');
+      if (!button) return;
+      const { error } = await supabaseClient.from('unit_grids').delete().eq('grid_identifier', button.dataset.deleteGrid);
+      if (error) { showCaseIntakeConfigNotice(`单元网格删除失败：${error.message}`); return; }
+      await loadCaseIntakeConfig();
+      showCaseIntakeConfigNotice('单元网格配置已删除。', 'success');
+    });
     userRows.addEventListener('click', async event => {
       const button = event.target.closest('[data-save-user]');
       if (!button) return;
@@ -2652,6 +4139,22 @@
       showNotice('人员信息已保存');
     });
     document.querySelector('#closeDetail').addEventListener('click', () => detailDialog.close());
+    openNotifications.addEventListener('click', () => {
+      closeAccountMenu();
+      renderNotifications(getRecords());
+      notificationDialog.showModal();
+    });
+    closeNotifications.addEventListener('click', () => notificationDialog.close());
+    notificationList.addEventListener('click', event => {
+      const button = event.target.closest('[data-notification-index]');
+      if (!button) return;
+      const index = Number(button.dataset.notificationIndex);
+      const record = getRecords()[index];
+      if (!record) return;
+      notificationDialog.close();
+      if (button.dataset.notificationMode === 'detail') showRecordDetail(record);
+      else openEditDialog(record, index);
+    });
     detailEvidence.addEventListener('click', event => {
       const image = event.target.closest('[data-evidence-url]');
       if (!image) return;
@@ -2764,8 +4267,10 @@
         showNotice('当前案件不能跳过处置节点，请按流程推进。');
         return;
       }
-      if (currentIsAdmin && currentStatus === '待核查' && status === '退回整改' && !note) {
-        showNotice('退回整改时请填写退回意见，便于负责人针对性办理。');
+      if (currentIsAdmin && currentStatus === '待核查' && ['已结案', '退回整改'].includes(status) && !note) {
+        showNotice(status === '已结案'
+          ? '办结前请填写核查结论，留存核查依据。'
+          : '退回整改时请填写退回意见，便于负责人针对性办理。');
         editNote.focus();
         return;
       }
@@ -2839,12 +4344,14 @@
     searchInput.addEventListener('input', renderRecords);
     statusFilter.addEventListener('change', renderRecords);
     deadlineFilter.addEventListener('change', renderRecords);
+    qualityFilter.addEventListener('change', renderRecords);
     document.querySelector('#ownerChart').addEventListener('click', event => {
       const button = event.target.closest('[data-owner-filter]');
       if (!button) return;
       ownerFilter.value = button.dataset.ownerFilter;
       statusFilter.value = '';
       deadlineFilter.value = '';
+      qualityFilter.value = '';
       renderRecords();
       focusRecords();
     });
@@ -2855,9 +4362,23 @@
       const record = getRecords()[index];
       if (record) openEditDialog(record, index);
     });
-    filterOverdue.addEventListener('click', () => { deadlineFilter.value = 'overdue'; statusFilter.value = ''; renderRecords(); focusRecords(); });
-    filterSoon.addEventListener('click', () => { deadlineFilter.value = 'soon'; statusFilter.value = ''; renderRecords(); focusRecords(); });
-    filterVerifying.addEventListener('click', () => { statusFilter.value = '待核查'; deadlineFilter.value = ''; renderRecords(); focusRecords(); });
+    filterOverdue.addEventListener('click', () => { deadlineFilter.value = 'overdue'; statusFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    filterSoon.addEventListener('click', () => { deadlineFilter.value = 'soon'; statusFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    filterVerifying.addEventListener('click', () => { statusFilter.value = '待核查'; deadlineFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    filterNoDeadline.addEventListener('click', () => { deadlineFilter.value = 'none'; statusFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    document.querySelector('#filterMyProcessing').addEventListener('click', () => { statusFilter.value = '处理中'; deadlineFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    document.querySelector('#filterMyReturned').addEventListener('click', () => { statusFilter.value = '退回整改'; deadlineFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    document.querySelector('#filterMyVerifying').addEventListener('click', () => { statusFilter.value = '待核查'; deadlineFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    document.querySelector('#filterMyOverdue').addEventListener('click', () => { deadlineFilter.value = 'overdue'; statusFilter.value = ''; qualityFilter.value = ''; renderRecords(); focusRecords(); });
+    myWorkbenchList.addEventListener('click', event => {
+      const button = event.target.closest('[data-my-task-index]');
+      if (!button) return;
+      const index = Number(button.dataset.myTaskIndex);
+      const record = getRecords()[index];
+      if (!record) return;
+      if (button.dataset.myTaskAction === 'detail') showRecordDetail(record);
+      else openEditDialog(record, index);
+    });
     ownerFilter.addEventListener('change', renderRecords);
     recordBody.addEventListener('click', async event => {
       const button = event.target.closest('button[data-index]');
@@ -3013,6 +4534,10 @@
       supabaseClient.auth.signOut().then(() => showLoggedOutState());
     });
 
+    const dashboardQualityFilter = new URLSearchParams(window.location.search).get('quality');
+    const dashboardSearch = new URLSearchParams(window.location.search).get('search');
+    if (['location', 'deadline', 'owner', 'photo', 'ai', 'description'].includes(dashboardQualityFilter)) qualityFilter.value = dashboardQualityFilter;
+    if (dashboardSearch) searchInput.value = dashboardSearch.slice(0, 160);
     renderRecords();
     if (supabaseClient) {
       supabaseClient.auth.getSession().then(({ data }) => refreshLoginState(data.session));

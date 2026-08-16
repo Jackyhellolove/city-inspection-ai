@@ -1,5 +1,7 @@
 -- 将误注册邮箱账号上的派单迁移到李四实际使用的账号。
--- 请先核对下方两个邮箱；脚本会自动查询 UUID，无需手工填写账号 ID。
+-- 注意：提交到仓库前已对真实邮箱脱敏。执行前请把下方两个
+-- example.com 占位邮箱替换为实际的正确账号邮箱和错误账号邮箱；
+-- 脚本会自动查询 UUID，无需手工填写账号 ID。
 
 begin;
 
@@ -10,18 +12,18 @@ declare
 begin
   select id into correct_user_id
   from auth.users
-  where lower(email) = lower('358795316qq@gmail.com');
+  where lower(email) = lower('correct_account@example.com');
 
   select id into wrong_user_id
   from auth.users
-  where lower(email) = lower('3589795316qq@gmail.com');
+  where lower(email) = lower('wrong_account@example.com');
 
   if correct_user_id is null then
-    raise exception '未找到正确邮箱账号，请核对 358795316qq@gmail.com';
+    raise exception '未找到正确邮箱账号，请核对 correct_account@example.com';
   end if;
 
   if wrong_user_id is null then
-    raise exception '未找到错误邮箱账号，请核对 3589795316qq@gmail.com';
+    raise exception '未找到错误邮箱账号，请核对 wrong_account@example.com';
   end if;
 
   if correct_user_id = wrong_user_id then
@@ -68,8 +70,8 @@ from auth.users u
 left join public.profiles p on p.id = u.id
 left join public.inspection_records r on r.assignee_id = u.id
 where lower(u.email) in (
-  lower('358795316qq@gmail.com'),
-  lower('3589795316qq@gmail.com')
+  lower('correct_account@example.com'),
+  lower('wrong_account@example.com')
 )
 group by u.id, u.email, p.display_name, p.is_active
 order by u.email;

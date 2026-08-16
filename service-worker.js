@@ -1,7 +1,10 @@
-const CACHE_NAME = 'city-inspection-ai-v19';
+const CACHE_NAME = 'city-inspection-ai-v101';
 const APP_FILES = [
   './',
   './index.html',
+  './command-center.html',
+  './vendor/leaflet.css',
+  './vendor/leaflet.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -21,7 +24,13 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
+  const requestUrl = new URL(event.request.url);
+  if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin) return;
+  // 运行时配置可能在部署后更新，不能使用旧的 PWA 缓存响应。
+  if (requestUrl.pathname === '/supabase-config.js' || requestUrl.pathname === '/amap-config.js') {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }));
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then(response => {

@@ -1,2 +1,5 @@
 supabase-config.js
+amap-config.js
 .env
+__pycache__/
+*.pyc
