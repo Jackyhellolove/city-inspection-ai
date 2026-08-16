@@ -12,7 +12,7 @@
 
 ### 1. 模型切换与分支纪律
 
-- 项目最初由 Codex 生成。`codex-checkpoint` 标签（提交 `088839d`，2026-08-16）锁定了切换前的 Codex 代码基线。
+- 项目最初由 Codex 生成。`codex-checkpoint` 标签锁定了切换前的 Codex 代码基线（2026-08-16，已并入 main）。
 - 切换 DeepSeek 后，所有新改动必须提交到 `deepseek/dev` 分支，不得直接改 Codex 基线。
 - 之前的 Codex 工作分支 `agent/https-deployment` 保持不动，作为可回退的原始分支。
 - 恢复 Codex 状态：
