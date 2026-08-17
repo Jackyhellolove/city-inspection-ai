@@ -33,5 +33,3 @@ services:
         sync: false
       - key: AMAP_SECURITY_JS_CODE
         sync: false
-      - key: AMAP_COORDINATE_SYSTEM
-        value: WGS84

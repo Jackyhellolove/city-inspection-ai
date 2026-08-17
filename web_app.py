@@ -476,14 +476,19 @@ def supabase_public_config():
 
 
 def amap_public_config():
-    """向驾驶舱提供高德 Web 端公开配置；不要在这里放 Web 服务私钥。"""
+    """向驾驶舱提供高德 Web 端公开配置；不要在这里放 Web 服务私钥。
+
+    项目统一以 WGS84 作为入库坐标系（浏览器定位返回的就是 WGS84），
+    前端在高德底图展示时再转换为 GCJ-02。这里不再读取
+    AMAP_COORDINATE_SYSTEM 环境变量，避免误配成 GCJ02 时点位二次偏移。
+    """
     return {
         "key": (os.environ.get("AMAP_WEB_KEY") or os.environ.get("AMAP_KEY") or "").strip(),
         "securityJsCode": (
             os.environ.get("AMAP_SECURITY_JS_CODE") or os.environ.get("AMAP_SECURITY_CODE") or ""
         ).strip(),
         "serviceHost": os.environ.get("AMAP_SERVICE_HOST", "").strip(),
-        "coordinateSystem": os.environ.get("AMAP_COORDINATE_SYSTEM", "WGS84").strip().upper(),
+        "coordinateSystem": "WGS84",
     }
 
 

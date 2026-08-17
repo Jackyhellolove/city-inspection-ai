@@ -263,7 +263,7 @@ AI 智能研判不能在 `file:///.../command-center.html` 文件预览模式下
 
 当前版本已接入 Supabase 真实登录能力。请将 `supabase-config.example.js` 复制为 `supabase-config.js`，再填写项目 Settings > API 中的 Project URL 和 publishable key。该配置文件不会提交到 GitHub；不要填写 secret key 或 service_role key。
 
-领导驾驶舱默认可直接使用 Leaflet + OpenStreetMap 备用底图。如需切换为更适合国内道路和地名展示的高德地图，可将 `amap-config.example.js` 复制为 `amap-config.js`，填写 Web Key 和安全密钥；浏览器定位数据默认为 WGS84，驾驶舱会在展示时转换为高德 GCJ-02 坐标。生产部署可设置 `AMAP_WEB_KEY`、`AMAP_SECURITY_JS_CODE` 和 `AMAP_COORDINATE_SYSTEM=WGS84`；如已配置高德推荐的服务端代理，可改设 `AMAP_SERVICE_HOST`，且不再提供 `AMAP_SECURITY_JS_CODE`。
+领导驾驶舱默认可直接使用 Leaflet + OpenStreetMap 备用底图。如需切换为更适合国内道路和地名展示的高德地图，可将 `amap-config.example.js` 复制为 `amap-config.js`，填写 Web Key 和安全密钥。入库坐标系统一为 WGS84（浏览器定位返回的就是 WGS84）：Leaflet/OSM 底图直接使用 WGS84，高德底图展示时自动转换为 GCJ-02 坐标，无需配置坐标系。生产部署可设置 `AMAP_WEB_KEY`、`AMAP_SECURITY_JS_CODE`；如已配置高德推荐的服务端代理，可改设 `AMAP_SERVICE_HOST`，且不再提供 `AMAP_SECURITY_JS_CODE`。
 
 运行 `supabase-profile-bootstrap.sql` 后，已验证账号会自动补齐人员资料；新注册账号在邮箱验证前不会进入负责人派单名单，验证完成后自动转为在岗。这样可避免误填邮箱产生的未验证账号被派单。
 
