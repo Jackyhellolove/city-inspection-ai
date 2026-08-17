@@ -1164,7 +1164,7 @@
       }
       markerLayer.clearLayers();
       const modeLabel = mapMode === 'heat' ? '热力态势' : mapMode === 'cluster' ? '点位聚合' : '案件点';
-      mapSummary.textContent = `${located.length} 个已定位案件 · ${filteredRecords().length} 条筛选结果 · ${modeLabel} · ${providerNote}`;
+      mapSummary.textContent = `${located.length} 个已定位案件 · ${filteredRecords().length} 条筛选结果 · ${modeLabel} · ${providerNote} · WGS84`;
       if (!located.length) { map.setView([35.8617, 104.1954], 4); mapSummary.textContent = `${filteredRecords().length} 条筛选结果 · 暂无带经纬度的案件 · ${providerNote}`; return; }
       const bounds = [];
       located.forEach(record => bounds.push(leafletPosition(record)));
@@ -1218,7 +1218,7 @@
       markers = [];
       const located = selectedRecords.filter(hasCoordinates);
       const modeLabel = mapMode === 'heat' ? '热力态势' : mapMode === 'cluster' ? '点位聚合' : '案件点';
-      mapSummary.textContent = `${located.length} 个已定位案件 · ${selectedRecords.length} 条筛选结果 · ${modeLabel} · 高德地图`;
+      mapSummary.textContent = `${located.length} 个已定位案件 · ${selectedRecords.length} 条筛选结果 · ${modeLabel} · 高德地图（WGS84→GCJ-02）`;
       if (!located.length) {
         map.setZoomAndCenter(4, [104.1954, 35.8617]);
         mapSummary.textContent = `${selectedRecords.length} 条筛选结果 · 暂无带经纬度的案件`;

@@ -3635,17 +3635,69 @@
       }
     });
 
-    document.querySelector('#getLocation').addEventListener('click', () => {
+    function acquirePrecisePosition() {
+      // iPhone 首次返回的往往是基站/Wi-Fi 粗定位（误差可达数百米），单次
+      // getCurrentPosition 拿到后不会继续收敛；这里用 watchPosition 持续接收
+      // 更优定位，直到精度达标或超时，保证上图点位不是粗定位。
+      return new Promise((resolve, reject) => {
+        const settleAccuracy = 35; // 精度优于 35 米即认为足够精确
+        const timeoutMs = 12000;
+        const deadline = Date.now() + timeoutMs;
+        const timeoutError = new Error('定位超时，请到开阔处重试');
+        timeoutError.code = 3;
+        let watchId = null;
+        let fallbackTimer = null;
+        let best = null;
+        let finished = false;
+        const settle = position => {
+          if (finished) return;
+          finished = true;
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          resolve(position);
+        };
+        const fail = error => {
+          if (finished) return;
+          finished = true;
+          if (fallbackTimer) clearTimeout(fallbackTimer);
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          reject(error);
+        };
+        const onPosition = position => {
+          const accuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : Infinity;
+          if (!best || accuracy < best.coords.accuracy) best = position;
+          if (accuracy <= settleAccuracy || Date.now() >= deadline) settle(best);
+        };
+        const fallbackSingleShot = error => navigator.geolocation.getCurrentPosition(onPosition, fail, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+        fallbackTimer = setTimeout(() => best ? settle(best) : fail(timeoutError), timeoutMs + 2000);
+        try {
+          watchId = navigator.geolocation.watchPosition(onPosition, error => {
+            if (best) settle(best);
+            else fallbackSingleShot(error);
+          }, { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 });
+        } catch (error) {
+          fallbackSingleShot(error);
+        }
+      });
+    }
+
+    document.querySelector('#getLocation').addEventListener('click', async () => {
       if (!navigator.geolocation) { setLocationStatus('定位失败：浏览器不支持', 'error'); return; }
+      if (!window.isSecureContext) { setLocationStatus('定位失败：需要 HTTPS', 'error'); return; }
       const button = document.querySelector('#getLocation');
       button.disabled = true;
-      setLocationStatus('正在定位…', 'loading');
-      navigator.geolocation.getCurrentPosition(async position => {
+      setLocationStatus('正在定位（高精度）…', 'loading');
+      try {
+        const position = await acquirePrecisePosition();
+        const accuracy = Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null;
+        const accuracyText = accuracy === null ? '' : `（精度约 ${accuracy} 米）`;
         currentCoordinates = {
           latitude: Number(position.coords.latitude.toFixed(6)),
           longitude: Number(position.coords.longitude.toFixed(6))
         };
-        setLocationStatus('定位成功，正在识别道路名称…', 'loading');
+        setLocationStatus(accuracy !== null && accuracy > 100
+          ? `定位成功${accuracyText}，精度较差，建议在系统设置中允许“精确定位”`
+          : `定位成功${accuracyText}，正在识别道路名称…`, 'loading');
         try {
           const { data: sessionData } = await supabaseClient.auth.getSession();
           const accessToken = sessionData.session?.access_token;
@@ -3660,7 +3712,7 @@
           if (payload.address) locationInput.value = payload.address;
           updateRecurrenceAlert();
           if (payload.resolved) {
-            setLocationStatus(`定位成功：${payload.road}`, 'success');
+            setLocationStatus(`定位成功${accuracyText}：${payload.road}`, 'success');
           } else {
             if (!locationInput.value.trim()) locationInput.value = '当前位置（请补充道路名称）';
             setLocationStatus('定位成功，但未识别到道路名称，请核对地点', 'loading');
@@ -3673,14 +3725,16 @@
         } finally {
           button.disabled = false;
         }
-      }, error => {
+      } catch (error) {
         currentCoordinates = null;
         button.disabled = false;
         const reason = !window.isSecureContext
           ? '定位失败：需要 HTTPS'
-          : error.code === 1 ? '定位失败：请允许位置权限' : '定位失败：暂时无法获取';
+          : error.code === 1 ? '定位失败：请允许位置权限'
+          : error.code === 3 ? '定位失败：暂时无法获取（请到开阔处重试）'
+          : '定位失败：暂时无法获取';
         setLocationStatus(reason, 'error');
-      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+      }
     });
 
     issue.addEventListener('input', updateRecurrenceAlert);
